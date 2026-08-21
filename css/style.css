@@ -58,7 +58,7 @@ button{font-family:inherit}
 .chip{
   background:var(--panel);color:var(--ink);border:1px solid var(--line);
   border-radius:999px;padding:9px 13px;font-size:15px;font-weight:700;
-  cursor:pointer;min-height:42px;
+  cursor:pointer;min-height:42px;white-space:nowrap;
 }
 .chip:active{transform:translateY(1px)}
 #hud{display:flex;gap:6px;flex-wrap:wrap}
@@ -73,7 +73,8 @@ button{font-family:inherit}
 #xpbar{height:100%;width:0;background:linear-gradient(90deg,#ffd400,#ff8a3d);transition:width .5s ease}
 #xptext{
   position:absolute;inset:0;text-align:center;font-size:10px;line-height:16px;
-  color:#0b1026;font-weight:800;text-shadow:0 1px 0 rgba(255,255,255,.35)
+  color:#e8edff;font-weight:800;letter-spacing:.5px;
+  text-shadow:0 1px 2px rgba(0,0,0,.85)
 }
 
 #app{max-width:860px;margin:0 auto;padding:16px 14px 90px}

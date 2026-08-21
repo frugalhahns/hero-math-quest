@@ -37,7 +37,7 @@ export function updateHud() {
   const pct = xpInLevel();
   document.getElementById('xpbar').style.width = pct + '%';
   document.getElementById('xptext').textContent = `${pct} / 100 XP  (Level ${level()})`;
-  document.getElementById('btn-sound').textContent = S.soundOn ? '\u{1F50A}' : '\u{1F507}';
+  document.getElementById('btn-sound').textContent = S.soundOn ? '\u266A On' : '\u266A Off';
   document.body.classList.toggle('no-motion', !!S.reduceMotion);
   document.body.classList.toggle('focus-mode', !!S.focusMode);
 }

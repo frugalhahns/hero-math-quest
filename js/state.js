@@ -13,7 +13,7 @@ const DEFAULT = {
   chunkSize: 8,
   dailyGoal: 3,
   // adaptive difficulty per skill, 1..5
-  levels: { add: 1, sub: 1, mul: 1, div: 1 },
+  levels: { add: 2, sub: 2, mul: 2, div: 2 },
   // rolling accuracy per skill
   stats: {},
   badges: {},          // badgeId -> ISO date earned

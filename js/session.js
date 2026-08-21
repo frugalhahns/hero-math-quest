@@ -424,7 +424,8 @@ export function runSession(cfg) {
 
   function skillNote(skill) {
     const lv = S.levels[skill] || 1;
-    return `Your ${skill.toUpperCase()} level is now ${lv} of 5.`;
+    const names = { add: 'Addition', sub: 'Subtraction', mul: 'Multiplication', div: 'Division' };
+    return `Your ${names[skill] || skill} level is now ${lv} of 5.`;
   }
 
   draw();
