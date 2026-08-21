@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hero Math Quest</title>
+<meta name="description" content="Math, reading and logic quests starring a speedster, a web-hero, a blocky miner and an electric mouse.">
+<meta name="theme-color" content="#0b1026">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#9733;</text></svg>">
+</head>
+<body>
+
+<div id="fx-layer" aria-hidden="true"></div>
+
+<header id="topbar">
+  <button id="btn-home" class="chip" type="button" title="Back to map">&#9664; Map</button>
+  <div id="hud">
+    <span class="hud-item" title="Level"><b id="hud-level">1</b><small>LVL</small></span>
+    <span class="hud-item" title="Rings (coins)"><b id="hud-coins">0</b><small>RINGS</small></span>
+    <span class="hud-item" title="Day streak"><b id="hud-streak">0</b><small>STREAK</small></span>
+  </div>
+  <div id="topbar-right">
+    <button id="btn-sound" class="chip" type="button" title="Sound on/off">&#128266;</button>
+    <button id="btn-settings" class="chip" type="button" title="Settings">&#9881;</button>
+  </div>
+</header>
+
+<div id="xpwrap"><div id="xpbar"></div><span id="xptext">0 / 100 XP</span></div>
+
+<main id="app" aria-live="polite"></main>
+
+<div id="modal" class="hidden" role="dialog" aria-modal="true">
+  <div id="modal-card"></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
