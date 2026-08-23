@@ -1,5 +1,5 @@
 /* Generic question runner. Feed it a list of questions of mixed kinds and it
-   handles input, feedback, hints, XP, and the end-of-chunk reward screen.
+   handles input, feedback, XP, and the end-of-chunk reward screen.
 
    Question kinds:
      numeric   { expr | prompt, answer, hint?, flavor?, passage?, art? }
@@ -22,7 +22,7 @@ export function runSession(cfg) {
   const total = q.length;
   const results = [];
   let i = 0, correctCount = 0, combo = 0, bestCombo = 0;
-  let attempts = 0, hintUsed = false, missed = false, keypadCtl = null;
+  let attempts = 0, missed = false, keypadCtl = null;
 
   function finishQuestion(ok) {
     if (keypadCtl) { keypadCtl.destroy(); keypadCtl = null; }
@@ -30,13 +30,13 @@ export function runSession(cfg) {
     if (ok) { correctCount++; combo++; bestCombo = Math.max(bestCombo, combo); }
     else combo = 0;
     if (cfg.skill) recordAnswer(cfg.skill, ok);
-    const gained = ok ? (!missed && !hintUsed ? XP_FIRST : XP_RETRY) : XP_SHOWN;
+    const gained = ok ? (missed ? XP_RETRY : XP_FIRST) : XP_SHOWN;
     const bonus = ok && combo >= 3 ? 5 : 0;
     const leveled = addXp(gained + bonus);
     if (ok) addCoins(2 + (combo >= 5 ? 2 : 0));
     U.updateHud();
     if (leveled) { sfx.levelup(); U.confetti(30); }
-    i++; attempts = 0; hintUsed = false; missed = false;
+    i++; attempts = 0; missed = false;
     setTimeout(() => (i >= total ? finish() : draw()), 480);
   }
 
@@ -101,18 +101,14 @@ export function runSession(cfg) {
       </div>
       <div class="answerline"><div id="answerbox">?</div></div>
       ${U.keypad()}
-      ${footer('<button class="chip" id="hint">Hint</button>')}
+      ${footer()}
     `);
     wireQuit(root);
-    root.querySelector('#hint').onclick = () => {
-      hintUsed = true;
-      fbBox(root).innerHTML = `<div class="fb ok">${U.esc(item.hint || 'Read it once more, slowly. Underline the numbers.')}</div>`;
-    };
     keypadCtl = U.wireKeypad(root, val => {
       attempts++;
       const box = root.querySelector('#answerbox');
       if (Number(val) === Number(item.answer)) {
-        box.classList.add('ok'); sfx.correct(); U.floater('+' + (!missed && !hintUsed ? XP_FIRST : XP_RETRY) + ' XP');
+        box.classList.add('ok'); sfx.correct(); U.floater('+' + (missed ? XP_RETRY : XP_FIRST) + ' XP');
         U.confetti(14);
         fbBox(root).innerHTML = `<div class="fb ok">${U.praise()}</div>`;
         finishQuestion(true);
@@ -179,14 +175,10 @@ export function runSession(cfg) {
       </div>
       <div class="answerline"><div id="answerbox">?</div></div>
       ${U.keypad()}
-      ${footer('<button class="chip" id="hint">Hint</button>')}
+      ${footer()}
     `);
     wireQuit(root);
     let stage = 0;
-    root.querySelector('#hint').onclick = () => {
-      hintUsed = true;
-      fbBox(root).innerHTML = `<div class="fb ok">Look at the jump between each number. The rule is <b>${U.esc(item.rule)}</b>.</div>`;
-    };
     keypadCtl = U.wireKeypad(root, val => {
       attempts++;
       const box = root.querySelector('#answerbox');
@@ -339,16 +331,11 @@ export function runSession(cfg) {
         </div>
         <div class="answerline"><div id="answerbox">?</div></div>
         ${U.keypad(stage === item.steps.length - 1 ? { enterLabel: 'ANSWER' } : {})}
-        ${footer(`<button class="chip" id="hint">Hint</button>${U.canSpeak() ? '<button class="chip" id="say">Read it to me</button>' : ''}`)}
+        ${footer(U.canSpeak() ? '<button class="chip" id="say">Read it to me</button>' : '')}
       `);
       wireQuit(root);
       const say = root.querySelector('#say');
       if (say) say.onclick = () => U.speak(speakText);
-      root.querySelector('#hint').onclick = () => {
-        hintUsed = true;
-        const s = item.steps[stage];
-        fbBox(root).innerHTML = `<div class="fb ok">Step ${stage + 1}: ${U.esc(s.label)}.${item.trapNote ? '<br>' + U.esc(item.trapNote) : ''}</div>`;
-      };
       if (keypadCtl) keypadCtl.destroy();
       keypadCtl = U.wireKeypad(root, val => {
         attempts++;

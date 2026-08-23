@@ -111,7 +111,7 @@ const PRAISE = [
 ];
 const ENCOURAGE = [
   'Close! Look again.', 'Not yet. One more try.', 'Almost. Slow it down a notch.',
-  'Nope, but good thinking.', 'Try the hint. Hints are for smart people.',
+  'Nope, but good thinking.', 'Good thinking, wrong turn.',
   'Mistakes are how the level goes up.', 'Reset. Read it one more time.'
 ];
 export const praise = () => PRAISE[Math.floor(Math.random() * PRAISE.length)];
