@@ -90,6 +90,23 @@ current level per skill, rounds finished, day streak and badges. It also explain
 the levels mean. Everything is local to the device; there is no server and nothing is
 uploaded.
 
+## Verdant Isle: a second game, for an older reader
+
+`island/` is a separate game in this repo, aimed at an 8th grade reader instead of a
+3rd/4th grade one. It is an exploration game where reading comprehension is the only
+thing that moves you forward: the game never marks your objective on the map, and every
+step is written on a notice, a tide chart, a tablet or a cave wall that you have to
+understand before you know where to go. You earn the island's residents by answering
+questions about the warden's field notes on them, and each one does a job that a build
+project needs — which project needs which job is, again, something you have to read.
+
+Six regions, eleven residents, 78 comprehension questions, no fighting and no failure
+states. See [island/README.md](island/README.md) for the design, and
+`island/selftest.html` for the ~970 assertions that prove the whole thing is still
+solvable in order.
+
+**Play it:** https://frugalhahns.github.io/hero-math-quest/island/
+
 ## Running it locally
 
 It is plain HTML, CSS and ES modules. No build step, no dependencies.
@@ -119,6 +136,7 @@ the worksheets it came from.
 
 ```
 index.html
+island/          Verdant Isle, the grade-8 reading game (see island/README.md)
 css/style.css
 js/
   main.js          home map, shop, settings, grown-up stats, boot

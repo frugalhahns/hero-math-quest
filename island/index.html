@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Verdant Isle &mdash; A Reading Expedition</title>
+<meta name="description" content="Explore an island, read the field notes, work out where to go next, and earn the trust of the creatures who live there. Grade 8 reading.">
+<meta name="theme-color" content="#0a1a17">
+<script>
+  /* Resolve the saved theme before first paint so light mode never flashes dark. */
+  (function () {
+    var pref = 'auto';
+    try { pref = (JSON.parse(localStorage.getItem('vi.save.v1') || '{}').theme) || 'auto'; } catch (e) {}
+    var light = pref === 'light' ||
+      (pref !== 'dark' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+    document.documentElement.dataset.theme = light ? 'light' : 'dark';
+    if (light) {
+      var bar = document.querySelector('meta[name="theme-color"]');
+      if (bar) bar.setAttribute('content', '#eef4ef');
+    }
+  })();
+</script>
+<link rel="stylesheet" href="css/island.css">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127796;</text></svg>">
+</head>
+<body>
+
+<header id="topbar">
+  <div id="place">
+    <b id="place-name">Landing Beach</b>
+    <small id="place-step">Read the letter on the cabin door.</small>
+  </div>
+  <nav id="tools">
+    <button class="chip" data-open="journal" type="button" title="Journal (J)">Journal</button>
+    <button class="chip" data-open="team" type="button" title="Your helpers (T)">Team</button>
+    <button class="chip" data-open="build" type="button" title="Projects (B)">Build</button>
+    <button class="chip" data-open="help" type="button" title="How to play (?)">?</button>
+  </nav>
+</header>
+
+<main id="stage">
+  <canvas id="screen" width="352" height="240" aria-label="Island map. Use arrow keys to walk."></canvas>
+  <div id="prompt" class="hidden"></div>
+</main>
+
+<div id="pad" aria-hidden="false">
+  <div id="dpad">
+    <button class="dbtn up"    data-dir="up"    type="button" aria-label="Walk north">&#9650;</button>
+    <button class="dbtn left"  data-dir="left"  type="button" aria-label="Walk west">&#9664;</button>
+    <button class="dbtn down"  data-dir="down"  type="button" aria-label="Walk south">&#9660;</button>
+    <button class="dbtn right" data-dir="right" type="button" aria-label="Walk east">&#9654;</button>
+  </div>
+  <button id="btn-act" type="button">Look / Talk</button>
+</div>
+
+<div id="sheet" class="hidden" role="dialog" aria-modal="true" aria-labelledby="sheet-title">
+  <div id="sheet-card">
+    <button id="sheet-close" type="button" aria-label="Close">&times;</button>
+    <div id="sheet-body"></div>
+  </div>
+</div>
+
+<div id="toast" class="hidden" role="status"></div>
+<div id="gloss" class="hidden" role="tooltip"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

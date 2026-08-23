@@ -1,0 +1,493 @@
+/* Original 16x16 pixel art, hand-placed glyph by glyph, then drawn to canvas.
+   Nothing here is traced or copied from anyone else's sprites. Each entry is
+   exactly 16 rows of exactly 16 characters; "." is transparent and every other
+   character indexes PALETTE below. Generated art is baked into this file so
+   there is no build step at run time. */
+
+export const SPRITE_SIZE = 16;
+
+export const PALETTE = {
+  'k': '#241a12',
+  'K': '#12161c',
+  'w': '#ffffff',
+  'W': '#f4efe2',
+  'c': '#f4e0b8',
+  'b': '#8a6238',
+  'l': '#e0c188',
+  'y': '#f6c62e',
+  'Y': '#dc9a14',
+  'o': '#f0862a',
+  'r': '#dd4f38',
+  'R': '#9c2f1e',
+  'p': '#f3a3c2',
+  'P': '#cf5f8c',
+  'g': '#79c257',
+  'G': '#3d8636',
+  'm': '#a9da8b',
+  't': '#5ec2b1',
+  'T': '#2c7a74',
+  'u': '#7fbcea',
+  'U': '#3a6ea8',
+  's': '#9dabb7',
+  'S': '#5c6a77',
+  'n': '#3a4a58',
+  'N': '#232d38',
+  'e': '#1b2026',
+  'h': '#8d5c2b',
+  'H': '#5a3817',
+  'x': '#cfe8ff',
+  'z': '#f8f3a4',
+  'v': '#8a6134',
+  'V': '#43301c',
+  'i': '#b7c2cb'
+};
+
+export const ART = {
+  player_down: [
+    '....KKKKKK......',
+    '...KrrrrrrK.....',
+    '...KrrrrrrK.....',
+    '....KccccK......',
+    '....cecceck.....',
+    '....ccccccc.....',
+    '.....krrk.......',
+    '...KgggggggK....',
+    '..KggWWWWggK....',
+    '..KggggggggK....',
+    '...KgggggK......',
+    '....KvvKvvK.....',
+    '....KvvKvvK.....',
+    '....KKK.KKK.....',
+    '................',
+    '................'
+  ],
+  player_up: [
+    '....KKKKKK......',
+    '...KrrrrrrK.....',
+    '...KrrrrrrK.....',
+    '....KbbbbK......',
+    '....KbbbbK......',
+    '....kbbbbbk.....',
+    '.....krrk.......',
+    '...KgggggggK....',
+    '..KgggggggggK...',
+    '..KggggggggK....',
+    '...KgggggK......',
+    '....KvvKvvK.....',
+    '....KvvKvvK.....',
+    '....KKK.KKK.....',
+    '................',
+    '................'
+  ],
+  player_side: [
+    '....KKKKKK......',
+    '...KrrrrrrK.....',
+    '...KrrrrrrK.....',
+    '....KcccccK.....',
+    '....ceccccK.....',
+    '....cccccck.....',
+    '.....krrk.......',
+    '....KgggggK.....',
+    '...KggWWggK.....',
+    '...KgggggggK....',
+    '....KgggggK.....',
+    '....KvvKvvK.....',
+    '....KvvKvvK.....',
+    '....KKK.KKK.....',
+    '................',
+    '................'
+  ],
+  pidgey: [
+    '................',
+    '......kk........',
+    '.....kllk.......',
+    '....kllllk......',
+    '...kcllllck.....',
+    '..kccllellk.....',
+    '..kcclllellk....',
+    '..kccllllYYk....',
+    '..kbbllllbYk....',
+    '..kbbbbbbbk.....',
+    '...kbbbbbk......',
+    '....kkkkkk......',
+    '.....Y..Y.......',
+    '....YY..YY......',
+    '................',
+    '................'
+  ],
+  psyduck: [
+    '.....k.k.k......',
+    '.....k.k.k......',
+    '....kyyyyyk.....',
+    '...kyyyyyyyk....',
+    '..kyyyyyyyyyk...',
+    '..kyeyyyyyeyk...',
+    '..kyyyyyyyyyk...',
+    '..kyyoooooyyk...',
+    '...kyoooooyk....',
+    '....kyyyyyk.....',
+    '...kyyyyyyyk....',
+    '..kyyyyyyyyyk...',
+    '..kyyyyyyyyyk...',
+    '...kyyyyyyyk....',
+    '....o.....o.....',
+    '................'
+  ],
+  chikorita: [
+    '.......gg.......',
+    '.....ggggggg....',
+    '...GgggggggggG..',
+    '.....GGGGGG.....',
+    '......kmk.......',
+    '.....kmmmk......',
+    '....kmmmmmk.....',
+    '....kmemmemk....',
+    '....kmmmmmmk....',
+    '...kmmmmmmmk....',
+    '...kmmmmmmmk....',
+    '....kmmmmmk.....',
+    '....k.mm..k.....',
+    '....G.....G.....',
+    '................',
+    '................'
+  ],
+  machop: [
+    '................',
+    '.....kSSSk......',
+    '....kssssSk.....',
+    '....ksesesk.....',
+    '....kssssSk.....',
+    '...kSSSSSSSk....',
+    '..kSssssssSk....',
+    '..ksssssssSk....',
+    '...ksssssSk.....',
+    '...ks.kk.sk.....',
+    '..ks..kk..sk....',
+    '.....kSSk.......',
+    '....kSSSSk......',
+    '....k....k......',
+    '................',
+    '................'
+  ],
+  pikachu: [
+    '.....K....K.....',
+    '.....K....K.....',
+    '.....y....y.....',
+    '....kyyyyyyk....',
+    '...kyyyyyyyyk...',
+    '...kyeyyyyeyk...',
+    '...kyryyyyryk...',
+    '...kyykkkkyyk...',
+    '....kyyyyyyk....',
+    '...kyyyyyyyykY..',
+    '...kyyyyyyyykYY.',
+    '....kyyyyyyk.Y..',
+    '.....kyyyyk.....',
+    '.....k.yy.k.....',
+    '................',
+    '................'
+  ],
+  bulbasaur: [
+    '................',
+    '.........GGG....',
+    '........GgggG...',
+    '....kttttGgggG..',
+    '...kttttttGGG...',
+    '...kteetttttk...',
+    '...kttttttttk...',
+    '..kttttttttttk..',
+    '..ktTttttttTtk..',
+    '..kttttttttttk..',
+    '...kttttttttk...',
+    '...k.tt..tt.k...',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  diglett: [
+    '................',
+    '................',
+    '.....kkkk.......',
+    '....khhhhk......',
+    '...khhhhhhk.....',
+    '...khehhehk.....',
+    '...khhppphk.....',
+    '...khhhhhhk.....',
+    '....khhhhk......',
+    '....kkkkkk......',
+    '..HHHHHHHHHH....',
+    '.HhhhhhhhhhhH...',
+    'HhhhhhhhhhhhhH..',
+    'HHHHHHHHHHHHHH..',
+    '................',
+    '................'
+  ],
+  wooper: [
+    '................',
+    '...UU......UU...',
+    '..UuuU....UuuU..',
+    '...UUkuuuukUU...',
+    '....kuuuuuuk....',
+    '...kueuuuueuk...',
+    '...kuuuuuuuuk...',
+    '..kuuuuuuuuuuk..',
+    '..kuuuuuuuuuuk..',
+    '..kuuuuuuuuuuk..',
+    '...kuuuuuuuuk...',
+    '....k.uu.uu.k...',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  chinchou: [
+    '..z..........z..',
+    '...z........z...',
+    '....U......U....',
+    '.....U....U.....',
+    '......U..U......',
+    '....kyyyyyyk....',
+    '...kyyyyyyyyk...',
+    '...kyeyyyyeyk...',
+    '...kUUUUUUUUk...',
+    '..kUUUUUUUUUUk..',
+    '..kUUUUUUUUUUk..',
+    '...kUUUUUUUUk...',
+    '....kUUUUUUk....',
+    '.....k....k.....',
+    '................',
+    '................'
+  ],
+  snorlax: [
+    '................',
+    '....kkkkkkkk....',
+    '...knnnnnnnnk...',
+    '..knnnnnnnnnnk..',
+    '..kneennneenk...',
+    '..knnnnnnnnnnk..',
+    '.knnWWWWWWWWnk..',
+    '.knWWWWWWWWWWk..',
+    'kNWWWWWWWWWWWNk.',
+    'kNWWWWWWWWWWWNk.',
+    '.knWWWWWWWWWWk..',
+    '..knnWWWWWWnk...',
+    '..kn.nnnnnn.nk..',
+    '...kk......kk...',
+    '................',
+    '................'
+  ],
+  ditto: [
+    '................',
+    '................',
+    '......pppp......',
+    '....pppppppp....',
+    '...pppppppppp...',
+    '..ppepppppeppp..',
+    '..pppppppppppp..',
+    '..pppppppppppp..',
+    '.PPPPPPPPPPPPPP.',
+    '.PPPPPPPPPPPPPP.',
+    '..PPPPPPPPPPPP..',
+    '...PPPPPPPPPP...',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  sign: [
+    '................',
+    '................',
+    '..VVVVVVVVVVV...',
+    '..VvvvvvvvvvV...',
+    '..VvWWWWWWvvV...',
+    '..VvWWWWWWvvV...',
+    '..VvvvvvvvvvV...',
+    '..VVVVVVVVVVV...',
+    '......VvV.......',
+    '......VvV.......',
+    '......VvV.......',
+    '.....VVVVV......',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  lockbox: [
+    '................',
+    '................',
+    '................',
+    '....iiiiiiii....',
+    '...iKKKKKKKKi...',
+    '...iiiiiiiiii...',
+    '...iKKKKKKKKi...',
+    '...iKKKyyKKKi...',
+    '...iKKKyyKKKi...',
+    '...iKKKKKKKKi...',
+    '...iiiiiiiiii...',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  post: [
+    '................',
+    '...WWWWWWWW.....',
+    '...WKKKKKKW.....',
+    '...WKKKKKKW.....',
+    '...WKKKKKKW.....',
+    '...WWWWWWWW.....',
+    '......Vv........',
+    '......Vv........',
+    '......Vv........',
+    '......Vv........',
+    '.....VVVV.......',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  berry: [
+    '................',
+    '......GGG.......',
+    '....GGGGGGG.....',
+    '...GGoGGGoGG....',
+    '...GGGGoGGGG....',
+    '....GoGGGoG.....',
+    '.....GGGGG......',
+    '.......V........',
+    '.......V........',
+    '......VVV.......',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  mound: [
+    '................',
+    '................',
+    '................',
+    '................',
+    '.....SSSSS......',
+    '....SsssssS.....',
+    '...SssiiisssS...',
+    '...SSSSSSSSSS...',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  marker: [
+    '................',
+    '................',
+    '.....rrr........',
+    '.....rrrr.......',
+    '.....rrr........',
+    '......V.........',
+    '......V.........',
+    '......V.........',
+    '......V.........',
+    '.....VVV........',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  boulder: [
+    '................',
+    '................',
+    '.....SSSSS......',
+    '....SssssSS.....',
+    '...SsssssssS....',
+    '...SsssssssS....',
+    '....SSSSSSSS....',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ],
+  crystal: [
+    '................',
+    '................',
+    '......x.........',
+    '.....xxx........',
+    '....xxxxx.......',
+    '....xxxxx.......',
+    '.....xxx........',
+    '......x.........',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'
+  ]
+};
+
+/* ------------------------------------------------------------------ */
+
+const cache = new Map();
+
+/* Bake one sprite into an offscreen canvas at the requested scale. Sprites are
+   drawn hundreds of times per second, so this happens once per (name, scale). */
+export function bake(name, scale = 1, flip = false) {
+  const key = name + '@' + scale + (flip ? 'f' : '');
+  if (cache.has(key)) return cache.get(key);
+  const rows = ART[name];
+  const c = document.createElement('canvas');
+  c.width = SPRITE_SIZE * scale;
+  c.height = SPRITE_SIZE * scale;
+  const g = c.getContext('2d');
+  if (rows) {
+    for (let y = 0; y < SPRITE_SIZE; y++) {
+      const row = rows[y];
+      for (let x = 0; x < SPRITE_SIZE; x++) {
+        const ch = row[x];
+        if (ch === '.') continue;
+        const col = PALETTE[ch];
+        if (!col) continue;
+        g.fillStyle = col;
+        const px = flip ? (SPRITE_SIZE - 1 - x) : x;
+        g.fillRect(px * scale, y * scale, scale, scale);
+      }
+    }
+  }
+  cache.set(key, c);
+  return c;
+}
+
+/* Draw a sprite into any 2d context at native scale. */
+export function drawSprite(ctx, name, x, y, flip = false) {
+  const c = bake(name, 1, flip);
+  ctx.drawImage(c, Math.round(x), Math.round(y));
+}
+
+/* Fill an <canvas> element with one sprite, scaled to fit. Used by the cards
+   and the encounter screen. */
+export function paintInto(canvasEl, name, flip = false) {
+  const scale = Math.max(1, Math.floor(Math.min(canvasEl.width, canvasEl.height) / SPRITE_SIZE));
+  const g = canvasEl.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.clearRect(0, 0, canvasEl.width, canvasEl.height);
+  const c = bake(name, scale, flip);
+  g.drawImage(c, Math.floor((canvasEl.width - c.width) / 2), Math.floor((canvasEl.height - c.height) / 2));
+}
+
+export function hasArt(name) { return !!ART[name]; }

@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="utf-8"><title>Verdant Isle self test</title>
+<style>body{font:13px/1.5 ui-monospace,Menlo,monospace;background:#111;color:#ddd;padding:16px}
+.ok{color:#7bd88f}.bad{color:#ff7b72}h2{color:#8ab4f8;font-size:14px;margin:18px 0 6px}</style>
+</head>
+<body>
+<div id="out">running…</div>
+<script type="module" src="js/selftest.js"></script>
+<script>
+window.addEventListener('error', e => {
+  document.getElementById('out').innerHTML =
+    '<div class="bad">UNCAUGHT ' + (e.message || '') + ' @ ' + (e.filename||'') + ':' + (e.lineno||'') + '</div>';
+  document.title = 'FAIL';
+});
+window.addEventListener('unhandledrejection', e => {
+  document.getElementById('out').innerHTML =
+    '<div class="bad">REJECTED ' + (e.reason && (e.reason.stack || e.reason.message || e.reason)) + '</div>';
+  document.title = 'FAIL';
+});
+</script>
+</body></html>

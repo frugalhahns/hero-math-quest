@@ -103,6 +103,19 @@ export function home() {
       <button class="btn ghost" id="shop">Ring Shop</button>
       <button class="btn ghost" id="grown">Grown-up stats</button>
     </div>
+
+    <div class="panel" style="margin-top:18px">
+      <div class="row">
+        <b>Verdant Isle</b>
+        <span class="spacer"></span>
+        <span class="muted">Grade 8 reading</span>
+      </div>
+      <p class="muted" style="margin:6px 0 12px">
+        A separate game for an older reader. You explore an island and work out what to do
+        next only by reading what the last warden left written down.
+      </p>
+      <a class="btn ghost" href="island/" style="text-decoration:none">Open Verdant Isle</a>
+    </div>
   `);
 
   document.querySelectorAll('[data-go]').forEach(b => {
