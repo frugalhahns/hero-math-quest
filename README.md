@@ -60,6 +60,9 @@ These are deliberate, not decoration:
   built-in speech.
 - **Calm mode** kills the animation. **Focus mode** hides the XP bar and counters for
   days when the numbers themselves are the distraction.
+- **Light and dark themes.** The theme follows the device by default and can be pinned
+  to Light or Dark in settings. The light palette is measured against WCAG AA: 4.5:1 or
+  better on every text pair, 3:1 or better on borders, controls and the focus ring.
 - **Immediate, varied feedback.** Sound, confetti, a different praise line every time.
 - **Progress that accumulates:** XP, levels, rings to spend, 11 badges, a day streak.
 
@@ -107,6 +110,7 @@ js/
   ui.js            rendering, effects, brain breaks, read-aloud
   audio.js         WebAudio synth, no audio files
   sprites.js       original SVG characters and icons
+  theme.js         light / dark / auto color theme
   content/         mathbanks, wordproblems, logic, reading, cases
   modes/           drill, mystery, logic, reading, detective
 ```

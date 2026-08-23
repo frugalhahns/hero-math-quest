@@ -132,7 +132,7 @@ export function runSession(cfg) {
       ${head}
       <div class="qcard">
         ${item.tag ? `<span class="tag">${U.esc(item.tag)}</span>` : ''}
-        ${item.passage ? `<div class="storybox">${item.passage}</div><hr style="border-color:#39447f;opacity:.4">` : ''}
+        ${item.passage ? `<div class="storybox">${item.passage}</div><hr class="rule">` : ''}
         <div class="qtext">${U.markNumbers(item.prompt)}</div>
       </div>
       ${U.choiceList(item.choices)}
@@ -327,7 +327,7 @@ export function runSession(cfg) {
           ${item.trap ? `<span class="tag trap">TRAP: ${U.esc(item.trap)}</span>` : ''}
           <b style="font-size:17px">${U.esc(item.title)}</b>
           <div class="qtext" style="margin-top:8px">${item.lines.map(l => `<div style="margin:.28em 0">${U.markNumbers(l)}</div>`).join('')}</div>
-          <div class="qtext" style="margin-top:10px;color:#ffd400"><b>${U.markNumbers(item.question)}</b></div>
+          <div class="qtext" style="margin-top:10px;color:var(--accent-ink)"><b>${U.markNumbers(item.question)}</b></div>
           <div class="steps">
             ${item.steps.map((s, k) => `<div class="step ${k < stage ? 'done' : k === stage ? 'active' : ''}">
               <div class="n">${k + 1}</div><div class="lbl">${U.esc(s.label)}</div>

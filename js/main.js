@@ -2,6 +2,7 @@
 
 import { S, save, resetAll, touchDay, level, BADGES } from './state.js';
 import { setSound, sfx } from './audio.js';
+import { applyTheme } from './theme.js';
 import * as U from './ui.js';
 import { SKILL_META } from './content/mathbanks.js';
 import { HEROES } from './sprites.js';
@@ -45,9 +46,7 @@ export function home() {
         <span class="spacer"></span>
         <span class="muted">${doneToday} of ${goal} rounds</span>
       </div>
-      <div style="height:14px;background:#0a0f24;border-radius:999px;overflow:hidden;margin-top:8px;border:1px solid var(--line)">
-        <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#31d67a,#19d3c5)"></div>
-      </div>
+      <div class="meter"><i style="width:${pct}%"></i></div>
       ${doneToday >= goal ? '<p class="muted" style="margin-bottom:0">Mission complete. Anything else today is bonus XP.</p>'
         : '<p class="muted" style="margin-bottom:0">Each round is a short chunk. Break in between. That is the plan.</p>'}
     </div>
@@ -194,6 +193,11 @@ function settings() {
       <select id="s-goal">
         ${[1, 2, 3, 4, 5].map(n => `<option value="${n}" ${S.dailyGoal === n ? 'selected' : ''}>${n}</option>`).join('')}
       </select></label>
+    <label class="field"><span>Color theme</span>
+      <select id="s-theme">
+        ${[['auto', 'Auto (match my device)'], ['light', 'Light'], ['dark', 'Dark']]
+          .map(([v, lbl]) => `<option value="${v}" ${(S.theme || 'auto') === v ? 'selected' : ''}>${lbl}</option>`).join('')}
+      </select></label>
     <label class="check"><input type="checkbox" id="s-motion" ${S.reduceMotion ? 'checked' : ''}> Calm mode (less animation)</label>
     <label class="check"><input type="checkbox" id="s-focus" ${S.focusMode ? 'checked' : ''}> Focus mode (hide XP and counters)</label>
     <label class="check"><input type="checkbox" id="s-sound" ${S.soundOn ? 'checked' : ''}> Sound effects</label>
@@ -209,17 +213,19 @@ function settings() {
       S.name = card.querySelector('#s-name').value.trim() || 'Hero';
       S.chunkSize = Number(card.querySelector('#s-chunk').value);
       S.dailyGoal = Number(card.querySelector('#s-goal').value);
+      S.theme = card.querySelector('#s-theme').value;
       S.reduceMotion = card.querySelector('#s-motion').checked;
       S.focusMode = card.querySelector('#s-focus').checked;
       S.soundOn = card.querySelector('#s-sound').checked;
       setSound(S.soundOn);
+      applyTheme();
       save(); U.closeModal(); U.updateHud(); home();
     };
     card.querySelector('#s-reset').onclick = () => {
       U.modal(`<h2>Erase everything?</h2><p>This wipes levels, badges, rings and stats on this device. It cannot be undone.</p>
         <div class="row"><button class="btn warn" id="yes">Yes, erase</button><button class="btn ghost" id="no">No, keep it</button></div>`, c2 => {
         c2.querySelector('#no').onclick = U.closeModal;
-        c2.querySelector('#yes').onclick = () => { resetAll(); U.closeModal(); setSound(S.soundOn); U.updateHud(); home(); };
+        c2.querySelector('#yes').onclick = () => { resetAll(); U.closeModal(); setSound(S.soundOn); applyTheme(); U.updateHud(); home(); };
       });
     };
   });
@@ -253,6 +259,7 @@ function welcome() {
 
 function boot() {
   touchDay();
+  applyTheme();
   setSound(S.soundOn);
   U.updateHud();
 

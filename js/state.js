@@ -8,6 +8,7 @@ const DEFAULT = {
   xp: 0,
   coins: 0,
   soundOn: true,
+  theme: 'auto',       // 'auto' | 'light' | 'dark'
   reduceMotion: false,
   focusMode: false,
   chunkSize: 8,

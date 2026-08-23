@@ -6,6 +6,20 @@
 <title>Hero Math Quest</title>
 <meta name="description" content="Math, reading and logic quests starring a speedster, a web-hero, a blocky miner and an electric mouse.">
 <meta name="theme-color" content="#0b1026">
+<script>
+  /* Resolve the saved color theme before first paint so light mode never flashes dark. */
+  (function () {
+    var pref = 'auto';
+    try { pref = (JSON.parse(localStorage.getItem('hmq.save.v1') || '{}').theme) || 'auto'; } catch (e) {}
+    var light = pref === 'light' ||
+      (pref !== 'dark' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
+    document.documentElement.dataset.theme = light ? 'light' : 'dark';
+    if (light) {
+      var bar = document.querySelector('meta[name="theme-color"]');
+      if (bar) bar.setAttribute('content', '#f2f5ff');
+    }
+  })();
+</script>
 <link rel="stylesheet" href="css/style.css">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#9733;</text></svg>">
 </head>
