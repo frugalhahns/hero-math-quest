@@ -14,7 +14,7 @@ const DEFAULT = {
   chunkSize: 8,
   dailyGoal: 3,
   // adaptive difficulty per skill, 1..5
-  levels: { add: 2, sub: 2, mul: 2, div: 2 },
+  levels: { add: 2, sub: 2, mul: 2, div: 2, frac: 1 },
   // rolling accuracy per skill
   stats: {},
   badges: {},          // badgeId -> ISO date earned
@@ -50,7 +50,12 @@ function load() {
     const raw = localStorage.getItem(KEY);
     if (!raw) return structuredClone(DEFAULT);
     const parsed = JSON.parse(raw);
-    return Object.assign(structuredClone(DEFAULT), parsed);
+    const merged = Object.assign(structuredClone(DEFAULT), parsed);
+    /* Nested objects are replaced wholesale by Object.assign, so a save written
+       before a new skill existed would come back without its level. Re-apply the
+       defaults underneath whatever the save already had. */
+    merged.levels = Object.assign(structuredClone(DEFAULT.levels), parsed.levels || {});
+    return merged;
   } catch (e) {
     return structuredClone(DEFAULT);
   }

@@ -30,6 +30,7 @@
   --detective:#ff8a3d;
   --logic:#19d3c5;
   --story:#ff5fa2;
+  --frac:#b6e01e;
   --boss-line:#fff;
 
   --good:#31d67a;
@@ -96,6 +97,7 @@
   --detective:#b8560f;
   --logic:#0d8a80;
   --story:#cc3576;
+  --frac:#4f6b00;
   --boss-line:#3a4480;
 
   --good:#157a49;
@@ -244,6 +246,7 @@ button{font-family:inherit}
 .world[data-c="detective"]{border-color:var(--detective)}
 .world[data-c="logic"]{border-color:var(--logic)}
 .world[data-c="story"]{border-color:var(--story)}
+.world[data-c="frac"]{border-color:var(--frac)}
 .world[data-c="boss"]{border-color:var(--boss-line)}
 
 /* ---------- question screen ---------- */
@@ -274,6 +277,8 @@ button{font-family:inherit}
 }
 .tag.trap{background:var(--bad-bg);border-color:var(--bad);color:var(--bad-ink)}
 hr.rule{border:0;border-top:1px solid var(--line);opacity:.6;margin:12px 0}
+.artbox{max-width:300px;margin:12px auto 4px;display:block}
+.artbox svg{display:block;border-radius:6px}
 
 /* answer input */
 .answerline{

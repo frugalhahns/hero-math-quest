@@ -8,7 +8,8 @@ no ads, no network calls. Everything saves in the browser on the device it is pl
 
 ## What is in it
 
-Nine worlds, all built from the printed practice pages:
+Ten worlds. Nine come straight off the printed practice pages; Fraction Falls is
+the one addition that does not, and is marked as such:
 
 | World | Skill | Source material |
 |---|---|---|
@@ -16,6 +17,7 @@ Nine worlds, all built from the printed practice pages:
 | Deepslate Mine | Subtraction | Daily Math Practice Week 1, Super Math Quest chunk 2 |
 | Web-Swing City | Multiplication | Daily Math Practice Week 1, Super Math Quest chunk 3 |
 | Trainer Gym | Division | Daily Math Practice Week 1, Super Math Quest chunk 4 |
+| Fraction Falls | Fractions | *Not from the worksheets.* Generated to the standard 3rd/4th grade sequence |
 | Mystery Lab | Multi-step word problems | Multi-Step Word Problems L1 and L2, Tricky Mode, Kumon-style set |
 | Detective Casebook | Deduction, memory, inference | A Detective's Casebook, all 3 cases plus the master memory challenge |
 | Logic Lab | Patterns, comparisons, odd-one-out, logic grids, sequencing, if-then | Complete Math and Logic Workbook, chapter 7 |
@@ -24,11 +26,12 @@ Nine worlds, all built from the printed practice pages:
 
 Every problem printed on the worksheets is in the game. Where the worksheets would run
 out, generators produce new problems in the same difficulty band, so a level never
-runs dry and never drifts off target.
+runs dry and never drifts off target. Fraction Falls is the exception: there were no
+fraction pages in the stack, so all of it is generated.
 
 ## How the difficulty works
 
-Each of the four math skills has its own level, 1 to 5, and each level matches a day
+Each of the four operations has its own level, 1 to 5, and each level matches a day
 of the printed Week 1 pages:
 
 1. two-digit work, no regrouping to speak of (Monday)
@@ -36,6 +39,18 @@ of the printed Week 1 pages:
 3. sums past 100, harder facts (Wednesday)
 4. three-digit, 12x tables (Thursday)
 5. three-digit carrying and borrowing, bigger division (Boss Battle Friday)
+
+Fractions carry their own level on the same 1 to 5 ladder, but the bands are the
+standard 3rd/4th grade order rather than the Week 1 pages:
+
+1. name the shaded fraction, unit fractions of a small set (halves, thirds, fourths)
+2. fifths through eighths, equivalent fractions, a fraction of a set
+3. comparing (same top or same bottom), bigger sets, first like-denominator sums
+4. adding and subtracting with like denominators, simplest form, against 1/2
+5. sums past one whole, harder simplifying, denominators to twelfths
+
+Fractions start at level 1 rather than 2, since the naming questions come before
+anything on the arithmetic pages.
 
 After each round the level moves on its own: 85% or better bumps it up, under 50%
 eases it back down. Nothing to configure, and the kid never sees a screen full of
@@ -60,6 +75,8 @@ These are deliberate, not decoration:
   built-in speech.
 - **Calm mode** kills the animation. **Focus mode** hides the XP bar and counters for
   days when the numbers themselves are the distraction.
+- **Fraction bars are drawn, not described.** The naming questions show the shaded
+  bar as SVG, colored from the theme so it reads in light and dark.
 - **Light and dark themes.** The theme follows the device by default and can be pinned
   to Light or Dark in settings. The light palette is measured against WCAG AA: 4.5:1 or
   better on every text pair, 3:1 or better on borders, controls and the focus ring.
@@ -111,7 +128,7 @@ js/
   audio.js         WebAudio synth, no audio files
   sprites.js       original SVG characters and icons
   theme.js         light / dark / auto color theme
-  content/         mathbanks, wordproblems, logic, reading, cases
+  content/         mathbanks, fractions, wordproblems, logic, reading, cases
   modes/           drill, mystery, logic, reading, detective
 ```
 

@@ -2,8 +2,9 @@
    handles input, feedback, hints, XP, and the end-of-chunk reward screen.
 
    Question kinds:
-     numeric   { expr | prompt, answer, hint?, flavor?, passage? }
-     choice    { prompt, choices[], answer(index), explain?, tag?, passage? }
+     numeric   { expr | prompt, answer, hint?, flavor?, passage?, art? }
+     choice    { prompt, choices[], answer(index), explain?, tag?, passage?, art? }
+   art is trusted inline SVG (fraction bars), so it is injected unescaped.
      seq2      { prompt, seq[], answers[2], rule }
      order     { prompt, correct[] }
      gridAssign{ prompt, rows[], cols[], clues[], solution{row:col}, explain }
@@ -95,6 +96,7 @@ export function runSession(cfg) {
       <div class="qcard">
         ${item.flavor ? `<div class="muted" style="font-size:15px;margin-bottom:6px">${U.esc(item.flavor)}</div>` : ''}
         ${item.prompt ? `<div class="qtext">${U.markNumbers(item.prompt)}</div>` : ''}
+        ${item.art ? `<div class="artbox">${item.art}</div>` : ''}
         ${item.expr ? `<div class="bigexpr">${U.esc(item.expr)} = ?</div>` : ''}
       </div>
       <div class="answerline"><div id="answerbox">?</div></div>
@@ -134,6 +136,7 @@ export function runSession(cfg) {
         ${item.tag ? `<span class="tag">${U.esc(item.tag)}</span>` : ''}
         ${item.passage ? `<div class="storybox">${item.passage}</div><hr class="rule">` : ''}
         <div class="qtext">${U.markNumbers(item.prompt)}</div>
+        ${item.art ? `<div class="artbox">${item.art}</div>` : ''}
       </div>
       ${U.choiceList(item.choices)}
       ${footer(U.canSpeak() ? '<button class="chip" id="say">Read it to me</button>' : '')}

@@ -3,6 +3,7 @@
 
 import { S } from '../state.js';
 import { makeChunk, makeBossChunk, SKILL_META } from '../content/mathbanks.js';
+import { makeFracChunk, FRAC_META } from '../content/fractions.js';
 import { runSession } from '../session.js';
 import * as U from '../ui.js';
 import { sfx } from '../audio.js';
@@ -20,6 +21,24 @@ export function startDrill(skill, onDone) {
     questions: makeChunk(skill, lvl, n),
     onDone,
     onAgain: () => startDrill(skill, onDone),
+    onQuit: onDone
+  });
+}
+
+/* Fractions ride the same adaptive-level machinery as the four operations,
+   under their own skill key so a strong multiplier does not skip them ahead. */
+export function startFractions(onDone) {
+  const lvl = S.levels.frac || 1;
+  const n = S.chunkSize || 8;
+  sfx.whoosh();
+  runSession({
+    title: FRAC_META.world,
+    subtitle: `${FRAC_META.label} | level ${lvl}`,
+    heroKey: FRAC_META.hero,
+    skill: 'frac',
+    questions: makeFracChunk(lvl, n),
+    onDone,
+    onAgain: () => startFractions(onDone),
     onQuit: onDone
   });
 }

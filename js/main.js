@@ -6,7 +6,7 @@ import { applyTheme } from './theme.js';
 import * as U from './ui.js';
 import { SKILL_META } from './content/mathbanks.js';
 import { HEROES } from './sprites.js';
-import { startDrill, bossIntro } from './modes/drill.js';
+import { startDrill, startFractions, bossIntro } from './modes/drill.js';
 import { mysteryMenu } from './modes/mystery.js';
 import { logicMenu } from './modes/logic.js';
 import { readingMenu } from './modes/reading.js';
@@ -62,6 +62,12 @@ export function home() {
         </button>`;
       }).join('')}
 
+      <button class="world" data-c="frac" data-go="frac">
+        <span class="lvlpill">LV ${S.levels.frac || 1}</span>
+        <div class="art">${U.sp.heroSvg('miner', 'idle')}</div>
+        <b>Fraction Falls</b><span>Parts of a whole, ${S.chunkSize} problems</span>
+      </button>
+
       <button class="world" data-c="mystery" data-go="mystery">
         <span class="lvlpill">READ + MATH</span>
         <div class="art">${U.sp.magnifier()}</div>
@@ -104,6 +110,7 @@ export function home() {
       const v = b.dataset.go;
       sfx.tap();
       if (v.startsWith('drill:')) return startDrill(v.split(':')[1], home);
+      if (v === 'frac') return startFractions(home);
       if (v === 'mystery') return mysteryMenu(home);
       if (v === 'cases') return caseMenu(home);
       if (v === 'logic') return logicMenu(home);
@@ -169,6 +176,7 @@ function grownUp() {
         <li>Subtraction: level <b>${S.levels.sub}</b> (${acc('sub')})</li>
         <li>Multiplication: level <b>${S.levels.mul}</b> (${acc('mul')})</li>
         <li>Division: level <b>${S.levels.div}</b> (${acc('div')})</li>
+        <li>Fractions: level <b>${S.levels.frac}</b> (${acc('frac')})</li>
         <li>Badges: <b>${Object.keys(S.badges).length} of ${BADGES.length}</b></li>
       </ul>
       <p class="muted">Levels move on their own: 85% or better on a round bumps the level up, under 50% eases it back down. Levels 1 to 5 run from
