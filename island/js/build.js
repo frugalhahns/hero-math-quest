@@ -75,7 +75,6 @@ export function openProject(id, onChange) {
       ${U.passageHTML([p.finish])}
       ${crew.length ? `<h3>Crew</h3><div class="grid2">${crew.map(sp => U.creatureCard(sp)).join('')}</div>` : ''}
       <div class="row end" style="margin-top:18px"><button class="btn" type="button" data-close>Close</button></div>`);
-    U.paintArt(U.$('#sheet-body'));
     return;
   }
 
@@ -95,7 +94,7 @@ export function openProject(id, onChange) {
             ? candidates.map(sp => `
               <button class="card pick" type="button" data-slot="${i}" data-sp="${sp.id}"
                 aria-pressed="${picked[i] === sp.id}">
-                <canvas width="44" height="44" data-art="${sp.id}"></canvas>
+                ${U.creatureImg(sp.id, 48)}
                 <div><div class="nm">${U.esc(sp.name)}</div><div class="jb">${U.esc(sp.jobName)}</div></div>
               </button>`).join('')
             : '<div class="card locked"><div><div class="nm">No one yet</div><div class="jb">Keep reading. Somebody on this island does this.</div></div></div>'}
@@ -124,7 +123,6 @@ export function openProject(id, onChange) {
       </div>
       ${ready ? '' : '<p class="muted small" style="margin-top:10px">Fill every job above to begin.</p>'}
     `);
-    U.paintArt(body);
 
     body.querySelectorAll('.card.pick').forEach(b => b.addEventListener('click', () => {
       const slot = Number(b.dataset.slot);
@@ -158,6 +156,5 @@ function complete(p, crew, onChange) {
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Go and look</button>
     </div>`);
-  U.paintArt(body);
   if (onChange) onChange();
 }

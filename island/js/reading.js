@@ -22,7 +22,6 @@ export function openSign(signId, label) {
     <p class="kicker">${U.esc(label || 'Somewhere on Verdant Isle')}</p>
     ${U.passageHTML(lines)}
     <div class="row end" style="margin-top:16px">
-      ${U.readAloudButton('sign:' + signId)}
       <button class="btn" type="button" data-close>Done</button>
     </div>`);
 }
@@ -42,7 +41,6 @@ function showPassage(doc, alreadyDone, reread) {
     ${U.docHeaderHTML(doc)}
     ${U.passageHTML(doc.text)}
     <div class="row" style="margin-top:16px">
-      ${U.readAloudButton('doc:' + doc.id)}
       <span class="spacer"></span>
       <button class="btn ghost" type="button" data-close>Put it back</button>
       ${alreadyDone
@@ -120,12 +118,4 @@ function finish(doc, firstTry, total) {
   const hook = afterDoc;
   afterDoc = null;
   if (hook) hook();
-}
-
-/* Text used by the read-aloud button. */
-export function speechFor(key) {
-  const [kind, id] = String(key).split(':');
-  if (kind === 'doc' && DOCS[id]) return DOCS[id].text.join(' ');
-  if (kind === 'sign' && SIGNS[id]) return SIGNS[id].join(' ');
-  return null;
 }

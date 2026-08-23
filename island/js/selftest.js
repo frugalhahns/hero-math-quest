@@ -13,6 +13,7 @@ import { GLOSSARY } from './content/glossary.js';
 import { ART, SPRITE_SIZE } from './pixels.js';
 import { isKnownTile, isSolidTile } from './tileset.js';
 import * as W from './world.js';
+import { DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
 import { askOne as U_askOne } from './ui.js';
 
 const out = [];
@@ -276,6 +277,31 @@ for (const [name, rows] of Object.entries(ART)) {
   ok(bad.length === 0, `${name}: every row ${SPRITE_SIZE} wide`, bad.join(', '));
 }
 for (const d of ['player_down', 'player_up', 'player_side']) ok(!!ART[d], `player art "${d}" exists`);
+
+/* ---------------- vendored sprites ---------------- */
+head('resident sprites');
+for (const sp of SPECIES) {
+  ok(Number.isInteger(DEX[sp.id]), `${sp.id}: has a national dex number`, String(DEX[sp.id]));
+  const t = TILES_TALL[sp.id];
+  ok(typeof t === 'number' && t >= 0.8 && t <= 4,
+    `${sp.id}: overworld height is a sane number of tiles`, String(t));
+}
+ok(Object.keys(DEX).length === SPECIES.length, 'no dex entries for residents that do not exist',
+  `${Object.keys(DEX).length} vs ${SPECIES.length}`);
+ok(Object.keys(TILES_TALL).length === SPECIES.length, 'every dex entry has an overworld height');
+
+/* The files must actually be on disk, or a resident becomes an empty tile.
+   Fetched rather than assumed, because these are vendored binaries. */
+{
+  const results = await Promise.all(SPECIES.flatMap(sp => [
+    fetch(animUrl(sp.id), { method: 'GET' }).then(r => [sp.id + ' anim', r.ok, r.headers.get('content-type')]).catch(e => [sp.id + ' anim', false, e.message]),
+    fetch(stillUrl(sp.id), { method: 'GET' }).then(r => [sp.id + ' still', r.ok, r.headers.get('content-type')]).catch(e => [sp.id + ' still', false, e.message])
+  ]));
+  for (const [what, good, ctype] of results) {
+    ok(good, `sprite file present: ${what}`, good ? '' : String(ctype));
+  }
+  ok(results.every(r => r[1]), 'every resident has both a still and an animated sprite on disk');
+}
 
 /* ---------------- quest chain ---------------- */
 head('quest chain');

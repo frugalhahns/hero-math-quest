@@ -123,6 +123,7 @@ export function camera(px, py) {
 /* ---------------- drawing ---------------- */
 
 import { bake } from './pixels.js';
+import { DEX, isBroken } from './creatures.js';
 
 export function drawMap(ctx, map, cam, frame, S) {
   const set = tiles();
@@ -143,6 +144,9 @@ export function drawMap(ctx, map, cam, frame, S) {
 
   for (const e of visibleEntities(map, S)) {
     if (!e.art) continue;
+    // residents are <img> elements in #actors so they stay crisp and animated;
+    // the hand-drawn 16x16 is only drawn if that image failed to load
+    if (e.kind === 'wild' && DEX[e.species] && !isBroken(e.species)) continue;
     const sx = (e.x - x0) * TS - ox, sy = (e.y - y0) * TS - oy;
     if (sx < -TS || sy < -TS || sx > VIEW_W * TS || sy > VIEW_H * TS) continue;
     ctx.drawImage(bake(e.art, 1, false), sx, sy);

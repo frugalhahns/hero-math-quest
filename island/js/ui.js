@@ -6,7 +6,7 @@
 import { S, save, tally } from './state.js';
 import { sfx } from './audio.js';
 import { define } from './content/glossary.js';
-import { paintInto } from './pixels.js';
+import { creatureImg } from './creatures.js';
 
 export const $ = sel => document.querySelector(sel);
 
@@ -65,7 +65,6 @@ export function setLocked(v) {
 
 export function closeSheet(force = false) {
   if (closeLocked && !force) return false;
-  stopSpeak();
   hideGloss();
   $('#sheet').classList.add('hidden');
   $('#sheet-body').innerHTML = '';
@@ -86,10 +85,6 @@ export function passageHTML(paras, opts = {}) {
 export function docHeaderHTML(doc) {
   return `<h2>${esc(doc.title)}</h2>
     <p class="kicker">${esc(doc.source || '')}</p>`;
-}
-
-export function readAloudButton(id) {
-  return `<button class="btn ghost small" type="button" data-speak="${id}">Read it to me</button>`;
 }
 
 /* ---------------- glossary tooltip ---------------- */
@@ -113,35 +108,6 @@ export function wireGlossary(root = document) {
 }
 
 export function hideGloss() { $('#gloss').classList.add('hidden'); }
-
-/* ---------------- read aloud ---------------- */
-
-let voiceOn = false;
-
-export function speak(text) {
-  if (!('speechSynthesis' in window)) { toast('This browser cannot read aloud.'); return; }
-  stopSpeak();
-  const u = new SpeechSynthesisUtterance(stripBraces(text));
-  u.rate = 0.92;
-  u.pitch = 1;
-  voiceOn = true;
-  u.onend = () => { voiceOn = false; };
-  window.speechSynthesis.speak(u);
-}
-
-export function stopSpeak() {
-  if ('speechSynthesis' in window && voiceOn) window.speechSynthesis.cancel();
-  voiceOn = false;
-}
-
-export function wireSpeak(root, textFor) {
-  root.addEventListener('click', ev => {
-    const b = ev.target.closest('[data-speak]');
-    if (!b) return;
-    const t = textFor(b.dataset.speak);
-    if (t) speak(t);
-  });
-}
 
 /* ---------------- one question at a time ---------------- */
 
@@ -223,22 +189,15 @@ export function toast(msg, ms = 2600) {
 
 /* ---------------- small builders ---------------- */
 
+export { creatureImg };
+
 export function creatureCard(sp, extra = '') {
   return `<div class="card">
-    <canvas width="64" height="64" data-art="${sp.id}"></canvas>
+    ${creatureImg(sp.id, 48)}
     <div>
       <div class="nm">${esc(sp.name)}</div>
       <div class="jb">${esc(sp.kind)} &middot; ${esc(sp.jobName)}</div>
       ${extra}
     </div>
   </div>`;
-}
-
-/* Paints every <canvas data-art> inside a container. Called after any render
-   that includes creature cards. */
-export function paintArt(root) {
-  root.querySelectorAll('canvas[data-art]').forEach(c => {
-    const name = c.dataset.art;
-    try { paintInto(c, name); } catch (e) { /* unknown art, leave blank */ }
-  });
 }

@@ -101,9 +101,10 @@ questions about the warden's field notes on them, and each one does a job that a
 project needs — which project needs which job is, again, something you have to read.
 
 Six regions, eleven residents, 78 comprehension questions, no fighting and no failure
-states. See [island/README.md](island/README.md) for the design, and
-`island/selftest.html` for the ~970 assertions that prove the whole thing is still
-solvable in order.
+states, and deliberately no read-aloud button — comprehension is the skill being
+practised, so having the browser read the passage out would route around the point.
+See [island/README.md](island/README.md) for the design, and `island/selftest.html`
+for the ~1,020 assertions that prove the whole thing is still solvable in order.
 
 **Play it:** https://frugalhahns.github.io/hero-math-quest/island/
 

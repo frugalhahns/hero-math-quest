@@ -64,7 +64,7 @@ export const ENTITIES = [
 
   /* ------------------------------------------------ Tidepool Caverns */
   { map: 'caverns', x: 19, y: 3,  art: 'sign', kind: 'sign', sign: 'cavernWall' },
-  { map: 'caverns', x: 8,  y: 11, art: 'sign', kind: 'doc', doc: 'vault',
+  { map: 'caverns', x: 9,  y: 11, art: 'sign', kind: 'doc', doc: 'vault',
     label: 'Letters cut deep into the wall, beside a gap you cannot get through.' },
   { map: 'caverns', x: 7,  y: 12, art: 'snorlax', kind: 'wild', species: 'snorlax',
     needsItem: { key: 'berries', count: 2 },

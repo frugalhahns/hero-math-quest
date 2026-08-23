@@ -87,17 +87,15 @@ function showFieldNote(id) {
   if (!sp) return;
   const body = U.openSheet(`
     <div class="speaker">
-      <canvas width="64" height="64" data-art="${sp.id}"></canvas>
+      ${U.creatureImg(sp.id, 84)}
       <div><b>${U.esc(sp.name)}</b><br><span>${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</span></div>
     </div>
     <h2>${U.esc(sp.passage.title)}</h2>
     <p class="kicker">${U.esc(sp.passage.source)}</p>
     ${U.passageHTML(sp.passage.text)}
     <div class="row end" style="margin-top:16px">
-      ${U.readAloudButton('sp:' + sp.id)}
       <button class="btn" type="button" data-close>Close</button>
     </div>`);
-  U.paintArt(body);
 }
 
 /* ---------------- team ---------------- */
@@ -112,7 +110,7 @@ export function openTeam() {
     ${mine.length
       ? `<div class="grid2">${mine.map(sp =>
           `<button class="card pick" type="button" data-sp="${sp.id}">
-            <canvas width="52" height="52" data-art="${sp.id}"></canvas>
+            ${U.creatureImg(sp.id, 48)}
             <div><div class="nm">${U.esc(sp.name)}</div><div class="jb">${U.esc(sp.jobName)}</div></div>
           </button>`).join('')}</div>`
       : '<p class="muted">Nobody yet. Read the notice on the cabin door and start there.</p>'}
@@ -125,7 +123,6 @@ export function openTeam() {
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Close</button>
     </div>`);
-  U.paintArt(body);
   body.querySelectorAll('[data-sp]').forEach(b =>
     b.addEventListener('click', () => showFieldNote(b.dataset.sp)));
 }
@@ -235,5 +232,4 @@ export function openEnding() {
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Keep exploring</button>
     </div>`);
-  U.paintArt(body);
 }

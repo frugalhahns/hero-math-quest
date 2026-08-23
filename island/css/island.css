@@ -124,6 +124,40 @@ body {
   touch-action: manipulation;
 }
 
+/* The residents live in this layer rather than in the canvas, so they stay
+   crisp and keep animating no matter how far the canvas is scaled up. */
+#actors {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  border-radius: var(--radius);
+}
+#actors img {
+  position: absolute;
+  image-rendering: pixelated;
+  transform: translate(-50%, -100%);
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, .35));
+}
+
+/* The player is drawn on its own canvas above the sprite layer. Standing next
+   to a Snorlax, which is nearly three tiles across, would otherwise hide it. */
+#hero {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+/* A sprite in the reading sheet: scaled to its box, aspect ratio kept. */
+.mon {
+  image-rendering: pixelated;
+  object-fit: contain;
+  flex: none;
+}
+
 #prompt {
   position: absolute;
   left: 50%;
@@ -283,13 +317,13 @@ body {
   gap: 10px;
   margin-bottom: 12px;
 }
-.speaker canvas {
-  width: 48px;
-  height: 48px;
-  image-rendering: pixelated;
+.speaker .mon {
+  width: 84px;
+  height: 84px;
   background: var(--card2);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: 12px;
+  padding: 2px;
 }
 .speaker span { font-size: .9rem; color: var(--ink-dim); }
 
@@ -401,11 +435,9 @@ body {
   align-items: center;
   text-align: left;
 }
-.card canvas {
-  width: 44px;
-  height: 44px;
-  flex: none;
-  image-rendering: pixelated;
+.card .mon {
+  width: 48px;
+  height: 48px;
 }
 .card .nm { font-weight: 600; }
 .card .jb { font-size: .8rem; color: var(--ink-dim); }

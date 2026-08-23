@@ -62,7 +62,7 @@ export function meet(entity, onDone) {
 function meterHTML(sp, got, need, left, patience) {
   return `
     <div class="speaker">
-      <canvas width="64" height="64" data-art="${sp.id}"></canvas>
+      ${U.creatureImg(sp.id, 84)}
       <div>
         <b>${U.esc(sp.name)}</b><br>
         <span>${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</span>
@@ -84,12 +84,10 @@ function intro(sp, entity, need, patience, onDone) {
     ${U.passageHTML(sp.passage.text)}
     <p class="muted small" style="margin-top:12px">Tap any underlined word for its meaning. You can bring the page back up during the questions.</p>
     <div class="row" style="margin-top:14px">
-      ${U.readAloudButton('sp:' + sp.id)}
       <span class="spacer"></span>
       <button class="btn ghost" type="button" data-close>Not yet</button>
       <button class="btn" type="button" id="begin">I have read it</button>
     </div>`);
-  U.paintArt(body);
   body.querySelector('#begin').addEventListener('click', () =>
     round(sp, entity, { got: 0, left: patience, need, patience, pool: poolFor(sp) }, onDone));
 }
@@ -107,7 +105,6 @@ function round(sp, entity, st, onDone) {
       ${U.passageHTML(sp.passage.text)}
     </details>
     <div id="qhost"></div>`);
-  U.paintArt(body);
 
   U.askOne(body.querySelector('#qhost'), q, ok => {
     if (ok) {
@@ -144,7 +141,6 @@ function succeed(sp, entity, st, onDone) {
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Back to the island</button>
     </div>`);
-  U.paintArt(body);
   if (wasNew && sp.id === 'ditto') S.finished = true;
   save();
   if (onDone) onDone(sp);
@@ -163,14 +159,6 @@ function depart(sp, entity, st, onDone) {
       <button class="btn ghost" type="button" id="reread">Read the notes again</button>
       <button class="btn" type="button" data-close>Leave it alone</button>
     </div>`);
-  U.paintArt(body);
   body.querySelector('#reread').addEventListener('click', () =>
     intro(sp, entity, st.need, st.patience, onDone));
-}
-
-/* Read-aloud text for a species page. */
-export function speechFor(key) {
-  const [kind, id] = String(key).split(':');
-  if (kind === 'sp' && BY_ID[id]) return BY_ID[id].passage.text.join(' ');
-  return null;
 }

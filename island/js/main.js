@@ -4,21 +4,26 @@
 import { S, save, give } from './state.js';
 import { setSound, sfx } from './audio.js';
 import * as W from './world.js';
-import { TS } from './world.js';
+import { TS, VIEW_W, VIEW_H } from './world.js';
 import { bake } from './pixels.js';
 import * as U from './ui.js';
 import { advance, refreshBar } from './quest.js';
-import { openDoc, openSign, speechFor as docSpeech } from './reading.js';
-import { meet, speechFor as spSpeech } from './encounter.js';
+import { openDoc, openSign } from './reading.js';
+import { meet } from './encounter.js';
 import { openBuildList, openProject } from './build.js';
 import { openJournal, openTeam, openHelp, openEnding, applyTheme } from './panels.js';
 import { REGIONS } from './content/entities.js';
+import { DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
 
 const STEP_MS = 145;
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
 ctx.imageSmoothingEnabled = false;
+
+const heroCanvas = document.getElementById('hero');
+const hctx = heroCanvas.getContext('2d');
+hctx.imageSmoothingEnabled = false;
 
 const P = { map: S.map, x: S.x, y: S.y, dir: S.dir || 'down', fromX: S.x, fromY: S.y, t: 1 };
 const held = { up: false, down: false, left: false, right: false };
@@ -34,7 +39,6 @@ applyTheme();
 setSound(S.soundOn);
 W.buildWorld(S);
 U.wireGlossary(document);
-U.wireSpeak(document, key => docSpeech(key) || spSpeech(key));
 advance();
 refreshBar(P.map);
 requestAnimationFrame(loop);
@@ -61,8 +65,9 @@ function loop(now) {
   const cam = W.camera(rx, ry);
 
   W.drawMap(ctx, P.map, cam, waterFrame, S);
-  drawPlayer(rx, ry, cam);
   if (REGIONS[P.map] && REGIONS[P.map].dark) W.drawGloom(ctx, canvas.width, canvas.height);
+  syncActors(cam);
+  drawPlayer(rx, ry, cam);
 
   updatePrompt();
   requestAnimationFrame(loop);
@@ -124,14 +129,60 @@ function drawPlayer(rx, ry, cam) {
   const bob = walking && P.t > 0.22 && P.t < 0.78 ? -1 : 0;
   const sx = Math.round((rx - cam.cx) * TS);
   const sy = Math.round((ry - cam.cy) * TS) + bob;
+  hctx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
   // a small shadow keeps the sprite from floating over tall grass
-  ctx.globalAlpha = 0.18;
-  ctx.fillStyle = '#000';
-  ctx.beginPath();
-  ctx.ellipse(sx + 8, sy + 15, 5, 2, 0, 0, 7);
-  ctx.fill();
-  ctx.globalAlpha = 1;
-  ctx.drawImage(bake(art, 1, flip), sx, sy);
+  hctx.globalAlpha = 0.18;
+  hctx.fillStyle = '#000';
+  hctx.beginPath();
+  hctx.ellipse(sx + 8, sy + 15, 5, 2, 0, 0, 7);
+  hctx.fill();
+  hctx.globalAlpha = 1;
+  hctx.drawImage(bake(art, 1, flip), sx, sy);
+}
+
+/* ---------------- the actor layer ---------------- */
+
+/* The residents are animated <img> elements sitting over the canvas rather than
+   sprites drawn into it: the canvas is 16px tiles blown up by CSS, so scaling a
+   48px sprite down to 22px and then magnifying it again looks like mud. This
+   keeps one element per visible resident and moves it each frame, which is
+   cheap -- no region has more than three on screen at once. */
+const actorLayer = document.getElementById('actors');
+const actors = new Map();     // species id -> img element
+let actorMap = null;          // which region those elements belong to
+
+function syncActors(cam) {
+  const here = W.visibleEntities(P.map, S).filter(e => e.kind === 'wild' && DEX[e.species]);
+
+  if (actorMap !== P.map || actors.size !== here.length ||
+      here.some(e => !actors.has(e.species))) {
+    for (const img of actors.values()) img.remove();
+    actors.clear();
+    actorMap = P.map;
+    for (const e of here) {
+      const img = document.createElement('img');
+      img.src = animUrl(e.species);
+      img.alt = '';
+      // if the file is missing, fall back to the hand-drawn 16x16 on the canvas
+      img.addEventListener('error', () => {
+        markBroken(e.species);
+        img.remove();
+        actors.delete(e.species);
+      });
+      actorLayer.appendChild(img);
+      actors.set(e.species, img);
+    }
+  }
+
+  const pctW = 100 / VIEW_W, pctH = 100 / VIEW_H;
+  for (const e of here) {
+    const img = actors.get(e.species);
+    if (!img) continue;
+    // anchored on the bottom centre of its tile, so it stands on the ground
+    img.style.left = ((e.x - cam.cx + 0.5) * pctW) + '%';
+    img.style.top = ((e.y - cam.cy + 1) * pctH) + '%';
+    img.style.height = ((TILES_TALL[e.species] || 1.5) * pctH) + '%';
+  }
 }
 
 /* ---------------- what you are facing ---------------- */

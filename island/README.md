@@ -78,7 +78,12 @@ Some deliberate choices:
   in a question in plain italics, so a vocabulary question never hands over its answer.
 - **The text never goes away.** Every question screen has the passage one tap below it,
   and every document stays in the journal permanently.
-- **Read-it-to-me** on every passage, using the browser's own speech synthesis.
+- **There is deliberately no read-aloud.** The other game in this repo has a
+  read-it-to-me button on every story, because for a 3rd grader decoding is the
+  bottleneck and speech removes it. Here comprehension *is* the skill being
+  practised, so having the browser read the passage out would route straight
+  around the thing the game exists to exercise. If a passage is too hard, the
+  glossary and the always-available text are the supports, not a narrator.
 - **Nothing is lost for good.** A resident that walks away goes back where it was. A
   project you cannot staff yet stays listed. There are no failure states.
 
@@ -101,7 +106,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~970
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,020
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -117,6 +122,9 @@ checks in the browser, including:
   finished, and the 21-step quest chain runs to its last step
 - every `{braced}` word has a definition and every definition is used
 - every vocabulary question asks about a word that actually appears in its own passage
+- every resident has a dex number, a sane overworld height, and **both sprite files
+  actually present on disk** — fetched rather than assumed, since those are vendored
+  binaries and a missing one would leave an empty tile
 - all six regions render without throwing
 
 That last simulation is the one worth keeping: it is what catches a requirement chain
@@ -141,6 +149,7 @@ js/
   quest.js          the expedition chain
   panels.js         journal, team, help, settings, ending
   audio.js          WebAudio synth, no audio files
+  creatures.js      dex numbers, sprite paths, and how tall each one stands
   content/
     maps.js         the six tile maps
     entities.js     what is placed where, and the region crossings
@@ -148,6 +157,9 @@ js/
     pokemon.js      the eleven residents: field notes and questions
     projects.js     what each project needs and what it changes
     glossary.js     definitions, written for the sentence not the dictionary
+sprites/
+  anim/             animated Gen V sprites, one per species, used everywhere
+  still/            static Gen V sprites, kept as a non-animated fallback
 ```
 
 Adding content means editing one file in `js/content/`, then opening `selftest.html`
@@ -155,14 +167,29 @@ to check you have not made something unreachable or unsolvable.
 
 ## About the characters and the art
 
-The residents use their familiar species names because that is what makes an
-8th grader pick the game up. Everything else is original: all the artwork is 16x16
-pixel art placed glyph by glyph in `js/pixels.js` and all the terrain is drawn in code
-in `js/tileset.js`, so no copyrighted image, sprite, font or audio file is included or
-downloaded. Every word of prose — the field notes, the documents, the questions and the
-explanations — was written for this game. Warden Elm and Verdant Isle are inventions.
-This is a personal learning tool for one kid, in the same spirit as the worksheets that
-`hero-math-quest` came from.
+**The residents' sprites are the real thing.** `sprites/` holds the Generation V
+animated sprites for the eleven species, taken from the
+[PokeAPI/sprites](https://github.com/PokeAPI/sprites) repository and vendored into
+this repo so the game still runs with no network. They are Nintendo / Game Freak /
+The Pokémon Company artwork, used here in a personal, non-commercial learning tool for
+one kid — the usual fan-project footing, and worth knowing if this ever went anywhere
+else. Everything needed to replace them is in one file, `js/creatures.js`.
+
+They are deliberately **not** drawn into the world canvas. That canvas is 16px tiles
+upscaled by CSS with nearest-neighbour, so squeezing a 48px sprite down to 22px and
+then magnifying what survived looks like mud. Instead the residents are `<img>`
+elements in a `#actors` layer positioned over the canvas, which keeps them sharp at
+any window size and animates them for free. `js/pixels.js` still carries a hand-drawn
+16x16 for every species; that is the fallback the canvas draws if one of the image
+files fails to load, so a missing sprite can never turn a resident into an invisible,
+unfindable tile.
+
+Everything else is original: the player, the signposts, lockboxes, berry bushes and
+dig mounds are 16x16 pixel art placed glyph by glyph in `js/pixels.js`, and every tile
+of terrain is drawn in code in `js/tileset.js` — no tilesets, no fonts, no audio files,
+and the music and effects are synthesised in `js/audio.js`. Every word of prose — the
+field notes, the documents, the questions and the explanations — was written for this
+game. Warden Elm and Verdant Isle are inventions.
 
 Swapping in original creature names is a one-line-per-species change: `name` in
 `js/content/pokemon.js`.

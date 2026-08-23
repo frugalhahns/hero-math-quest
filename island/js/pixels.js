@@ -473,21 +473,3 @@ export function bake(name, scale = 1, flip = false) {
   return c;
 }
 
-/* Draw a sprite into any 2d context at native scale. */
-export function drawSprite(ctx, name, x, y, flip = false) {
-  const c = bake(name, 1, flip);
-  ctx.drawImage(c, Math.round(x), Math.round(y));
-}
-
-/* Fill an <canvas> element with one sprite, scaled to fit. Used by the cards
-   and the encounter screen. */
-export function paintInto(canvasEl, name, flip = false) {
-  const scale = Math.max(1, Math.floor(Math.min(canvasEl.width, canvasEl.height) / SPRITE_SIZE));
-  const g = canvasEl.getContext('2d');
-  g.imageSmoothingEnabled = false;
-  g.clearRect(0, 0, canvasEl.width, canvasEl.height);
-  const c = bake(name, scale, flip);
-  g.drawImage(c, Math.floor((canvasEl.width - c.width) / 2), Math.floor((canvasEl.height - c.height) / 2));
-}
-
-export function hasArt(name) { return !!ART[name]; }
