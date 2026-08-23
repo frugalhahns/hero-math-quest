@@ -57,7 +57,7 @@ export const DOCS = {
   },
 
   fieldguide: {
-    id: 'fieldguide', title: 'Who Can Do What: A Page for My Replacement', source: 'Warden Elm, pinned inside the cabin',
+    id: 'fieldguide', title: 'Who Can Do What: A Page for My Replacement', source: 'Warden Elm, pinned to a post outside the cabin',
     text: [
       'The gate needs two things done at once, and neither of them is something you can do yourself.',
       'First, somebody has to go up the channel and tell you whether the sluice above the gate is clear. I cannot see it from the beach and neither can you. What you want is the bird in the driftwood scrub above the tide line — the small brown one that throws sand at you and disappears. It is not much of a fighter. It is the best route-finder on this island, and it will come back and it will remember what it saw.',
