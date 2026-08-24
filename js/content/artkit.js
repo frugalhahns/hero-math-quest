@@ -212,3 +212,67 @@ export function linePair(kind) {
          <line x1="26" y1="22" x2="170" y2="112" stroke="${INK}" stroke-width="3"/>`;
   return svg(W, H, s, kind + ' lines');
 }
+
+/* ---------- L-shaped (rectilinear) figure, for area as additive ----------
+   A wide bottom bar with a block sitting on its left end. Drawn as unit
+   squares so the area can be counted as well as reasoned about. */
+export function rectilinearL(w, h1, w2, h2) {
+  const cell = Math.max(13, Math.min(26, Math.floor(230 / Math.max(w, h1 + h2))));
+  const W = w * cell + 52, H = (h1 + h2) * cell + 40, x0 = 34, y0 = 8;
+  let s = '';
+  for (let r = 0; r < h2; r++) for (let c = 0; c < w2; c++)          // upper block
+    s += `<rect x="${x0 + c * cell}" y="${y0 + r * cell}" width="${cell}" height="${cell}"
+           fill="${FILL}" stroke="${INK}" stroke-width="1.3"/>`;
+  for (let r = 0; r < h1; r++) for (let c = 0; c < w; c++)           // lower bar
+    s += `<rect x="${x0 + c * cell}" y="${y0 + (h2 + r) * cell}" width="${cell}" height="${cell}"
+           fill="${SUNK}" stroke="${INK}" stroke-width="1.3"/>`;
+  const lbl = (x, y, txt) => `<text x="${x}" y="${y}" text-anchor="middle" font-size="12"
+    fill="${INK}" font-weight="700">${txt}</text>`;
+  s += lbl(x0 + (w2 * cell) / 2, y0 - 1 + 0, '');
+  s += lbl(x0 + (w * cell) / 2, y0 + (h1 + h2) * cell + 20, w);
+  s += lbl(x0 - 13, y0 + (h2 * cell) / 2 + 4, h2);
+  s += lbl(x0 - 13, y0 + h2 * cell + (h1 * cell) / 2 + 4, h1);
+  s += lbl(x0 + w2 * cell + 13, y0 + (h2 * cell) / 2 + 4, w2);
+  return svg(W, H, s, `an L shaped figure ${w} by ${h1} plus ${w2} by ${h2}`);
+}
+
+/* ---------- scaled picture graph (3.MD.B.3 asks for this, not just bars) ---------- */
+export function pictograph(cats, vals, per) {
+  const rowH = 26, W = 300, H = cats.length * rowH + 34, x0 = 62;
+  let s = '';
+  cats.forEach((c, i) => {
+    const y = 16 + i * rowH;
+    s += `<text x="${x0 - 8}" y="${y + 5}" text-anchor="end" font-size="11"
+           fill="${INK}" font-weight="700">${c}</text>`;
+    const n = vals[i] / per;
+    for (let k = 0; k < n; k++)
+      s += `<circle cx="${x0 + 12 + k * 22}" cy="${y}" r="8" fill="${FILL}"
+             stroke="${INK}" stroke-width="1.5"/>`;
+  });
+  s += `<text x="${W / 2}" y="${H - 6}" text-anchor="middle" font-size="11"
+         fill="${INK}">each circle = ${per}</text>`;
+  return svg(W, H, s, 'picture graph');
+}
+
+/* ---------- point, line, segment, ray (4.G.A.1 vocabulary) ---------- */
+export function geoPrimitive(kind) {
+  const W = 220, H = 90, y = 46, a = 26, b = W - 26;
+  const dot = x => `<circle cx="${x}" cy="${y}" r="5.5" fill="${INK}"/>`;
+  const arrow = (x, dir) =>
+    `<polygon points="${x},${y - 7} ${x},${y + 7} ${x + dir * 13},${y}" fill="${INK}"/>`;
+  let s = '';
+  if (kind === 'point') {
+    s = dot(W / 2) + `<text x="${W / 2 + 12}" y="${y - 8}" font-size="14"
+        fill="${INK}" font-weight="700">A</text>`;
+  } else if (kind === 'line') {
+    s = `<line x1="${a + 10}" y1="${y}" x2="${b - 10}" y2="${y}" stroke="${INK}" stroke-width="3"/>`
+      + arrow(a + 10, -1) + arrow(b - 10, 1) + dot(80) + dot(140);
+  } else if (kind === 'segment') {
+    s = `<line x1="${a}" y1="${y}" x2="${b}" y2="${y}" stroke="${INK}" stroke-width="3"/>`
+      + dot(a) + dot(b);
+  } else {                                  // ray: one endpoint, one arrow
+    s = `<line x1="${a}" y1="${y}" x2="${b - 10}" y2="${y}" stroke="${INK}" stroke-width="3"/>`
+      + dot(a) + arrow(b - 10, 1);
+  }
+  return svg(W, H, s, kind);
+}

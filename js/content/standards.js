@@ -10,7 +10,8 @@
    with SVG from artkit.js for the standards that are about reading a picture. */
 
 import { clockFace, barGraph, linePlot, tiledRect, dotArray, numberLine,
-         angleArt, angleSplit, polygon, linePair } from './artkit.js';
+         angleArt, angleSplit, polygon, linePair,
+         rectilinearL, pictograph, geoPrimitive } from './artkit.js';
 
 const ri = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
@@ -715,6 +716,160 @@ function g_symmetry() {
     why, { art: polygon(k, { mirror: line }) });
 }
 
+
+/* ================= sub-parts that the first pass missed ================= */
+
+/* 3.NF.A.3a — equivalent means the SAME POINT on the number line. */
+function g_samePoint(lvl) {
+  const pairs = [[1, 2, 2, 4], [1, 2, 3, 6], [1, 2, 4, 8], [1, 2, 5, 10], [1, 2, 6, 12],
+                 [1, 3, 2, 6], [1, 3, 4, 12], [2, 3, 4, 6], [2, 3, 8, 12],
+                 [1, 4, 2, 8], [3, 4, 6, 8], [1, 6, 2, 12], [1, 5, 2, 10]];
+  const [sn, sd, bn, bd] = pick(pairs);
+  const wrong = [];
+  for (const alt of LEGAL_DEN) if (alt !== bd && sn < alt) wrong.push(`${sn}/${alt}`);
+  if (bn + 1 <= bd) wrong.push(`${bn + 1}/${bd}`);
+  return ch('3.NF.A.3', `The dot sits on ${bn}/${bd}. Which fraction is at the SAME point?`,
+    `${sn}/${sd}`, [...new Set(wrong)].slice(0, 3),
+    `${sn}/${sd} and ${bn}/${bd} land on exactly the same spot, so they are equal. Same point means same number.`,
+    { art: numberLine(bd, bn) });
+}
+
+/* 3.MD.C.7d — area is additive: break the L into two rectangles and add. */
+function g_areaAdditive(lvl) {
+  const w = ri(4, lvl <= 2 ? 6 : 9);
+  const h1 = ri(1, 3), h2 = ri(1, 3);
+  const w2 = ri(2, w - 1);
+  const total = w * h1 + w2 * h2;
+  return num('3.MD.C.7', '', total,
+    `Cut it into two rectangles: ${w} × ${h1} = ${w * h1} and ${w2} × ${h2} = ${w2 * h2}. Areas add up, so ${w * h1} + ${w2 * h2}.`,
+    { art: rectilinearL(w, h1, w2, h2),
+      prompt: 'What is the total area of this shape, in square units?' });
+}
+
+/* 4.NF.B.3d — the same like-denominator adding, but inside a word problem. */
+function g_fracWord() {
+  const d = pick([4, 5, 6, 8, 10, 12]);
+  const a = ri(1, d - 2), b = ri(1, d - 1 - a);
+  const add = Math.random() < 0.6;
+  if (add)
+    return num('4.NF.B.3', '', a + b,
+      `Same bottom number, so add just the tops: ${a} + ${b}. The answer is ${a + b}/${d}.`,
+      { prompt: `Ravi ate ${a}/${d} of a pizza and Mia ate ${b}/${d} of the same pizza. How much did they eat together? Type the top number of the answer over ${d}.` });
+  const big = a + b;
+  return num('4.NF.B.3', '', b,
+    `Same bottom number, so subtract the tops: ${big} − ${a}. The answer is ${b}/${d}.`,
+    { prompt: `A jug had ${big}/${d} of a litre in it. Someone drank ${a}/${d} of a litre. How much is left? Type the top number of the answer over ${d}.` });
+}
+
+/* 4.NF.B.4c — multiplying a fraction by a whole number, in a word problem. */
+function g_fracTimesWord() {
+  const d = pick([3, 4, 5, 6, 8]);
+  const n = ri(1, d - 1), k = ri(2, 6);
+  const s = pick([
+    `Each person at the party eats ${n}/${d} of a pound of cheese. There are ${k} people. How many ${d}ths of a pound is that in total?`,
+    `One lap of the track is ${n}/${d} of a mile. You run ${k} laps. How many ${d}ths of a mile did you run?`,
+    `A recipe needs ${n}/${d} of a cup of flour. You make it ${k} times. How many ${d}ths of a cup do you need?`
+  ]);
+  return num('4.NF.B.4', '', n * k,
+    `${k} lots of ${n}/${d} is ${k} × ${n} = ${n * k} pieces, each of size 1/${d}. So ${n * k}/${d}.`,
+    { prompt: s });
+}
+
+/* 3.MD.B.3 — the standard asks for a picture graph as well as a bar graph. */
+function g_pictograph(lvl) {
+  const per = lvl <= 2 ? pick([2, 5]) : pick([5, 10]);
+  const names = ['Red', 'Blue', 'Green'];
+  const vals = names.map(() => per * ri(1, 6));
+  const i = ri(0, 2);
+  let j = ri(0, 2); while (j === i) j = ri(0, 2);
+  const hi = vals[i] >= vals[j] ? i : j, lo = hi === i ? j : i;
+  if (Math.random() < 0.5)
+    return num('3.MD.B.3', '', vals[hi] - vals[lo],
+      `Each circle stands for ${per}, so count the circles and multiply before subtracting.`,
+      { art: pictograph(names, vals, per),
+        prompt: `How many more ${names[hi].toLowerCase()} than ${names[lo].toLowerCase()}?` });
+  return num('3.MD.B.3', '', vals.reduce((x, y) => x + y, 0),
+    `Each circle is worth ${per}. Count all the circles, then multiply by ${per}.`,
+    { art: pictograph(names, vals, per), prompt: 'How many votes altogether?' });
+}
+
+/* 4.G.A.1 — the vocabulary half of the standard: point, line, segment, ray. */
+function g_geoName() {
+  const kind = pick(['point', 'line', 'segment', 'ray']);
+  const label = { point: 'A point', line: 'A line', segment: 'A line segment', ray: 'A ray' };
+  const why = {
+    point: 'Just a single position. No length at all.',
+    line: 'Arrows on BOTH ends: it keeps going forever in both directions.',
+    segment: 'Two endpoints, so it stops at both ends. It has a length you could measure.',
+    ray: 'One endpoint and one arrow: it starts somewhere and goes on forever one way.'
+  };
+  return ch('4.G.A.1', 'What is this called?', label[kind],
+    Object.values(label).filter(v => v !== label[kind]), why[kind],
+    { art: geoPrimitive(kind) });
+}
+
+/* 4.NBT.A.2 — number names, the part of the standard between numerals and
+   expanded form. Word form only goes to the hundred thousands here. */
+const ONES = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine',
+  'ten', 'eleven', 'twelve', 'thirteen', 'fourteen', 'fifteen', 'sixteen', 'seventeen',
+  'eighteen', 'nineteen'];
+const TENS = ['', '', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety'];
+
+function under1000(n) {
+  if (n === 0) return '';
+  const parts = [];
+  if (n >= 100) { parts.push(ONES[Math.floor(n / 100)] + ' hundred'); n %= 100; }
+  if (n >= 20) { parts.push(TENS[Math.floor(n / 10)] + (n % 10 ? '-' + ONES[n % 10] : '')); }
+  else if (n > 0) parts.push(ONES[n]);
+  return parts.join(' ');
+}
+
+export function numberName(n) {
+  if (n === 0) return 'zero';
+  const th = Math.floor(n / 1000), rest = n % 1000;
+  const out = [];
+  if (th) out.push(under1000(th) + ' thousand');
+  if (rest) out.push(under1000(rest));
+  return out.join(' ');
+}
+
+function g_numberName(lvl) {
+  const n = lvl <= 2 ? ri(1001, 9999) : ri(10001, 999999);
+  const correct = numberName(n);
+  /* Near misses that a kid actually makes: a place slipped, or digits swapped. */
+  const cands = [numberName(n * 10 % 1000000 || n + 1000), numberName(Math.floor(n / 10) || 1),
+                 numberName(n + (n % 10 === 9 ? 1000 : 100))];
+  const bad = [...new Set(cands)].filter(x => x && x !== correct).slice(0, 3);
+  return ch('4.NBT.A.2', `How do you write ${n.toLocaleString('en-US')} in words?`, correct, bad,
+    `Read the thousands first, then the rest: ${correct}.`);
+}
+
+/* 4.OA.B.4 — "find ALL factor pairs", so ask how many there are. */
+function g_factorPairCount(lvl) {
+  const n = pick(lvl <= 2 ? [12, 16, 18, 20, 24, 28, 30]
+                          : [24, 30, 36, 40, 42, 48, 56, 60, 64, 72, 100]);
+  let count = 0;
+  for (let i = 1; i * i <= n; i++) if (n % i === 0) count++;
+  const pairs = [];
+  for (let i = 1; i * i <= n; i++) if (n % i === 0) pairs.push(`${i}×${n / i}`);
+  return num('4.OA.B.4', '', count,
+    `Work up from 1: ${pairs.join(', ')}. That is ${count} ${count === 1 ? 'pair' : 'pairs'}.`,
+    { prompt: `How many different factor pairs does ${n} have? (1 × ${n} counts as one.)` });
+}
+
+/* 4.MD.A.1 — the two-column conversion table the standard asks for. */
+function g_convTable() {
+  const table = [['ft', 'in', 12], ['yd', 'ft', 3], ['m', 'cm', 100], ['kg', 'g', 1000],
+                 ['hr', 'min', 60], ['min', 'sec', 60], ['lb', 'oz', 16], ['l', 'ml', 1000]];
+  const [big, small, f] = pick(table);
+  const start = ri(1, 4);
+  const rows = [start, start + 1, start + 2].map(k => `(${k}, ${k * f})`).join(', ');
+  const next = start + 3;
+  return num('4.MD.A.1', '', next * f,
+    `Every row multiplies the ${big} by ${f}. So row ${next} is ${next} × ${f}.`,
+    { prompt: `A conversion table for ${big} and ${small} lists the pairs ${rows}, ... What is the second number in the pair that starts with ${next}?` });
+}
+
 /* ================= tracks =================
    One track per playable world. `codes` is the list of standards that track is
    answerable for; the grown-up screen reads it, so keep it honest. */
@@ -729,14 +884,14 @@ export const TRACKS = [
   { id: 'place', label: 'Place Value Peak', grade: '3-4', hero: 'miner', color: 'mine',
     blurb: 'Rounding, big numbers, remainders',
     codes: ['3.NBT.A.1', '3.NBT.A.3', '4.NBT.A.1', '4.NBT.A.2', '4.NBT.A.3', '4.NBT.B.5', '4.NBT.B.6'],
-    gens: [g_round3, g_multiple10, g_tenTimes, g_placeValue, g_placeValue,
+    gens: [g_round3, g_multiple10, g_tenTimes, g_placeValue, g_numberName,
            g_round4, g_bigMultiply, g_remainder] },
 
   { id: 'fracfront', label: 'Fraction Frontier', grade: '3-4', hero: 'speedster', color: 'frac',
     blurb: 'Fractions on a line, mixed numbers, times a whole',
     codes: ['3.NF.A.2', '3.NF.A.3', '4.NF.A.2', '4.NF.B.3', '4.NF.B.4'],
-    gens: [g_fracLine, g_fracLine, g_wholeAsFraction, g_compareUnlike,
-           g_decompose, g_mixedNumber, g_fracTimesWhole] },
+    gens: [g_fracLine, g_samePoint, g_wholeAsFraction, g_compareUnlike,
+           g_decompose, g_mixedNumber, g_fracTimesWhole, g_fracWord, g_fracTimesWord] },
 
   { id: 'decimal', label: 'Decimal Depot', grade: '4', hero: 'sparkmouse', color: 'poke',
     blurb: 'Tenths, hundredths and decimal points',
@@ -746,17 +901,18 @@ export const TRACKS = [
   { id: 'clock', label: 'Clock Tower', grade: '3-4', hero: 'speedster', color: 'sonic',
     blurb: 'Telling time, elapsed minutes, units',
     codes: ['3.MD.A.1', '3.MD.A.2', '4.MD.A.1', '4.MD.A.2'],
-    gens: [g_readClock, g_readClock, g_elapsed, g_massVolume, g_convert, g_measureWord] },
+    gens: [g_readClock, g_readClock, g_elapsed, g_massVolume, g_convert,
+           g_convTable, g_measureWord] },
 
   { id: 'data', label: 'Data Depot', grade: '3-4', hero: 'webhero', color: 'logic',
     blurb: 'Bar graphs and line plots',
     codes: ['3.MD.B.3', '3.MD.B.4', '4.MD.B.4'],
-    gens: [g_barGraph, g_barGraph, g_linePlot3, g_linePlot4] },
+    gens: [g_barGraph, g_pictograph, g_pictograph, g_linePlot3, g_linePlot4] },
 
   { id: 'area', label: 'Area Arena', grade: '3-4', hero: 'miner', color: 'mystery',
     blurb: 'Area, perimeter and unit squares',
     codes: ['3.MD.C.5', '3.MD.C.6', '3.MD.C.7', '3.MD.D.8', '4.MD.A.3'],
-    gens: [g_area, g_area, g_area, g_areaSplit, g_unitSquare] },
+    gens: [g_area, g_area, g_areaSplit, g_areaAdditive, g_unitSquare] },
 
   { id: 'shapes', label: 'Shape Shrine', grade: '3-4', hero: 'miner', color: 'detective',
     blurb: 'Quadrilaterals, lines and symmetry',
@@ -768,12 +924,12 @@ export const TRACKS = [
     /* 4.MD.C.6 (measure and sketch with a protractor) is deliberately absent:
        it needs a real protractor, not a tap target. Left on paper. */
     codes: ['4.MD.C.5', '4.MD.C.7', '4.G.A.1'],
-    gens: [g_angleType, g_angleType, g_oneDegree, g_angleAdd] },
+    gens: [g_angleType, g_geoName, g_oneDegree, g_angleAdd] },
 
   { id: 'factors', label: 'Factor Forest', grade: '4', hero: 'webhero', color: 'std',
     blurb: 'Times as many, factors, primes, patterns',
     codes: ['4.OA.A.1', '4.OA.A.2', '4.OA.A.3', '4.OA.B.4', '4.OA.C.5'],
-    gens: [g_timesAsMany, g_multCompare, g_compareType, g_factors, g_factors,
+    gens: [g_timesAsMany, g_multCompare, g_compareType, g_factors, g_factorPairCount,
            g_interpretRemainder, g_patternRule] }
 ];
 

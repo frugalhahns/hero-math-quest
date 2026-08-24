@@ -52,7 +52,18 @@ each with its own adaptive level, covering **46 standards**:
 | Factor Forest | 4 | 4.OA.A.1-3, 4.OA.B.4, 4.OA.C.5 |
 
 The four-operation drills already covered 3.OA.C.7, 3.NBT.A.2 and 4.NBT.B.4; Mystery Lab
-covers 3.OA.D.8; Fraction Falls covers 3.NF.A.1 and 4.NF.A.1.
+covers 3.OA.D.8; Fraction Falls covers 3.NF.A.1 and 4.NF.A.1. That is 52 of the 53 Grade 3
+and Grade 4 standards.
+
+**Counted at sub-part level, not just parent level.** Several standards break into lettered
+parts, and having one question for the parent does not mean the parts are covered. Each of
+these now has its own question: 3.NF.A.3a (equivalent means the same *point* on a number
+line), 3.MD.C.7d (area is additive, so an L-shape decomposes into two rectangles),
+4.NF.B.3d and 4.NF.B.4c (the fraction word problems, not just the bare arithmetic), plus
+the halves of parent standards that were being skipped: scaled *picture* graphs as well as
+bar graphs (3.MD.B.3), point/line/segment/ray vocabulary as well as angle types (4.G.A.1),
+number names as well as expanded form (4.NBT.A.2), how many factor pairs a number has
+rather than just one of them (4.OA.B.4), and the two-column conversion table (4.MD.A.1).
 
 Fourteen of these standards are about reading a picture rather than a sentence, so the
 picture is generated as SVG and *is* the question: an analog clock, a scaled bar graph, a
