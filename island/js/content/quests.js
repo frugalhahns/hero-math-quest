@@ -265,6 +265,107 @@ export const DOCS = {
         answer: 0,
         why: 'The animal up there "will want to know whether you were paying attention," and then Elm turns that question straight around onto you.' }
     ]
+  },
+  /* ---------------------------------------------------------------------
+     Team Rocket. The idea behind all three of these: they are the people who
+     do not read. Elm's whole argument across nine years of notes is that you
+     read a place before you act in it, so the natural opposition is somebody
+     who skimmed the page and started digging. Every one of these is a mistake
+     the player can only catch because they read the real document first, which
+     is why each is gated behind that document.
+
+     It also explains the second hole on the beach, which was in the game long
+     before Team Rocket were.
+     --------------------------------------------------------------------- */
+
+  rocketBeach: {
+    id: 'rocketBeach', title: 'A Crumpled Plan', source: 'Dropped on the beach',
+    outcome: 'The grunt reads the chart over your shoulder, looks at the hole, and goes very red. Then they walk off up the beach without saying anything.',
+    text: [
+      'There is a hole in the sand at the near end of the rock finger. Somebody in a black uniform is digging it. There is a big red R on the front of the uniform.',
+      'They have not noticed you. A piece of paper has blown out of their pocket and landed by your boot. You pick it up.',
+      'The paper says: PLAN. Go to the west beach. Find the big rock. Dig at the rock. Get the handle. Easy.',
+      'But you have read the tide chart. It does not say dig at the rock. It says dig where the rock\'s shadow ends.',
+      'And it says do not dig at the near end, because there is nothing there but an old hole.',
+      'So that is why there were two holes on this beach. Somebody read four words of the chart and started digging.'
+    ],
+    questions: [
+      { tag: 'Detail',
+        q: 'Where does their plan say to dig?',
+        choices: ['At the big rock', 'Where the shadow ends', 'By the dock', 'Next to the gate'],
+        answer: 0,
+        why: 'Their plan is only four steps long, and step three is "Dig at the rock." That is not what the chart says.' },
+      { tag: 'Cause and effect',
+        q: 'Why will Team Rocket not find the handle?',
+        choices: ['They are digging in the wrong spot', 'They are digging too slowly', 'Somebody already took it', 'The handle is under the water'],
+        answer: 0,
+        why: 'The chart says to dig where the shadow ends, and warns that the near end of the rock has nothing in it. They are digging at the near end.' },
+      { tag: 'Main idea',
+        q: 'What did Team Rocket do wrong?',
+        choices: ['They did not read the whole chart', 'They came at the wrong time of day', 'They brought the wrong tools', 'They dug too deep'],
+        answer: 0,
+        why: 'The plan skips the one detail that matters. Reading four words instead of the whole page is the mistake, and it is the same mistake all the way through.' }
+    ]
+  },
+
+  rocketMarsh: {
+    id: 'rocketMarsh', title: 'Team Rocket\'s Orders', source: 'Pinned to a post in the marsh',
+    outcome: 'You hold the notebook out and let them read the page about the four years. The one holding the shears puts them down in the mud and does not pick them back up.',
+    text: [
+      'Two people in black uniforms are standing at the edge of the reeds. One of them is holding a very large pair of shears.',
+      'Their orders are pinned to the post next to them. You read them.',
+      'TODAY: cut the tall grass by the water. We need a clear path for the truck. Should take about an hour.',
+      'But you have read the water notebook. The reeds are not tall grass in the way of anything.',
+      'They hold the line between the salt water and the fresh water. Cut them and the salt gets to the springs.',
+      'It happened once before. The island had no water you could drink for four years.'
+    ],
+    questions: [
+      { tag: 'Cause and effect',
+        q: 'What will happen if they cut the reeds?',
+        choices: ['Salt will get to the springs', 'The marsh will dry out', 'The truck will get stuck', 'The animals will move away'],
+        answer: 0,
+        why: 'The reeds hold the line between the salt water and the fresh water. With the reeds gone, the salt reaches the springs.' },
+      { tag: 'Detail',
+        q: 'How long did the island have no drinking water last time?',
+        choices: ['Four years', 'One hour', 'Four days', 'One summer'],
+        answer: 0,
+        why: 'This already happened once, and the notebook records how long it took to come back: four years.' },
+      { tag: 'Inference',
+        q: 'Why do the orders call the reeds "tall grass"?',
+        choices: ['Whoever wrote them did not know what the reeds do', 'The reeds really are a kind of grass', 'They are trying to trick the reader', 'They could not see the reeds properly'],
+        answer: 0,
+        why: 'Calling them tall grass in the way is how you describe something you have not bothered to find out about. An hour of reading would have stopped this.' }
+    ]
+  },
+
+  rocketCaves: {
+    id: 'rocketCaves', title: 'A Note Taped to a Drum', source: 'Tidepool Caves',
+    outcome: 'You point at the wall and wait. They read it twice. Then they pick up the drum between them and carry it back out through the tunnel.',
+    text: [
+      'There is a drum in the middle of the cave floor. A very big drum. Two people in black uniforms are taking turns hitting it.',
+      'The Snorlax has not moved. It has not even changed the way it is breathing.',
+      'There is a note taped to the side of the drum. STEP ONE: wake it with the drum. STEP TWO: it moves the rocks for us. STEP THREE: we take the rocks.',
+      'But you have read the wall. Yelling does not work. Drums do not work.',
+      'This animal has slept through waves, and falling rocks, and thunder. It learned a long time ago that loud noise in a cave is never worth getting up for.',
+      'It gets up for one thing, and it is not a sound. They could hit that drum until the tide came in.'
+    ],
+    questions: [
+      { tag: 'Cause and effect',
+        q: 'Why is the drum not working?',
+        choices: ['It learned that loud cave noise is never worth waking for', 'The drum is too small', 'It cannot hear the drum from there', 'It is not really asleep'],
+        answer: 0,
+        why: 'The wall says it has slept through waves, falling rocks and thunder. Noise is the one thing it has learned to ignore.' },
+      { tag: 'What to do',
+        q: 'What would actually wake it up?',
+        choices: ['The smell of a ripe berry', 'A much bigger drum', 'Cold water', 'Waiting until night'],
+        answer: 0,
+        why: 'Smell means food, and food is the only thing worth standing up for. A ripe Rowan berry held near its nose does it in about a minute.' },
+      { tag: 'Inference',
+        q: 'What mistake did Team Rocket make this time?',
+        choices: ['They tried it without reading the wall first', 'They came into the caves too early', 'They brought the wrong drum', 'They woke it up too fast'],
+        answer: 0,
+        why: 'The answer was cut into the wall a few steps away. It is the same mistake as the hole on the beach and the shears in the marsh: act first, read never.' }
+    ]
   }
 };
 

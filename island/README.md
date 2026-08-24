@@ -70,9 +70,9 @@ than 3 pages, and no single page may run over 60 words.
 
 - **6 regions**, hand-drawn as tile maps, 34 x 24 tiles each
 - **11 animals**, each with a paged field-note passage and 5 questions
-- **8 documents**, each with 3 or 4 questions
+- **11 documents**, each with 3 or 4 questions
 - **12 signs** and scenery notes, two of which carry a detail a document relies on
-- **82 comprehension questions** in total
+- **91 comprehension questions** in total
 - **22 steps** in the chain
 - **6 build projects**, one of them optional and worth nothing but doing
 
@@ -109,10 +109,42 @@ Some deliberate choices:
   always-available text are the supports instead.
 - **Nothing is lost for good.** An animal that walks away goes back where it was.
   A project you cannot staff yet stays listed. There are no failure states.
+- **You can see what you can do.** Whatever you are facing gets a bouncing arrow
+  and a ring round its tile, drawn above the sprite layer so a big animal cannot
+  hide it, and the action button turns green and names the verb. Anything on
+  screen you have never examined gets a small faint arrow that disappears once
+  you have read it, so the map shows what is left to find without staying
+  covered in markers. This was not the original design and it should have been:
+  a real 8 year old walked straight past a thin grey "press Space" pill.
 
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the
 game's design brief.
+
+## Team Rocket
+
+Team Rocket are in the game, and the thing they are is **the people who do not
+read.** Ranger Elm's argument across nine years of notes is that you read a place
+before you act in it, so the natural opposition is somebody who skimmed the page
+and started digging.
+
+They turn up three times, and each appearance is a mistake you can only catch
+because you read the real document first — which is why each one is gated behind
+that document:
+
+| Where | What they are doing | What they missed |
+|---|---|---|
+| Landing Beach | Digging at the near end of the rock finger | The chart says dig where the *shadow* ends, and says the near end is empty |
+| Reed Marsh | About to cut the reeds for a truck path | The reeds keep salt out of the springs; last time it cost four years of drinking water |
+| Tidepool Caves | Trying to wake the Snorlax with a drum | The wall says noise never works. Smell does |
+
+You deal with them by reading, not fighting. You find their plan, read it, answer
+questions that pin down what they got wrong, and they leave. Getting a question
+wrong costs nothing — it comes back round, same as everywhere else.
+
+The beach one is the reason the island has always had *two* dug holes on the
+shore, one at each end of the rock finger. That decoy was in the game long before
+Team Rocket were; they just turned out to be the obvious explanation for it.
 
 ## Music
 
@@ -146,8 +178,14 @@ into the next fades out, changes key, and fades back in.
 Details that matter more than they sound like they should:
 
 - **The music ducks while you are reading.** A passage on screen drops it from
-  0.30 to 0.13. Reading is the point of the game; the soundtrack should not
+  0.42 to 0.16. Reading is the point of the game; the soundtrack should not
   compete with it.
+- **The effects are balanced against it as a group.** Everything in
+  `js/audio.js` runs through one bus at 0.5 rather than straight to the speakers,
+  because otherwise there is no way to tune effects against music at all. The
+  footstep is a soft low-passed tap rather than a tone, and only every other one
+  plays: a pitched blip on all eight steps of a walk across the screen buries
+  the pads completely, which is exactly what it did on the first pass.
 - **Nothing is built until you touch the page.** Browsers block audio before a
   gesture, so the whole graph waits for the first key press or tap rather than
   being created at load and silently refused.
@@ -159,7 +197,7 @@ Details that matter more than they sound like they should:
 
 Loudness is measured rather than assumed, but by hand rather than in the suite:
 `renderOne()` in `js/music.js` renders a region into an `OfflineAudioContext` and
-reports peak and RMS. Every region comes out around **rms 0.015, peak 0.06** —
+reports peak and RMS. Every region comes out around **rms 0.022, peak 0.07** —
 clearly audible, nowhere near clipping. The comment on that function explains why
 it is not automated: `OfflineAudioContext` proved too flaky to rely on, finishing
 one short render per page and then stalling, and an await that never resolves
@@ -180,7 +218,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,150
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,235
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -276,8 +314,15 @@ hand-drawn 16x16 for every species; that is the fallback the canvas draws if an
 image file fails to load, so a missing sprite can never turn an animal into an
 invisible, unfindable tile.
 
-Everything else is original: the player, the signposts, metal boxes, berry bushes
-and dig mounds are 16x16 pixel art placed glyph by glyph in `js/pixels.js`, and
+The two Team Rocket grunts are **not** vendored, because there is no clean source
+for them: `PokeAPI/sprites` is Pokémon only, the Showdown client repo's
+`trainers/` directory contains an `index.php` and nothing else, and `smogon/sprites`
+is build tooling. They are drawn here instead, in the same 16x16 style as the
+player — a black uniform and a red R reads instantly at that size, and it matches
+the player sprite rather than towering over it the way a battle sprite would.
+
+Everything else is original too: the player, the signposts, metal boxes, berry
+bushes and dig mounds are 16x16 pixel art placed glyph by glyph in `js/pixels.js`, and
 every tile of terrain is drawn in code in `js/tileset.js` — no tilesets and no
 fonts. There is no audio file either: the sound effects are synthesised in
 `js/audio.js` and the music is generated in `js/music.js`, both written for this

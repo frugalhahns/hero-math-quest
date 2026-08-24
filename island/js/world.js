@@ -73,6 +73,8 @@ function hidden(e, S) {
   // a finished project must stop occupying its own tile, or clearing the
   // barrier would open the path and the marker would still block it
   if (e.kind === 'project' && S.projects[e.project]) return true;
+  // grunts leave once you have read the page that catches them out
+  if (e.kind === 'rocket' && S.flags[e.doc]) return true;
   return false;
 }
 

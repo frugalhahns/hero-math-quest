@@ -178,6 +178,7 @@ body {
   box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
 }
 #prompt b { font-size: 1.06rem; letter-spacing: .2px; }
+@media (max-width: 420px) { #prompt b { font-size: .95rem; } }
 #prompt span {
   font-size: .76rem;
   color: #cfe0d6;

@@ -117,7 +117,9 @@ function finish(doc, firstTry, total) {
       <p>${clean
         ? 'Every question right the first time. That is what paying attention looks like.'
         : `You got there. <b>${firstTry} of ${total}</b> right the first time, and the rest after you read why.`}</p>
-      ${wasNew ? `<p><b>Written in your journal.</b> ${U.esc(nowStep.log || '')}</p>` : ''}
+      ${doc.outcome
+        ? `<p>${U.esc(doc.outcome)}</p>`
+        : (wasNew ? `<p><b>Written in your journal.</b> ${U.esc(nowStep.log || '')}</p>` : '')}
     </div>
     ${before !== nowStep.id
       ? `<h3>What now</h3><div class="passage"><p>${U.esc(nowStep.objective)}</p></div>`

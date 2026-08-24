@@ -268,7 +268,7 @@ function facingEntity() {
 
 const KIND_VERB = {
   doc: 'Read this', sign: 'Look', dig: 'Dig here', item: 'Pick it up',
-  wild: 'Say hello', project: 'Take a look'
+  wild: 'Say hello', project: 'Take a look', rocket: 'See what they are up to'
 };
 
 /* Has this thing never been looked at? Used for the faint markers, so the map
@@ -279,6 +279,7 @@ function unexamined(e) {
   if (e.kind === 'dig') return !S.flags['dug:' + e.id];
   if (e.kind === 'item') return !S.flags['took:' + e.id];
   if (e.kind === 'project') return !S.projects[e.project];
+  if (e.kind === 'rocket') return !S.flags[e.doc];
   return false;   // the animals are their own signpost, they do not need one
 }
 
@@ -311,6 +312,7 @@ function act() {
 
   switch (e.kind) {
     case 'doc':
+    case 'rocket':
       openDoc(e.doc, { onDone: refresh });
       break;
 

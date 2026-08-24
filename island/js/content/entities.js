@@ -29,6 +29,9 @@ export const ENTITIES = [
     found: 'Down under the gravel, wrapped in oiled cloth: an iron handle. It is heavier than it looks.' },
   { map: 'beach', x: 11, y: 15, art: 'pidgey',  kind: 'wild', species: 'pidgey' },
   { map: 'beach', x: 8,  y: 19, art: 'psyduck', kind: 'wild', species: 'psyduck' },
+  { map: 'beach', x: 2,  y: 17, art: 'rocket_a', kind: 'rocket', doc: 'rocketBeach',
+    when: s => !!s.flags.tidechart,
+    label: 'Somebody in a black uniform, digging.' },
   { map: 'beach', x: 17, y: 1,  art: null,      kind: 'project', project: 'gate' },
 
   /* ------------------------------------------------ Meadow Hollow */
@@ -60,6 +63,10 @@ export const ENTITIES = [
   { map: 'marsh', x: 4,  y: 5,  art: 'sign', kind: 'sign', sign: 'marshPost' },
   { map: 'marsh', x: 14, y: 13, art: 'wooper',   kind: 'wild', species: 'wooper' },
   { map: 'marsh', x: 18, y: 20, art: 'chinchou', kind: 'wild', species: 'chinchou' },
+  { map: 'marsh', x: 9,  y: 5,  art: 'rocket_b', kind: 'rocket', doc: 'rocketMarsh',
+    when: s => !!s.flags.ledger, label: 'Two black uniforms at the edge of the reeds.' },
+  { map: 'marsh', x: 10, y: 5,  art: 'rocket_a', kind: 'rocket', doc: 'rocketMarsh',
+    when: s => !!s.flags.ledger, label: 'Two black uniforms at the edge of the reeds.' },
   { map: 'marsh', x: 17, y: 22, art: null, kind: 'project', project: 'lantern' },
 
   /* ------------------------------------------------ Tidepool Caves */
@@ -69,6 +76,10 @@ export const ENTITIES = [
   { map: 'caverns', x: 7,  y: 12, art: 'snorlax', kind: 'wild', species: 'snorlax',
     needsItem: { key: 'berries', count: 2 },
     without: 'It fills the whole gap and does not move at all. Shouting does nothing. You are going to need something else.' },
+  { map: 'caverns', x: 11, y: 10, art: 'rocket_a', kind: 'rocket', doc: 'rocketCaves',
+    when: s => !!s.flags.vault, label: 'Two black uniforms, taking turns on a drum.' },
+  { map: 'caverns', x: 12, y: 10, art: 'rocket_b', kind: 'rocket', doc: 'rocketCaves',
+    when: s => !!s.flags.vault, label: 'Two black uniforms, taking turns on a drum.' },
   { map: 'caverns', x: 4,  y: 12, art: 'lockbox', kind: 'sign', sign: 'vaultCache' },
 
   /* ------------------------------------------------ Ash Ridge */

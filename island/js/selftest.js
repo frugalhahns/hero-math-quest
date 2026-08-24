@@ -108,7 +108,7 @@ for (const e of ENTITIES) {
      around.length ? '' : 'no reachable neighbour');
 
   if (e.art) ok(!!ART[e.art], `${at}: sprite "${e.art}" exists`);
-  if (e.kind === 'doc') ok(!!DOCS[e.doc], `${at}: doc "${e.doc}" exists`);
+  if (e.kind === 'doc' || e.kind === 'rocket') ok(!!DOCS[e.doc], `${at}: doc "${e.doc}" exists`);
   if (e.kind === 'sign') ok(!!SIGNS[e.sign], `${at}: sign "${e.sign}" exists`);
   if (e.kind === 'wild') ok(!!BY_ID[e.species], `${at}: species "${e.species}" exists`);
   if (e.kind === 'project') ok(PROJECTS.some(p => p.id === e.project), `${at}: project "${e.project}" exists`);
@@ -121,7 +121,8 @@ for (const sp of SPECIES) {
   ok(!!ART[sp.id], `${sp.name} has sprite art`);
 }
 for (const id of Object.keys(DOCS)) {
-  ok(ENTITIES.some(e => e.kind === 'doc' && e.doc === id), `document "${id}" is placed on a map`);
+  ok(ENTITIES.some(e => (e.kind === 'doc' || e.kind === 'rocket') && e.doc === id),
+    `document "${id}" is placed on a map`);
 }
 for (const id of Object.keys(SIGNS)) {
   ok(ENTITIES.some(e => e.kind === 'sign' && e.sign === id), `sign "${id}" is placed on a map`);

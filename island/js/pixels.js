@@ -438,6 +438,42 @@ export const ART = {
     '................',
     '................',
     '................'
+  ],
+  rocket_a: [
+    '.....KKKKKK.....',
+    '....KKKKKKKK....',
+    '....KcccccKK....',
+    '....ceccecK.....',
+    '....cccccck.....',
+    '.....kcccck.....',
+    '...KKKKKKKKKK...',
+    '..KKKKrrrKKKK...',
+    '..cKKKrKrKKKc...',
+    '..cKKKrrrKKKc...',
+    '...KKKKrKrKKK...',
+    '...KKKKrKrKKK...',
+    '....KKK.KKK.....',
+    '....SS...SS.....',
+    '................',
+    '................'
+  ],
+  rocket_b: [
+    '....oooooooo....',
+    '...ooKKKKKKoo...',
+    '...oKcccccKo....',
+    '...oceccecKo....',
+    '...occccccko....',
+    '....kcccck......',
+    '...KKKKKKKKKK...',
+    '..KKKKrrrKKKK...',
+    '..cKKKrKrKKKc...',
+    '..cKKKrrrKKKc...',
+    '...KKKKrKrKKK...',
+    '...KKKKrKrKKK...',
+    '....KKK.KKK.....',
+    '....SS...SS.....',
+    '................',
+    '................'
   ]
 };
 
