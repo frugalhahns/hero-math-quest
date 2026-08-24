@@ -13,7 +13,8 @@ import { GLOSSARY } from './content/glossary.js';
 import { ART, SPRITE_SIZE } from './pixels.js';
 import { isKnownTile, isSolidTile } from './tileset.js';
 import * as W from './world.js';
-import { DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
+import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
+import { form, nextForm, canGrow, growableCount } from './evolve.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 
@@ -291,6 +292,15 @@ function checkPassage(what, pages) {
 
 for (const sp of SPECIES) checkPassage(`${sp.id} notes`, sp.passage.text);
 for (const [id, d] of Object.entries(DOCS)) checkPassage(`doc ${id}`, d.text);
+for (const sp of SPECIES) {
+  for (const f of sp.line) {
+    if (!f.blurb) continue;
+    const g = grade(f.blurb);
+    ok(g.fk <= TARGET, `${f.name} blurb: reading level ${g.fk.toFixed(1)} at or under ${TARGET.toFixed(1)}`,
+      `${g.words} words`);
+    ok(g.words <= MAX_PAGE_WORDS, `${f.name} blurb: fits on one page`, `${g.words} words`);
+  }
+}
 
 /* the questions have to be readable too, or the passage level is meaningless */
 {
@@ -359,27 +369,59 @@ for (const d of ['player_down', 'player_up', 'player_side']) ok(!!ART[d], `playe
 /* ---------------- vendored sprites ---------------- */
 head('resident sprites');
 for (const sp of SPECIES) {
-  ok(Number.isInteger(DEX[sp.id]), `${sp.id}: has a national dex number`, String(DEX[sp.id]));
+  ok(Number.isInteger(BASE_DEX[sp.id]), `${sp.id}: has a national dex number`, String(BASE_DEX[sp.id]));
   const t = TILES_TALL[sp.id];
   ok(typeof t === 'number' && t >= 0.8 && t <= 4,
     `${sp.id}: overworld height is a sane number of tiles`, String(t));
 }
-ok(Object.keys(DEX).length === SPECIES.length, 'no dex entries for residents that do not exist',
-  `${Object.keys(DEX).length} vs ${SPECIES.length}`);
+ok(Object.keys(BASE_DEX).length === SPECIES.length, 'no dex entries for residents that do not exist',
+  `${Object.keys(BASE_DEX).length} vs ${SPECIES.length}`);
 ok(Object.keys(TILES_TALL).length === SPECIES.length, 'every dex entry has an overworld height');
 
-/* The files must actually be on disk, or a resident becomes an empty tile.
-   Fetched rather than assumed, because these are vendored binaries. */
-{
-  const results = await Promise.all(SPECIES.flatMap(sp => [
-    fetch(animUrl(sp.id), { method: 'GET' }).then(r => [sp.id + ' anim', r.ok, r.headers.get('content-type')]).catch(e => [sp.id + ' anim', false, e.message]),
-    fetch(stillUrl(sp.id), { method: 'GET' }).then(r => [sp.id + ' still', r.ok, r.headers.get('content-type')]).catch(e => [sp.id + ' still', false, e.message])
-  ]));
-  for (const [what, good, ctype] of results) {
-    ok(good, `sprite file present: ${what}`, good ? '' : String(ctype));
-  }
-  ok(results.every(r => r[1]), 'every resident has both a still and an animated sprite on disk');
+/* ---------------- evolution lines ---------------- */
+head('growing up');
+const allForms = [];
+for (const sp of SPECIES) {
+  ok(Array.isArray(sp.line) && sp.line.length >= 1, `${sp.id}: has an evolution line`,
+    String(sp.line && sp.line.length));
+  if (!Array.isArray(sp.line)) continue;
+  ok(sp.line[0].dex === BASE_DEX[sp.id],
+    `${sp.id}: stage 0 dex matches the one used on the map`,
+    `${sp.line[0].dex} vs ${BASE_DEX[sp.id]}`);
+  ok(sp.line[0].name === sp.name, `${sp.id}: stage 0 name matches the species name`);
+  sp.line.forEach((f, i) => {
+    allForms.push({ id: sp.id, i, ...f });
+    ok(typeof f.name === 'string' && f.name.length > 1, `${sp.id} stage ${i}: has a name`);
+    ok(Number.isInteger(f.dex) && f.dex > 0, `${sp.id} stage ${i}: has a dex number`, String(f.dex));
+    // every form you can grow into is a little more reading, so it needs its page
+    if (i > 0) ok(typeof f.blurb === 'string' && f.blurb.length > 40,
+      `${sp.id} stage ${i} (${f.name}): has a blurb to read`, String(f.blurb && f.blurb.length));
+  });
+  // a fresh save must start every animal at stage 0 and show a next form if it has one
+  const f = form(sp.id);
+  ok(f.stage === 0, `${sp.id}: starts at stage 0 on a new save`, String(f.stage));
+  ok(canGrow(sp.id) === (sp.line.length > 1), `${sp.id}: canGrow agrees with the line length`);
+  if (sp.line.length > 1) ok(!!nextForm(sp.id), `${sp.id}: has a next form to grow into`);
 }
+{
+  const dexes = allForms.map(f => f.dex);
+  ok(new Set(dexes).size === dexes.length, 'no two forms share a dex number',
+    String(dexes.length - new Set(dexes).size) + ' duplicates');
+  note(`${allForms.length} forms across ${SPECIES.length} animals; ${growableCount()} can grow`);
+}
+
+/* Every form needs its portrait on disk, grown ones included -- a grown animal
+   with a missing file is a blank card in the team screen. */
+{
+  const results = await Promise.all(allForms.flatMap(f => [
+    fetch(animUrl(f.dex)).then(r => [`${f.name} anim`, r.ok]).catch(() => [`${f.name} anim`, false]),
+    fetch(stillUrl(f.dex)).then(r => [`${f.name} still`, r.ok]).catch(() => [`${f.name} still`, false])
+  ]));
+  const missing = results.filter(r => !r[1]).map(r => r[0]);
+  ok(missing.length === 0, `all ${results.length} form sprite files are present`, missing.join(', '));
+}
+
+
 
 /* ---------------- soundtrack ---------------- */
 head('soundtrack');

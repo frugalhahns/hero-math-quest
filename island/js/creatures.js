@@ -14,7 +14,11 @@
    is the fallback the canvas draws if one of these files fails to load, so a
    missing image can never make a resident invisible and unfindable. */
 
-export const DEX = {
+/* The dex number of each animal AS YOU MEET IT. Grown forms are not here: they
+   never stand on the map (an animal leaves the world the moment it joins you),
+   so they only ever need a portrait in the sheet. Ask js/evolve.js for the
+   current form's dex when drawing a portrait. */
+export const BASE_DEX = {
   bulbasaur: 1,
   pidgey: 16,
   pikachu: 25,
@@ -47,8 +51,10 @@ export const TILES_TALL = {
   snorlax: 2.8
 };
 
-export function animUrl(id) { return `sprites/anim/${DEX[id]}.gif`; }
-export function stillUrl(id) { return `sprites/still/${DEX[id]}.png`; }
+/* These take a dex number, not a species id, because a species has more than
+   one dex number once it can grow. */
+export function animUrl(dex) { return `sprites/anim/${dex}.gif`; }
+export function stillUrl(dex) { return `sprites/still/${dex}.png`; }
 
 /* Anything in here failed to load, so the canvas should draw the hand-drawn
    fallback for it instead of leaving an empty tile. */
@@ -58,7 +64,7 @@ export function isBroken(id) { return broken.has(id); }
 
 /* A sprite sized to fill a square box in the sheet UI. object-fit keeps the
    aspect ratio, so a Diglett is scaled up to the box and a Snorlax down. */
-export function creatureImg(id, px = 64, extra = '') {
-  if (!DEX[id]) return '';
-  return `<img class="mon" src="${animUrl(id)}" alt="" width="${px}" height="${px}" ${extra}>`;
+export function creatureImg(dex, px = 64, extra = '') {
+  if (!dex) return '';
+  return `<img class="mon" src="${animUrl(dex)}" alt="" width="${px}" height="${px}" ${extra}>`;
 }

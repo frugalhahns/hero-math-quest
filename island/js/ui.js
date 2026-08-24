@@ -241,13 +241,4 @@ export function toast(msg, ms = 2600) {
 
 export { creatureImg };
 
-export function creatureCard(sp, extra = '') {
-  return `<div class="card">
-    ${creatureImg(sp.id, 48)}
-    <div>
-      <div class="nm">${esc(sp.name)}</div>
-      <div class="jb">${esc(sp.kind)} &middot; ${esc(sp.jobName)}</div>
-      ${extra}
-    </div>
-  </div>`;
-}
+

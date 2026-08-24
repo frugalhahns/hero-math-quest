@@ -18,6 +18,9 @@ const DEFAULT = {
   read: {},               // docId -> times opened
   signs: {},              // signId -> true
   team: [],               // species ids, in the order they joined
+  stage: {},              // speciesId -> how many times it has grown
+  joinedAt: {},           // speciesId -> the chain step it joined on
+  grownAt: {},            // speciesId -> the chain step it last grew on
   projects: {},           // projectId -> true
   crew: {},               // projectId -> [speciesId, ...] who did it
   items: {},              // crank: 1, berries: 2
@@ -37,7 +40,8 @@ function load() {
     const parsed = JSON.parse(raw);
     const s = Object.assign(fresh(), parsed);
     // objects need a deeper merge or a partial old save leaves holes
-    for (const k of ['flags', 'read', 'signs', 'projects', 'crew', 'items']) {
+    for (const k of ['flags', 'read', 'signs', 'projects', 'crew', 'items',
+                     'stage', 'joinedAt', 'grownAt']) {
       s[k] = Object.assign({}, DEFAULT[k], parsed[k] || {});
     }
     if (!Array.isArray(s.team)) s.team = [];
@@ -75,7 +79,12 @@ export function take(item, n = 1) { S.items[item] = Math.max(0, (S.items[item] |
 export function onTeam(id) { return S.team.includes(id); }
 
 export function join(id) {
-  if (!S.team.includes(id)) S.team.push(id);
+  if (!S.team.includes(id)) {
+    S.team.push(id);
+    // remember which step it joined on, so js/evolve.js can leave a gap before
+    // asking you to recall its notes
+    S.joinedAt[id] = S.step;
+  }
   save();
 }
 

@@ -12,6 +12,7 @@ import * as U from './ui.js';
 import { openDoc } from './reading.js';
 import { setSound } from './audio.js';
 import { setMusic } from './music.js';
+import { form, nextForm, canGrow, ready, stepsToGo, tryGrow, grownCount, growableCount, stage } from './evolve.js';
 
 export function applyTheme() {
   const pref = S.theme || 'auto';
@@ -71,6 +72,7 @@ export function openJournal() {
       Got right: <b>${S.right}</b> (<b>${accuracy()}%</b>)<br>
       Words you looked up: <b>${S.looked}</b><br>
       Animal friends: <b>${S.team.length}</b> of <b>${SPECIES.length}</b><br>
+      Animals grown by remembering: <b>${grownCount()}</b><br>
       Projects finished: <b>${Object.keys(S.projects).length}</b> of <b>${PROJECTS.length}</b></p>
     </div>
 
@@ -91,8 +93,8 @@ function showFieldNote(id) {
     title: sp.passage.title,
     kicker: sp.passage.source,
     head: `<div class="speaker">
-      ${U.creatureImg(sp.id, 84)}
-      <div><b>${U.esc(sp.name)}</b><br><span>${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</span></div>
+      ${U.creatureImg(form(sp.id).dex, 84)}
+      <div><b>${U.esc(form(sp.id).name)}</b><br><span>${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</span></div>
     </div>`,
     pages: sp.passage.text,
     doneLabel: 'Close',
@@ -106,15 +108,57 @@ export function openTeam() {
   const mine = SPECIES.filter(sp => S.team.includes(sp.id));
   const rest = SPECIES.filter(sp => !S.team.includes(sp.id));
 
+  /* One card per animal, showing what it has grown into and what it is waiting
+     for. The growing happens from here, because this is where a kid goes to look
+     at their animals anyway. */
+  const card = sp => {
+    const f = form(sp.id);
+    const next = nextForm(sp.id);
+    const dots = sp.line.map((_, i) =>
+      `<i class="dot${i === f.stage ? ' on' : ''}${i < f.stage ? ' seen' : ''}"></i>`).join('');
+
+    let status, cls = '';
+    if (!canGrow(sp.id)) {
+      status = sp.line.length > 1
+        ? '<span class="tick">Fully grown</span>'
+        : '<span class="muted">Does not change</span>';
+    } else if (ready(sp.id)) {
+      status = '<span class="grow-now">Ready to grow!</span>';
+      cls = ' can-grow';
+    } else {
+      const n = stepsToGo(sp.id);
+      status = `<span class="muted">Growing &mdash; ${n} more step${n === 1 ? '' : 's'} to go</span>`;
+    }
+
+    return `<div class="card${cls}">
+      ${U.creatureImg(f.dex, 52)}
+      <div style="min-width:0">
+        <div class="nm">${U.esc(f.name)}</div>
+        <div class="jb">${U.esc(sp.jobName)}</div>
+        <div class="dots" style="margin:5px 0 4px">${dots}</div>
+        <div class="jb">${status}</div>
+        <div class="row" style="gap:6px;margin-top:6px">
+          <button class="chip" type="button" data-sp="${sp.id}">Its notes</button>
+          ${ready(sp.id) ? `<button class="chip" data-on="1" type="button" data-grow="${sp.id}">Grow</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+  };
+
+  const readyNow = mine.filter(sp => ready(sp.id));
+
   const body = U.openSheet(`
     <h2>Your friends</h2>
-    <p class="kicker">${mine.length} of ${SPECIES.length} animals</p>
+    <p class="kicker">${mine.length} of ${SPECIES.length} animals &middot; ${grownCount()} grown</p>
+
+    ${readyNow.length ? `<div class="why"><b>${readyNow.length === 1
+      ? U.esc(form(readyNow[0].id).name) + ' is ready to grow.'
+      : readyNow.length + ' of your animals are ready to grow.'}</b>
+      Growing one means answering questions about its notes <b>with the notes shut</b>.
+      Press Grow when you think you remember.</div>` : ''}
+
     ${mine.length
-      ? `<div class="grid2">${mine.map(sp =>
-          `<button class="card pick" type="button" data-sp="${sp.id}">
-            ${U.creatureImg(sp.id, 48)}
-            <div><div class="nm">${U.esc(sp.name)}</div><div class="jb">${U.esc(sp.jobName)}</div></div>
-          </button>`).join('')}</div>`
+      ? `<div class="grid2" style="margin-top:14px">${mine.map(card).join('')}</div>`
       : '<p class="muted">Nobody yet. Read the notice on the cabin door and start there.</p>'}
 
     ${rest.length ? `<h3>Not met yet</h3>
@@ -125,8 +169,11 @@ export function openTeam() {
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Close</button>
     </div>`);
+
   body.querySelectorAll('[data-sp]').forEach(b =>
     b.addEventListener('click', () => showFieldNote(b.dataset.sp)));
+  body.querySelectorAll('[data-grow]').forEach(b =>
+    b.addEventListener('click', () => tryGrow(b.dataset.grow, openTeam)));
 }
 
 /* ---------------- help and settings ---------------- */

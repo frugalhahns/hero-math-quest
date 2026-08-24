@@ -69,7 +69,7 @@ than 3 pages, and no single page may run over 60 words.
 | Ash Ridge | The Rock Slide | Ditto | The last page |
 
 - **6 regions**, hand-drawn as tile maps, 34 x 24 tiles each
-- **11 animals**, each with a paged field-note passage and 5 questions
+- **11 animals** in **24 forms**, each with a paged field-note passage and 5 questions
 - **11 documents**, each with 3 or 4 questions
 - **12 signs** and scenery notes, two of which carry a detail a document relies on
 - **91 comprehension questions** in total
@@ -120,6 +120,46 @@ Some deliberate choices:
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the
 game's design brief.
+
+## Growing up: evolution as recall
+
+Animals evolve, and **evolution is earned by remembering, not by grinding.**
+
+Reading an animal's notes to make friends with it is comprehension: the text is
+right there, one tap away. Answering about it *later, with the notes shut* is
+recall, which is a different skill and the harder one. So that is what evolution
+costs.
+
+How it works:
+
+1. You befriend an animal by reading its field notes and answering questions,
+   with the text available throughout.
+2. It does **not** offer to grow straight away. It waits until you have moved a
+   few more steps through the island — two for a first growth, three after that —
+   so by the time you are asked, the page is no longer fresh in your head.
+   Spacing the recall out is what makes it stick.
+3. When it is ready, the Team button gets a dot and the animal's card says
+   **Ready to grow**. You answer 3 questions about its notes with **no text and
+   no re-read button anywhere on the screen**. One miss is allowed.
+4. Get them and it evolves: new name, new sprite, and a short new page to read
+   about what changed.
+5. Get them wrong and nothing is lost. It offers to open the notes there and
+   then, and you can try again immediately.
+
+That is spaced retrieval practice, which is about the best-evidenced study
+technique there is, wearing a Pokémon costume. The kid sees his Pokémon levelling
+up; what he is actually doing is being tested on a text he read half an hour ago
+without being allowed to look at it.
+
+**24 forms across the 11 animals**, of which 9 can grow — six two-stage lines and
+three three-stage ones. Snorlax and Ditto do not change, and their cards say so
+rather than leaving you waiting for something that will not come.
+
+The species id never changes when an animal grows, only its stage. Quest steps
+and project crews are keyed on the id (`s.team.includes('machop')`), so a Machop
+that has become a Machamp still satisfies every check that named Machop, and
+still does the same job. Growing is a reward and a new page of reading, not a
+balance change.
 
 ## Team Rocket
 
@@ -218,7 +258,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,235
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,365
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -242,7 +282,12 @@ checks in the browser, including:
 - every vocabulary question asks about a word that appears in its own passage
 - every animal has a dex number, a sane overworld height, and **both sprite files
   actually present on disk** — fetched rather than assumed, since those are
-  vendored binaries and a missing one would leave an empty tile
+  vendored binaries and a missing one would leave an empty tile. That covers
+  every *form*, grown ones included: a grown animal with a missing file is a
+  blank card in the team screen
+- every evolution line is well formed: stage 0 matches the sprite used on the
+  map, no two forms share a dex number, and every form you can grow into has a
+  page of its own to read, held to the same reading level as everything else
 - every region has a soundtrack theme with a sane tempo, root note, four bars of
   chords and a five-note scale, and the regions do not all sit in the same key
 - the note scheduler starts, changes region and stops without throwing
@@ -268,6 +313,7 @@ js/
   tileset.js        every tile drawn in code, four variants each, two water frames
   pixels.js         original 16x16 pixel art, baked to canvas on first use
   creatures.js      dex numbers, sprite paths, and how tall each one stands
+  evolve.js         growing up: the gap, the from-memory test, the forms
   state.js          the save file
   ui.js             the sheet, the paged reader, glossary, question runner
   reading.js        documents and signs

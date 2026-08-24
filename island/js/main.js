@@ -13,8 +13,9 @@ import { openDoc, openSign } from './reading.js';
 import { meet } from './encounter.js';
 import { openBuildList, openProject } from './build.js';
 import { openJournal, openTeam, openHelp, openEnding, applyTheme } from './panels.js';
+import { pending, form } from './evolve.js';
 import { REGIONS } from './content/entities.js';
-import { DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
+import { BASE_DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
 
 const STEP_MS = 145;
 
@@ -32,6 +33,7 @@ const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 let lastBump = 0;
 let stepParity = 0;
+const announced = new Set();   // growth nudges already given this session
 let waterFrame = 0;
 let waterAt = 0;
 
@@ -44,6 +46,7 @@ W.buildWorld(S);
 U.wireGlossary(document);
 advance();
 refreshBar(P.map);
+checkGrowth();
 requestAnimationFrame(loop);
 
 /* Browsers will not let audio start before the player has touched something, so
@@ -57,6 +60,22 @@ function firstGesture() {
 }
 window.addEventListener('pointerdown', firstGesture, { once: true, capture: true });
 window.addEventListener('keydown', firstGesture, { once: true, capture: true });
+
+/* An animal becoming ready to grow is easy to miss, so say so once, and keep a
+   dot on the Team button until it has been dealt with.
+   `announced` is declared up with the other module state on purpose: boot calls
+   checkGrowth() before this point in the file, and a `const` down here would
+   still be in its temporal dead zone. */
+function checkGrowth() {
+  const list = pending();
+  const teamBtn = document.querySelector('#tools [data-open="team"]');
+  if (teamBtn) teamBtn.classList.toggle('has-news', list.length > 0);
+  for (const id of list) {
+    if (announced.has(id)) continue;
+    announced.add(id);
+    U.toast(form(id).name + ' is ready to grow. Open Team.', 5000);
+  }
+}
 
 /* First visit gets a nudge toward the only thing on the beach that is written on. */
 if (!S.flags.notice && !S.read.notice) {
@@ -221,7 +240,7 @@ const actors = new Map();     // species id -> img element
 let actorMap = null;          // which region those elements belong to
 
 function syncActors(cam) {
-  const here = W.visibleEntities(P.map, S).filter(e => e.kind === 'wild' && DEX[e.species]);
+  const here = W.visibleEntities(P.map, S).filter(e => e.kind === 'wild' && BASE_DEX[e.species]);
 
   if (actorMap !== P.map || actors.size !== here.length ||
       here.some(e => !actors.has(e.species))) {
@@ -230,7 +249,7 @@ function syncActors(cam) {
     actorMap = P.map;
     for (const e of here) {
       const img = document.createElement('img');
-      img.src = animUrl(e.species);
+      img.src = animUrl(BASE_DEX[e.species]);
       img.alt = '';
       // if the file is missing, fall back to the hand-drawn 16x16 on the canvas
       img.addEventListener('error', () => {
@@ -308,7 +327,7 @@ function act() {
   if (U.sheetOpen()) return;
   const e = facingEntity();
   if (!e) return;
-  const refresh = () => { advance(); refreshBar(P.map); persist(); };
+  const refresh = () => { advance(); refreshBar(P.map); persist(); checkGrowth(); };
 
   switch (e.kind) {
     case 'doc':
@@ -405,7 +424,7 @@ window.addEventListener('keydown', ev => {
   }
   if (ev.key === 'j' || ev.key === 'J') openJournal();
   if (ev.key === 't' || ev.key === 'T') openTeam();
-  if (ev.key === 'b' || ev.key === 'B') openBuildList(() => { advance(); refreshBar(P.map); });
+  if (ev.key === 'b' || ev.key === 'B') openBuildList(() => { advance(); refreshBar(P.map); checkGrowth(); });
   if (ev.key === '?' || ev.key === '/') openHelp();
 });
 
@@ -460,7 +479,7 @@ document.querySelectorAll('#tools [data-open]').forEach(b =>
     const which = b.dataset.open;
     if (which === 'journal') openJournal();
     if (which === 'team') openTeam();
-    if (which === 'build') openBuildList(() => { advance(); refreshBar(P.map); });
+    if (which === 'build') openBuildList(() => { advance(); refreshBar(P.map); checkGrowth(); });
     if (which === 'help') openHelp();
   }));
 

@@ -5,10 +5,24 @@
 import { S, save } from './state.js';
 import { PROJECTS, PROJECT_BY_ID } from './content/projects.js';
 import { BY_ID, JOBS } from './content/pokemon.js';
+import { form } from './evolve.js';
 import { applyProject } from './world.js';
 import * as U from './ui.js';
 import { sfx } from './audio.js';
 import { advance, step } from './quest.js';
+
+/* Shows whatever the animal has grown into, not what you first met. */
+function card(sp, extra = '') {
+  const f = form(sp.id);
+  return `<div class="card">
+    ${U.creatureImg(f.dex, 48)}
+    <div>
+      <div class="nm">${U.esc(f.name)}</div>
+      <div class="jb">${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</div>
+      ${extra}
+    </div>
+  </div>`;
+}
 
 /* A project is only listed once you have read the document that explains it. */
 function known(p) { return !p.learn || !!S.flags[p.learn]; }
@@ -73,7 +87,7 @@ export function openProject(id, onChange) {
       <h2>${U.esc(p.name)}</h2>
       <p class="kicker">Finished</p>
       ${U.passageHTML([p.finish])}
-      ${crew.length ? `<h3>Who helped</h3><div class="grid2">${crew.map(sp => U.creatureCard(sp)).join('')}</div>` : ''}
+      ${crew.length ? `<h3>Who helped</h3><div class="grid2">${crew.map(sp => card(sp)).join('')}</div>` : ''}
       <div class="row end" style="margin-top:18px"><button class="btn" type="button" data-close>Close</button></div>`);
     return;
   }
@@ -94,8 +108,8 @@ export function openProject(id, onChange) {
             ? candidates.map(sp => `
               <button class="card pick" type="button" data-slot="${i}" data-sp="${sp.id}"
                 aria-pressed="${picked[i] === sp.id}">
-                ${U.creatureImg(sp.id, 48)}
-                <div><div class="nm">${U.esc(sp.name)}</div><div class="jb">${U.esc(sp.jobName)}</div></div>
+                ${U.creatureImg(form(sp.id).dex, 48)}
+                <div><div class="nm">${U.esc(form(sp.id).name)}</div><div class="jb">${U.esc(sp.jobName)}</div></div>
               </button>`).join('')
             : '<div class="card locked"><div><div class="nm">No one yet</div><div class="jb">Keep reading. Somebody on this island can do this.</div></div></div>'}
         </div>`;
@@ -151,7 +165,7 @@ function complete(p, crew, onChange) {
     ${U.passageHTML([p.finish])}
     ${p.opens ? `<div class="why"><b>${U.esc(p.opens)}</b> is open now.</div>` : ''}
     <h3>Who helped</h3>
-    <div class="grid2">${crew.map(i => U.creatureCard(BY_ID[i])).join('')}</div>
+    <div class="grid2">${crew.map(i => card(BY_ID[i])).join('')}</div>
     ${before !== now.id ? `<h3>Next</h3><div class="passage"><p>${U.esc(now.objective)}</p></div>` : ''}
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Go and look</button>

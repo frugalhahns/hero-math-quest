@@ -62,7 +62,7 @@ export function meet(entity, onDone) {
 function meterHTML(sp, got, need, left, patience) {
   return `
     <div class="speaker">
-      ${U.creatureImg(sp.id, 84)}
+      ${U.creatureImg(sp.line[0].dex, 84)}
       <div>
         <b>${U.esc(sp.name)}</b><br>
         <span>${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</span>

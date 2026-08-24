@@ -4,7 +4,14 @@
    item is ONE PAGE -- the reader gets a few sentences, presses Next, and gets a
    few more. Keep new pages that short.
    Words in {curly braces} are glossary words; see content/glossary.js.
-   The prose is original. The sprites are described in js/creatures.js. */
+   The prose is original. The sprites are described in js/creatures.js.
+
+   `line` is the evolution line: stage 0 is what you meet in the wild, and each
+   later stage is earned by RECALL -- answering questions about this animal's
+   notes later on, with the notes shut. See js/evolve.js. The species id never
+   changes when it grows, only the stage, because quest steps and project crews
+   are keyed on the id. Each grown form carries a short `blurb`, so growing one
+   is also a little more reading. */
 
 export const SPECIES = [
   /* ------------------------------------------------------------ beach */
@@ -12,6 +19,13 @@ export const SPECIES = [
     id: 'pidgey', name: 'Pidgey', kind: 'Tiny Bird', region: 'beach',
     job: 'scout', jobName: 'Scouting', jobDesc: 'Finds a path and remembers it.',
     found: 'the bushes above the tide line, on the Landing Beach',
+    line: [
+      { name: 'Pidgey', dex: 16 },
+      { name: 'Pidgeotto', dex: 17,
+        blurb: 'Pidgeotto is bigger, and it flies much further. It can hold a whole stretch of coast in its head for a full season now. It still throws sand at you when it is cross.' },
+      { name: 'Pidgeot', dex: 18,
+        blurb: 'Pidgeot can cross the island in the time it takes you to walk to the dock. Elm wrote one line about them: a Pidgeot never gets lost. Not once, in nine years of watching.' }
+    ],
     passage: {
       title: 'Field Notes: Pidgey',
       source: 'Ranger Elm, note 14',
@@ -59,6 +73,11 @@ export const SPECIES = [
     id: 'psyduck', name: 'Psyduck', kind: 'Duck', region: 'beach',
     job: 'water', jobName: 'Finding Water', jobDesc: 'Sniffs out fresh water and carries it.',
     found: 'the shallow water at the west end of the beach',
+    line: [
+      { name: 'Psyduck', dex: 54 },
+      { name: 'Golduck', dex: 55,
+        blurb: 'The headache is gone. Golduck can use its power when it wants to now, instead of waiting for it to burst out on its own. It swims faster than anything else on this coast.' }
+    ],
     passage: {
       title: 'Field Notes: Psyduck',
       source: 'Ranger Elm, note 22',
@@ -109,6 +128,13 @@ export const SPECIES = [
     id: 'chikorita', name: 'Chikorita', kind: 'Leaf', region: 'meadow',
     job: 'plant', jobName: 'Planting', jobDesc: 'Makes roots, vines and rope grass grow.',
     found: 'the sunny south end of Meadow Hollow, where the tall grass is thickest',
+    line: [
+      { name: 'Chikorita', dex: 152 },
+      { name: 'Bayleef', dex: 153,
+        blurb: 'Bayleef has a ring of leaves around its neck now, and the sweet smell is much stronger. Plants near a Bayleef grow so fast you can almost watch them do it.' },
+      { name: 'Meganium', dex: 154,
+        blurb: 'Meganium\'s flower can calm an angry animal from right across a field. The ground it walks on turns dark and rich. Elm called it the best gardener on the island.' }
+    ],
     passage: {
       title: 'Field Notes: Chikorita',
       source: 'Ranger Elm, note 31',
@@ -157,6 +183,13 @@ export const SPECIES = [
     id: 'machop', name: 'Machop', kind: 'Superpower', region: 'meadow',
     job: 'haul', jobName: 'Carrying', jobDesc: 'Lifts what people cannot lift.',
     found: 'the stone circle on the east side of Meadow Hollow',
+    line: [
+      { name: 'Machop', dex: 66 },
+      { name: 'Machoke', dex: 67,
+        blurb: 'Machoke is thicker through the arms and the shoulders. It still stops and measures before it lifts. It just has less to measure now.' },
+      { name: 'Machamp', dex: 68,
+        blurb: 'Machamp has four arms. It can hold a block steady with two of them and set it down with the other two. Nothing here moves more in an afternoon.' }
+    ],
     passage: {
       title: 'Field Notes: Machop',
       source: 'Ranger Elm, note 38',
@@ -206,6 +239,11 @@ export const SPECIES = [
     id: 'pikachu', name: 'Pikachu', kind: 'Mouse', region: 'meadow',
     job: 'power', jobName: 'Sparking', jobDesc: 'Puts power into something dead.',
     found: 'the little reed island in the middle of the meadow pond',
+    line: [
+      { name: 'Pikachu', dex: 25 },
+      { name: 'Raichu', dex: 26,
+        blurb: 'Raichu holds a lot more power than Pikachu did. Its long tail ends in a flat shape that lets the extra power run away into the ground. Watch for the same three signs.' }
+    ],
     passage: {
       title: 'Field Notes: Pikachu',
       source: 'Ranger Elm, note 45',
@@ -256,6 +294,13 @@ export const SPECIES = [
     id: 'bulbasaur', name: 'Bulbasaur', kind: 'Seed', region: 'grove',
     job: 'plant', jobName: 'Planting', jobDesc: 'Makes roots, vines and rope grass grow.',
     found: 'the shrine clearing in the middle of Whispering Grove',
+    line: [
+      { name: 'Bulbasaur', dex: 1 },
+      { name: 'Ivysaur', dex: 2,
+        blurb: 'The bulb has opened into a bud. Ivysaur carries more water than it used to, so it can walk further from the brook. It plants as it goes, the same as always.' },
+      { name: 'Venusaur', dex: 3,
+        blurb: 'Venusaur has a wide flower on its back that drinks the sun all day. A hillside a Venusaur has crossed will hold together through any storm. Nothing plants better.' }
+    ],
     passage: {
       title: 'Field Notes: Bulbasaur',
       source: 'Ranger Elm, note 52',
@@ -304,6 +349,11 @@ export const SPECIES = [
     id: 'diglett', name: 'Diglett', kind: 'Mole', region: 'grove',
     job: 'dig', jobName: 'Digging', jobDesc: 'Sinks posts and opens up blocked ground.',
     found: 'the soft mushroom dirt along the grove brook',
+    line: [
+      { name: 'Diglett', dex: 50 },
+      { name: 'Dugtrio', dex: 51,
+        blurb: 'There are three heads now, and they work as one. A Dugtrio digs three times as fast. Nobody has seen the bottom half of any of the three, either.' }
+    ],
     passage: {
       title: 'Field Notes: Diglett',
       source: 'Ranger Elm, note 60',
@@ -355,6 +405,11 @@ export const SPECIES = [
     id: 'wooper', name: 'Wooper', kind: 'Water Fish', region: 'marsh',
     job: 'water', jobName: 'Finding Water', jobDesc: 'Sniffs out fresh water and carries it.',
     found: 'the firm reed island in the middle of the Reed Marsh',
+    line: [
+      { name: 'Wooper', dex: 194 },
+      { name: 'Quagsire', dex: 195,
+        blurb: 'Quagsire is bigger and somehow even calmer. It still needs its skin kept wet. It will stand in a stream all day and look pleased about it.' }
+    ],
     passage: {
       title: 'Field Notes: Wooper',
       source: 'Ranger Elm, note 71',
@@ -404,6 +459,11 @@ export const SPECIES = [
     id: 'chinchou', name: 'Chinchou', kind: 'Angler', region: 'marsh',
     job: 'light', jobName: 'Lighting', jobDesc: 'Holds a steady light in the dark.',
     found: 'the deep channel at the south end of the marsh, after dark',
+    line: [
+      { name: 'Chinchou', dex: 170 },
+      { name: 'Lanturn', dex: 171,
+        blurb: 'Lanturn\'s light is far brighter, and it can hold it steady all night. Boats used to steer by them. Keep your own lantern above the water anyway.' }
+    ],
     passage: {
       title: 'Field Notes: Chinchou',
       source: 'Ranger Elm, note 78',
@@ -455,6 +515,9 @@ export const SPECIES = [
     id: 'snorlax', name: 'Snorlax', kind: 'Sleeping', region: 'caverns',
     job: 'shove', jobName: 'Pushing', jobDesc: 'Moves what nothing else can move.',
     found: 'asleep across the west room of the Tidepool Caves',
+    line: [
+      { name: 'Snorlax', dex: 143 }
+    ],
     passage: {
       title: 'Field Notes: Snorlax',
       source: 'Ranger Elm, note 90',
@@ -507,6 +570,9 @@ export const SPECIES = [
     id: 'ditto', name: 'Ditto', kind: 'Transform', region: 'ridge',
     job: 'mimic', jobName: 'Copying', jobDesc: 'Can stand in for any helper here.',
     found: 'the stone pile at the top of Ash Ridge',
+    line: [
+      { name: 'Ditto', dex: 132 }
+    ],
     passage: {
       title: 'Field Notes: Ditto',
       source: 'Ranger Elm, last note',

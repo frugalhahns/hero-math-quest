@@ -503,6 +503,22 @@ body {
 .card.pick[aria-pressed="true"] { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
 
 .tick { color: var(--accent); font-weight: 700; }
+.grow-now { color: var(--gold); font-weight: 700; }
+.card.can-grow { border-color: var(--gold); box-shadow: inset 0 0 0 1px var(--gold); }
+
+/* a dot on a top-bar button when something is waiting behind it */
+.chip.has-news { position: relative; }
+.chip.has-news::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 0 2px var(--card);
+}
 .cross { color: var(--rose); font-weight: 700; }
 
 .entry {
