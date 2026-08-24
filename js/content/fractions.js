@@ -50,8 +50,15 @@ function twoDistinct(arr) {
 
 const range = (lo, hi) => Array.from({ length: hi - lo + 1 }, (_, i) => lo + i);
 
-const DENOMS = { 1: [2, 3, 4], 2: [2, 3, 4, 5, 6, 8], 3: [3, 4, 5, 6, 8, 10],
-                 4: [4, 5, 6, 8, 10, 12], 5: [4, 6, 8, 9, 10, 12] };
+/* Denominators are held to the ones the standards allow: Grade 3 is limited to
+   2, 3, 4, 6 and 8 (3.NF footnote), Grade 4 adds 5, 10, 12 and 100 (4.NF
+   footnote). Nothing outside that list appears anywhere, including in wrong
+   answers and in the un-simplified form of a simplify question, so a kid never
+   meets a denominator they have not been taught. */
+const LEGAL = [2, 3, 4, 5, 6, 8, 10, 12];
+const isLegal = d => LEGAL.includes(d);
+const DENOMS = { 1: [2, 3, 4], 2: [2, 3, 4, 6, 8], 3: [3, 4, 5, 6, 8, 10],
+                 4: [4, 5, 6, 8, 10, 12], 5: [4, 5, 6, 8, 10, 12] };
 
 /* ---------------- question builders ---------------- */
 
@@ -61,13 +68,13 @@ function identify(lvl) {
   const n = ri(1, d - 1);
   const correct = `${n}/${d}`;
   const distract = new Set();
-  distract.add(`${d}/${n}`);                       // flipped, the classic slip
-  distract.add(`${n}/${d + 1}`);                   // miscounted the total
+  if (isLegal(n)) distract.add(`${d}/${n}`);       // flipped, the classic slip
   if (n + 1 < d) distract.add(`${n + 1}/${d}`);    // counted a shaded part twice
   distract.add(`${d - n}/${d}`);                   // named the unshaded part
-  distract.add(`${n + 1}/${d + 1}`);               // small denominators need a spare
-  distract.add(`${n}/${d + 2}`);
-  const picks = [...distract].filter(s => s !== correct).slice(0, 3);
+  if (n > 1) distract.add(`${n - 1}/${d}`);        // counted one too few
+  /* Any spare has to stay on a legal denominator, so borrow a neighbouring one. */
+  for (const alt of LEGAL) if (alt !== d && n < alt) distract.add(`${n}/${alt}`);
+  const picks = [...distract].filter(x => x !== correct).slice(0, 3);
   const { choices, answer } = shuffled(correct, picks);
   return {
     kind: 'choice', skill: 'frac', level: lvl,
@@ -96,10 +103,14 @@ function ofSet(lvl) {
 }
 
 /* Equivalent fractions with the numerator missing: keypad stays useful. */
+/* Every (small denominator -> bigger legal denominator) step available. */
+const SCALE_UP = LEGAL.flatMap(d => LEGAL.filter(D => D > d && D % d === 0).map(D => [d, D]));
+
 function equivalent(lvl) {
-  const base = pick([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [3, 5], [1, 6], [5, 6]]);
-  const [n, d] = base;
-  const k = lvl <= 2 ? ri(2, 3) : ri(2, 5);
+  const opts = lvl <= 2 ? SCALE_UP.filter(([, D]) => D <= 8) : SCALE_UP;
+  const [d, D] = pick(opts);
+  const n = ri(1, d - 1);
+  const k = D / d;
   return {
     kind: 'numeric', skill: 'frac', level: lvl,
     flavor: pick(FLAVOR),
@@ -165,26 +176,37 @@ function likeDen(lvl, op) {
 }
 
 /* Simplest form. Answer is a fraction, so this one is multiple choice. */
+/* Reducible fractions whose BEFORE and AFTER denominators are both legal. */
+const REDUCIBLE = (() => {
+  const out = [];
+  for (const d of LEGAL) for (let n = 2; n < d; n++) {
+    const g = gcd(n, d);
+    if (g > 1 && isLegal(d / g)) out.push([n, d, n / g, d / g]);
+  }
+  return out;
+})();
+
 function simplify(lvl) {
-  const target = pick([[1, 2], [1, 3], [2, 3], [1, 4], [3, 4], [2, 5], [3, 5], [1, 6], [5, 6], [3, 8]]);
-  const [sn, sd] = target;
-  const k = lvl <= 4 ? ri(2, 3) : ri(2, 4);
-  const n = sn * k, d = sd * k;
+  const pool = lvl <= 3 ? REDUCIBLE.filter(([, d]) => d <= 8) : REDUCIBLE;
+  const [n, d, sn, sd] = pick(pool.length ? pool : REDUCIBLE);
+  const g = gcd(n, d);
   const correct = `${sn}/${sd}`;
-  const distract = [`${n}/${d}`, `${sn * 2}/${sd * 2}`, `${sn + 1}/${sd}`]
-    .filter(s => s !== correct);
+  /* Wrong answers: a half-done reduction, and near misses on legal denominators. */
+  const distract = [`${n}/${d}`];
+  for (const alt of LEGAL) if (alt !== sd && sn < alt) distract.push(`${sn}/${alt}`);
+  if (sn + 1 < sd) distract.push(`${sn + 1}/${sd}`);
   const { choices, answer } = shuffled(correct, [...new Set(distract)].slice(0, 3));
   return {
     kind: 'choice', skill: 'frac', level: lvl,
     prompt: `Which one is ${n}/${d} in simplest form?`,
     choices, answer,
-    explain: `${n} and ${d} both divide by ${gcd(n, d)}. ${n} ÷ ${k} = ${sn} and ${d} ÷ ${k} = ${sd}, so ${sn}/${sd}.`
+    explain: `${n} and ${d} both divide by ${g}. ${n} ÷ ${g} = ${sn} and ${d} ÷ ${g} = ${sd}, so ${sn}/${sd}.`
   };
 }
 
 /* Benchmark against 1/2 — the comparison trick worth owning. */
 function benchmark(lvl) {
-  const d = pick(DENOMS[lvl].filter(x => x >= 4));
+  const d = pick(DENOMS[lvl].filter(x => x >= 4 && isLegal(x)));
   let n = ri(1, d - 1);
   while (n * 2 === d) n = ri(1, d - 1);      // never exactly one half
   const more = n / d > 0.5;

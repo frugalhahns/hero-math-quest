@@ -16,6 +16,10 @@ const ri = (lo, hi) => lo + Math.floor(Math.random() * (hi - lo + 1));
 const pick = arr => arr[Math.floor(Math.random() * arr.length)];
 const gcd = (a, b) => (b ? gcd(b, a % b) : a);
 
+/* The only denominators the Grade 3/4 fraction standards allow (3.NF and 4.NF
+   footnotes). Wrong answers have to stay inside this list too. */
+const LEGAL_DEN = [2, 3, 4, 5, 6, 8, 10, 12];
+
 function shuffled(correct, distractors) {
   /* Dedupe across the whole set: a repeated option is a giveaway, and some
      generators can produce the same distractor twice for small numbers. */
@@ -137,15 +141,17 @@ function g_multiple10() {
 function g_fracLine(lvl) {
   const b = pick(lvl <= 2 ? [2, 3, 4] : [3, 4, 6, 8]);
   const a = ri(1, b - 1);
+  const wrong = [`${a + 1 <= b ? a + 1 : a - 1}/${b}`, `${b - a}/${b}`];
+  for (const alt of LEGAL_DEN) if (alt !== b && a < alt) wrong.push(`${a}/${alt}`);
   return ch('3.NF.A.2', 'What fraction is the dot sitting on?', `${a}/${b}`,
-    [`${b}/${a}`, `${a}/${b + 1}`, `${a + 1}/${b}`],
+    [...new Set(wrong)].slice(0, 3),
     `0 to 1 is split into ${b} equal jumps, and the dot is ${a} jumps along, so ${a}/${b}.`,
     { art: numberLine(b, a) });
 }
 
 /* 3.NF.A.3c — whole numbers written as fractions. */
 function g_wholeAsFraction() {
-  const w = ri(2, 8);
+  const w = pick(LEGAL_DEN.filter(d => d <= 8));
   return pick([
     () => num('3.NF.A.3', `${w} = ?/1`, w, `Anything over 1 is just itself. ${w} wholes is ${w}/1.`,
       { prompt: 'Write the whole number as a fraction.' }),
@@ -317,8 +323,9 @@ function g_quadCategory() {
 /* 3.G.A.2 — partition a shape, name one part as a unit fraction. */
 function g_partition() {
   const b = pick([2, 3, 4, 6, 8]);
+  const near = pick(LEGAL_DEN.filter(x => x !== b));
   return ch('3.G.A.2', `A shape is cut into ${b} equal parts. What fraction of the shape is ONE part?`,
-    `1/${b}`, [`${b}/1`, `1/${b + 1}`, `2/${b}`],
+    `1/${b}`, [`${b}/1`, `1/${near}`, `2/${b}`],
     `One part out of ${b} equal parts is 1/${b} of the area.`,
     { art: polygon('rectangle') });
 }
@@ -519,7 +526,8 @@ function g_decompose() {
   const n = ri(3, d - 1);
   const k = ri(1, n - 1);
   const correct = `${k}/${d} + ${n - k}/${d}`;
-  const bad = [`${k}/${d} + ${n - k}/${d + 1}`, `${k}/${d} + ${n}/${d}`, `${n}/${d} + ${n}/${d}`]
+  const other = pick(LEGAL_DEN.filter(x => x !== d && x > n - k));
+  const bad = [`${k}/${d} + ${n - k}/${other}`, `${k}/${d} + ${n}/${d}`, `${n}/${d} + ${n}/${d}`]
     .filter(x => x !== correct);
   return ch('4.NF.B.3', `Which sum equals ${n}/${d}?`, correct, bad,
     `${k} parts plus ${n - k} parts makes ${n} parts, all of size 1/${d}. The bottom never changes.`);
@@ -575,9 +583,10 @@ function g_decimalNotation() {
     return ch('4.NF.C.6', `Write ${frac} as a decimal.`, dec, wrong,
       `${frac} means ${n} ${hundredths ? 'hundredths' : 'tenths'}, which is written ${dec}.`);
   }
+  /* Tenths and hundredths are the only denominators 4.NF.C works in. */
   const wrongF = hundredths
-    ? [`${n}/10`, `${n}/1000`, `100/${n}`]
-    : [`${n}/100`, `${n}/1`, `10/${n}`];
+    ? [`${n}/10`, `${Math.floor(n / 10) || 1}/100`, `${n}0/100`]
+    : [`${n}/100`, `${n}0/100`, `${n}00/100`];
   return ch('4.NF.C.6', `Write ${dec} as a fraction.`, frac, wrongF,
     `The last digit sits in the ${hundredths ? 'hundredths' : 'tenths'} place, so the bottom is ${hundredths ? 100 : 10}.`);
 }

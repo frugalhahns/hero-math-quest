@@ -59,6 +59,12 @@ picture is generated as SVG and *is* the question: an analog clock, a scaled bar
 line plot in eighths, a number line, tiled unit squares, angles, polygons and line pairs.
 All of it is drawn from CSS variables, so it works in both themes.
 
+**Denominators are held to the grades' own limits.** The 3.NF footnote limits Grade 3 to
+denominators 2, 3, 4, 6 and 8; the 4.NF footnote allows 2, 3, 4, 5, 6, 8, 10, 12 and 100.
+Nothing outside that list appears anywhere, including in wrong answers and in the
+un-simplified half of a "simplest form" question, so a kid never meets a denominator they
+have not been taught. A generated-content check enforces this over 80,000 items.
+
 **One standard is deliberately left out.** 4.MD.C.6 asks a kid to measure and sketch angles
 *with a protractor*. That wants a real protractor and paper, not a tap target, so it stays
 on paper. The in-game coverage screen says so too, rather than quietly claiming it.
