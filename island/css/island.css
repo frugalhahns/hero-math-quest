@@ -158,19 +158,34 @@ body {
   flex: none;
 }
 
+/* Bigger and brighter than it was. An 8 year old was walking straight past the
+   old version, which was a thin grey pill of small text. */
 #prompt {
   position: absolute;
   left: 50%;
-  bottom: 10px;
+  bottom: 12px;
   transform: translateX(-50%);
-  background: rgba(8, 22, 18, .88);
-  color: #eaf5ef;
-  border: 1px solid rgba(234, 245, 239, .28);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(8, 22, 18, .93);
+  color: #fff;
+  border: 2px solid var(--focus);
   border-radius: 999px;
-  padding: 6px 14px;
-  font-size: .86rem;
+  padding: 8px 18px;
   white-space: nowrap;
   pointer-events: none;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, .4);
+}
+#prompt b { font-size: 1.06rem; letter-spacing: .2px; }
+#prompt span {
+  font-size: .76rem;
+  color: #cfe0d6;
+  border-left: 1px solid rgba(255, 255, 255, .25);
+  padding-left: 9px;
+}
+@media (max-width: 480px) {
+  #prompt span { display: none; }     /* on a phone there is no Space key */
 }
 
 /* ---------------- touch controls ---------------- */
@@ -221,6 +236,26 @@ body {
   touch-action: manipulation;
 }
 #btn-act:active { filter: brightness(.92); }
+
+/* The button is dull grey until there is actually something to press it on, and
+   then it lights up and breathes. Half the discoverability problem was that it
+   looked identical either way. */
+#btn-act {
+  background: var(--card2);
+  color: var(--ink-dim);
+  border: 2px solid var(--line);
+  transition: background .18s ease, color .18s ease, border-color .18s ease;
+}
+#btn-act.ready {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: transparent;
+  animation: actpulse 1.5s ease-in-out infinite;
+}
+@keyframes actpulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(88, 214, 141, .55); }
+  50%      { box-shadow: 0 0 0 9px rgba(88, 214, 141, 0); }
+}
 
 /* ---------------- sheet (reading, quiz, menus) ---------------- */
 

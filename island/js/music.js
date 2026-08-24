@@ -53,8 +53,8 @@ export const THEMES = {
   }
 };
 
-const FULL = 0.30;      // music sits well under the sound effects
-const DUCKED = 0.13;    // while a reading sheet is open
+const FULL = 0.42;      // raised once the effects were pulled back off it
+const DUCKED = 0.16;    // while a reading sheet is open
 
 const STEPS_PER_BAR = 8;    // eighth notes
 const BARS = 4;             // length of a chord loop

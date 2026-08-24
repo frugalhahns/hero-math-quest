@@ -31,6 +31,7 @@ const held = { up: false, down: false, left: false, right: false };
 const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 let lastBump = 0;
+let stepParity = 0;
 let waterFrame = 0;
 let waterAt = 0;
 
@@ -81,7 +82,7 @@ function loop(now) {
   W.drawMap(ctx, P.map, cam, waterFrame, S);
   if (REGIONS[P.map] && REGIONS[P.map].dark) W.drawGloom(ctx, canvas.width, canvas.height);
   syncActors(cam);
-  drawPlayer(rx, ry, cam);
+  drawPlayer(rx, ry, cam, now);
 
   updatePrompt();
   requestAnimationFrame(loop);
@@ -109,7 +110,10 @@ function tryMove(dir) {
   }
   P.fromX = P.x; P.fromY = P.y;
   P.x = nx; P.y = ny; P.t = 0;
-  sfx.step();
+  // every other tile: a tap on all eight steps of a walk across the screen is
+  // relentless, and it buries the music
+  stepParity ^= 1;
+  if (stepParity) sfx.step();
 }
 
 function arrive() {
@@ -137,7 +141,56 @@ function ease(t) { return t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2; }
 
 /* ---------------- the player sprite ---------------- */
 
-function drawPlayer(rx, ry, cam) {
+/* A chunky downward chevron, drawn row by row so it matches the pixel art. */
+function chevron(cx, y, half, color) {
+  hctx.fillStyle = color;
+  for (let r = 0; r <= half; r++) {
+    const w = (half - r) * 2 + 1;
+    hctx.fillRect(cx - Math.floor(w / 2), y + r, w, 1);
+  }
+}
+
+/* Markers over anything you can act on. This is the whole answer to "my kid
+   cannot tell when there is something to press Space on": the thing you are
+   facing gets a big bouncing arrow and a bright ring on its tile, and anything
+   on screen you have never looked at gets a small faint one so it can be found
+   at all. The faint ones disappear once examined, so the map does not stay
+   covered in markers. */
+function drawMarkers(cam, now) {
+  const bounce = Math.sin(now / 260);
+  const facingT = facing();
+
+  for (const e of W.visibleEntities(P.map, S)) {
+    const isFacing = e.x === facingT.x && e.y === facingT.y;
+    if (!isFacing && !unexamined(e)) continue;
+
+    const sx = Math.round((e.x - cam.cx) * TS);
+    const sy = Math.round((e.y - cam.cy) * TS);
+    if (sx < -TS || sy < -TS || sx > heroCanvas.width || sy > heroCanvas.height) continue;
+    const cx = sx + 8;
+
+    if (isFacing) {
+      // a ring on the tile, so it is obvious which square is being talked about
+      hctx.strokeStyle = 'rgba(255, 212, 94, 0.95)';
+      hctx.lineWidth = 1;
+      hctx.strokeRect(sx + 0.5, sy + 0.5, TS - 1, TS - 1);
+      const y = sy - 9 + Math.round(bounce * 2);
+      chevron(cx, y - 1, 4, '#2b2410');        // outline, so it reads on any tile
+      chevron(cx, y, 3, '#ffd45e');
+      hctx.fillStyle = '#2b2410';
+      hctx.fillRect(cx - 1, y - 5, 2, 3);       // a little stalk above the arrow
+      hctx.fillStyle = '#ffd45e';
+      hctx.fillRect(cx - 1, y - 4, 2, 2);
+    } else {
+      hctx.globalAlpha = 0.72;
+      const y = sy - 6 + Math.round(bounce * 1.5);
+      chevron(cx, y, 2, '#f4efe2');
+      hctx.globalAlpha = 1;
+    }
+  }
+}
+
+function drawPlayer(rx, ry, cam, now) {
   const art = P.dir === 'up' ? 'player_up' : P.dir === 'down' ? 'player_down' : 'player_side';
   const flip = P.dir === 'right';
   const walking = P.t < 1;
@@ -145,6 +198,7 @@ function drawPlayer(rx, ry, cam) {
   const sx = Math.round((rx - cam.cx) * TS);
   const sy = Math.round((ry - cam.cy) * TS) + bob;
   hctx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
+  if (!U.sheetOpen()) drawMarkers(cam, now);
   // a small shadow keeps the sprite from floating over tall grass
   hctx.globalAlpha = 0.18;
   hctx.fillStyle = '#000';
@@ -213,16 +267,38 @@ function facingEntity() {
 }
 
 const KIND_VERB = {
-  doc: 'Read', sign: 'Look', dig: 'Dig', item: 'Take', wild: 'Say hello', project: 'Look'
+  doc: 'Read this', sign: 'Look', dig: 'Dig here', item: 'Pick it up',
+  wild: 'Say hello', project: 'Take a look'
 };
+
+/* Has this thing never been looked at? Used for the faint markers, so the map
+   shows what is left to find and then quietly stops nagging once it is done. */
+function unexamined(e) {
+  if (e.kind === 'doc') return !S.flags[e.doc];
+  if (e.kind === 'sign') return !S.signs[e.sign];
+  if (e.kind === 'dig') return !S.flags['dug:' + e.id];
+  if (e.kind === 'item') return !S.flags['took:' + e.id];
+  if (e.kind === 'project') return !S.projects[e.project];
+  return false;   // the animals are their own signpost, they do not need one
+}
+
+const actBtn = document.getElementById('btn-act');
 
 function updatePrompt() {
   const el = document.getElementById('prompt');
-  if (U.sheetOpen()) { el.classList.add('hidden'); return; }
-  const e = facingEntity();
-  if (!e) { el.classList.add('hidden'); return; }
-  el.textContent = (KIND_VERB[e.kind] || 'Look') + '  \u2022  press Space';
+  const e = U.sheetOpen() ? null : facingEntity();
+
+  if (!e) {
+    el.classList.add('hidden');
+    actBtn.classList.remove('ready');
+    actBtn.textContent = 'Look';
+    return;
+  }
+  const verb = KIND_VERB[e.kind] || 'Look';
+  el.innerHTML = `<b>${verb}</b><span>press Space</span>`;
   el.classList.remove('hidden');
+  actBtn.classList.add('ready');
+  actBtn.textContent = verb;
 }
 
 /* ---------------- interaction ---------------- */
