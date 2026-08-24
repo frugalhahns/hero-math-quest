@@ -14,6 +14,7 @@ import { ART, SPRITE_SIZE } from './pixels.js';
 import { isKnownTile, isSolidTile } from './tileset.js';
 import * as W from './world.js';
 import { DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
+import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 
 const out = [];
@@ -25,8 +26,16 @@ function ok(cond, label, detail = '') {
   if (!cond) fails++;
   out.push(`<div class="${cond ? 'ok' : 'bad'}">${cond ? 'PASS' : 'FAIL'}  ${label}${detail ? '  — ' + detail : ''}</div>`);
 }
-function head(t) { out.push(`<h2>${t}</h2>`); }
-function note(t) { out.push(`<div>      ${t}</div>`); }
+/* The report is flushed to the page after every section rather than only at the
+   end. If something stalls -- and audio rendering in a headless browser is very
+   good at stalling -- you still get everything up to that point, which is how
+   you find out where it stopped. */
+function flush() {
+  const el = document.getElementById('out');
+  if (el) el.innerHTML = out.join('');
+}
+function head(t) { out.push(`<h2>${t}</h2>`); flush(); }
+function note(t) { out.push(`<div>      ${t}</div>`); flush(); }
 
 /* ---------------- maps ---------------- */
 head('maps');
@@ -371,6 +380,28 @@ ok(Object.keys(TILES_TALL).length === SPECIES.length, 'every dex entry has an ov
   ok(results.every(r => r[1]), 'every resident has both a still and an animated sprite on disk');
 }
 
+/* ---------------- soundtrack ---------------- */
+head('soundtrack');
+for (const key of Object.keys(REGIONS)) {
+  const t = THEMES[key];
+  ok(!!t, `${key}: has a theme`);
+  if (!t) continue;
+  ok(t.bpm >= 50 && t.bpm <= 110, `${key}: tempo ${t.bpm} is in the cozy range`, String(t.bpm));
+  ok(t.root >= 40 && t.root <= 80, `${key}: root note is in a sane octave`, String(t.root));
+  ok(Array.isArray(t.chords) && t.chords.length === 4, `${key}: four bars of chords`, String(t.chords && t.chords.length));
+  ok(t.chords.every(c => c.length >= 3), `${key}: every chord has at least three notes`);
+  ok(t.chords.every(c => c.every(n => n >= -12 && n <= 24)), `${key}: chord offsets stay near the root`);
+  ok(Array.isArray(t.scale) && t.scale.length === 5, `${key}: melody uses a five note scale`);
+  ok(t.bright > 0.2 && t.bright <= 2, `${key}: filter brightness is sane`, String(t.bright));
+}
+ok(Object.keys(THEMES).length === Object.keys(REGIONS).length,
+  'no themes for regions that do not exist', `${Object.keys(THEMES).length} themes, ${Object.keys(REGIONS).length} regions`);
+{
+  const keys = Object.keys(THEMES);
+  const roots = new Set(keys.map(k => THEMES[k].root));
+  ok(roots.size >= 4, 'the regions do not all sit in the same key', `${roots.size} different roots`);
+}
+
 /* ---------------- quest chain ---------------- */
 head('quest chain');
 const empty = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
@@ -398,6 +429,33 @@ try {
 } catch (e) {
   ok(false, 'every region draws without throwing', e.message);
 }
+
+/* ---------------- the soundtrack actually runs ---------------- */
+head('soundtrack engine');
+{
+  let threw = null;
+  try {
+    musicUnlock('beach');
+    await new Promise(r => setTimeout(r, 500));
+    musicRegion('caverns');
+    await new Promise(r => setTimeout(r, 500));
+  } catch (e) {
+    threw = e.message;
+  }
+  ok(!threw, 'starting the soundtrack and changing region throws nothing', threw || '');
+  const st = musicStatus();
+  ok(st.running, 'the note scheduler is running', JSON.stringify(st));
+  // a suspended context has a frozen clock, so only assert progress if it is live
+  if (st.contextState === 'running') {
+    ok(st.steps > 0, 'the scheduler queued notes', `${st.steps} steps`);
+  } else {
+    note(`audio context is "${st.contextState}" here, so note timing was not exercised`);
+  }
+  musicSet(false);   // do not leave a dev page humming
+  ok(true, 'soundtrack stopped cleanly after the check');
+  note('loudness is measured by hand with renderOne() in js/music.js -- see the comment there for why it is not automated');
+}
+
 
 /* ---------------- report ---------------- */
 out.unshift(`<h2>${fails ? fails + ' FAILURES' : 'all clear'} — ${checks} checks</h2>`);

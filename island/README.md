@@ -114,6 +114,57 @@ The theme running through Ranger Elm's notes — that reading a place before act
 in it is slower than being confident and better than being confident — is also the
 game's design brief.
 
+## Music
+
+There is a soundtrack, and there is still not a single audio file in the repo.
+Every note is generated in the browser by `js/music.js`.
+
+That is not only about download size. A loop long enough not to grate is a big
+file, and a short one grates. Generated music can amble along for an hour without
+repeating a bar, which is what you want behind a game somebody sits and reads in.
+
+It is aiming for cozy rather than exciting: slow tempos, warm detuned pads, a soft
+music-box arpeggio, no drums at all, and a melody that rests more often than it
+plays — it sits out the third bar of every four-bar loop to let the thing breathe.
+Melody notes come from a small random walk along a pentatonic scale, which is the
+trick that makes generated music safe to leave running: on a pentatonic scale there
+is no note that can land wrong, so it never needs supervising.
+
+Each region has its own key, chord loop, tempo and filter brightness, so the caves
+sound muffled and low and the ridge sounds open and high. Walking from one region
+into the next fades out, changes key, and fades back in.
+
+| Region | Key centre | Tempo | Feel |
+|---|---|---|---|
+| Landing Beach | D | 82 | I–V–vi–IV, bright and plain |
+| Meadow Hollow | E | 90 | I–iii–IV–V, the busiest of them |
+| Whispering Grove | A | 72 | vi–IV–I–V, slower and a bit wistful |
+| Reed Marsh | C | 68 | ii–V–I–vi, muffled, no arpeggio |
+| Tidepool Caves | G minor | 62 | i–VI–III–VII, sparse and low |
+| Ash Ridge | F | 78 | I–IV–vi–V, open and high |
+
+Details that matter more than they sound like they should:
+
+- **The music ducks while you are reading.** A passage on screen drops it from
+  0.30 to 0.13. Reading is the point of the game; the soundtrack should not
+  compete with it.
+- **Nothing is built until you touch the page.** Browsers block audio before a
+  gesture, so the whole graph waits for the first key press or tap rather than
+  being created at load and silently refused.
+- **It stops in a background tab**, and the scheduler is torn down entirely when
+  you switch music off, so Off actually costs nothing.
+- **Notes are scheduled ahead** on the audio clock — about 0.7s of lookahead,
+  topped up every 45ms — rather than played from a timer, which is the only way
+  to get timing that does not stutter when the frame rate dips.
+
+Loudness is measured rather than assumed, but by hand rather than in the suite:
+`renderOne()` in `js/music.js` renders a region into an `OfflineAudioContext` and
+reports peak and RMS. Every region comes out around **rms 0.015, peak 0.06** —
+clearly audible, nowhere near clipping. The comment on that function explains why
+it is not automated: `OfflineAudioContext` proved too flaky to rely on, finishing
+one short render per page and then stalling, and an await that never resolves
+would stop the self test printing its report at all.
+
 ## Running it locally
 
 Plain HTML, CSS and ES modules. No build step, no dependencies.
@@ -129,7 +180,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,090
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,150
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -154,7 +205,13 @@ checks in the browser, including:
 - every animal has a dex number, a sane overworld height, and **both sprite files
   actually present on disk** — fetched rather than assumed, since those are
   vendored binaries and a missing one would leave an empty tile
+- every region has a soundtrack theme with a sane tempo, root note, four bars of
+  chords and a five-note scale, and the regions do not all sit in the same key
+- the note scheduler starts, changes region and stops without throwing
 - all six regions render without throwing
+
+The report is flushed to the page after every section rather than only at the end,
+so if something does stall you can see exactly where it stopped.
 
 The solvability simulation and the reading-level check are the two worth keeping.
 One catches a requirement chain that has quietly become impossible; the other
@@ -180,7 +237,8 @@ js/
   build.js          projects and crew assignment
   quest.js          the 22-step chain
   panels.js         journal, team, help, settings, ending
-  audio.js          WebAudio synth, no audio files
+  audio.js          WebAudio synth for the sound effects, no audio files
+  music.js          the generated soundtrack: themes, voices, scheduler
   content/
     maps.js         the six tile maps
     entities.js     what is placed where, and the region crossings
@@ -220,10 +278,12 @@ invisible, unfindable tile.
 
 Everything else is original: the player, the signposts, metal boxes, berry bushes
 and dig mounds are 16x16 pixel art placed glyph by glyph in `js/pixels.js`, and
-every tile of terrain is drawn in code in `js/tileset.js` — no tilesets, no fonts,
-no audio files, and the effects are synthesised in `js/audio.js`. Every word of
-prose — the field notes, the documents, the questions and the explanations — was
-written for this game. Ranger Elm and Verdant Isle are inventions.
+every tile of terrain is drawn in code in `js/tileset.js` — no tilesets and no
+fonts. There is no audio file either: the sound effects are synthesised in
+`js/audio.js` and the music is generated in `js/music.js`, both written for this
+game. Every word of prose — the field notes, the documents, the questions and the
+explanations — was written for this game too. Ranger Elm and Verdant Isle are
+inventions.
 
 Swapping in original creature names is a one-line-per-species change: `name` in
 `js/content/pokemon.js`.

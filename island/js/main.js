@@ -3,6 +3,7 @@
 
 import { S, save, give } from './state.js';
 import { setSound, sfx } from './audio.js';
+import * as music from './music.js';
 import * as W from './world.js';
 import { TS, VIEW_W, VIEW_H } from './world.js';
 import { bake } from './pixels.js';
@@ -37,11 +38,24 @@ let waterAt = 0;
 
 applyTheme();
 setSound(S.soundOn);
+music.setMusic(S.musicOn);
 W.buildWorld(S);
 U.wireGlossary(document);
 advance();
 refreshBar(P.map);
 requestAnimationFrame(loop);
+
+/* Browsers will not let audio start before the player has touched something, so
+   the soundtrack waits for the first key press or tap rather than trying at boot
+   and being silently blocked. */
+let musicStarted = false;
+function firstGesture() {
+  if (musicStarted) return;
+  musicStarted = true;
+  music.unlock(P.map);
+}
+window.addEventListener('pointerdown', firstGesture, { once: true, capture: true });
+window.addEventListener('keydown', firstGesture, { once: true, capture: true });
 
 /* First visit gets a nudge toward the only thing on the beach that is written on. */
 if (!S.flags.notice && !S.read.notice) {
@@ -107,6 +121,7 @@ function arrive() {
     P.dir = ex.dir;
     sfx.open();
     refreshBar(P.map);
+    music.setRegion(P.map);
     U.toast(REGIONS[P.map] ? REGIONS[P.map].name : P.map, 1800);
   }
   persist();
@@ -381,6 +396,7 @@ document.getElementById('sheet').addEventListener('click', ev => {
 /* the ending fires once, after the sheet that awarded the Ditto is dismissed */
 const sheetEl = document.getElementById('sheet');
 new MutationObserver(() => {
+  music.duck(!sheetEl.classList.contains('hidden'));
   if (sheetEl.classList.contains('hidden') && S.finished && !S.flags.endingShown) {
     S.flags.endingShown = true;
     save();
@@ -395,3 +411,9 @@ if (window.matchMedia) {
   const onChange = () => { if ((S.theme || 'auto') === 'auto') applyTheme(); };
   mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
 }
+
+/* Nothing should be playing into a background tab. */
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) music.suspend();
+  else if (musicStarted && S.musicOn) music.resume();
+});

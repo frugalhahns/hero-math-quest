@@ -9,6 +9,7 @@ const KEY = 'vi.save.v1';
 const DEFAULT = {
   theme: 'auto',          // 'auto' | 'light' | 'dark'
   soundOn: true,
+  musicOn: true,
   bigText: false,
   map: 'beach',
   x: 17, y: 3, dir: 'down',
@@ -57,9 +58,9 @@ export function save() {
 }
 
 export function resetAll() {
-  const theme = S.theme, soundOn = S.soundOn, bigText = S.bigText;
+  const theme = S.theme, soundOn = S.soundOn, musicOn = S.musicOn, bigText = S.bigText;
   const s = fresh();
-  s.theme = theme; s.soundOn = soundOn; s.bigText = bigText;
+  s.theme = theme; s.soundOn = soundOn; s.musicOn = musicOn; s.bigText = bigText;
   for (const k of Object.keys(S)) delete S[k];
   Object.assign(S, s);
   save();

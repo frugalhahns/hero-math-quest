@@ -17,6 +17,10 @@ function ac() {
 export function setSound(v) { on = !!v; }
 export function soundOn() { return on; }
 
+/* music.js needs the same AudioContext -- two of them on one page is a good way
+   to run a phone's battery down and get throttled by the browser. */
+export function context() { return ac(); }
+
 function tone(freq, start, dur, type = 'triangle', gain = 0.11) {
   const c = ac(); if (!c) return;
   const o = c.createOscillator(), g = c.createGain();

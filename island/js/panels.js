@@ -11,6 +11,7 @@ import { REGIONS } from './content/entities.js';
 import * as U from './ui.js';
 import { openDoc } from './reading.js';
 import { setSound } from './audio.js';
+import { setMusic } from './music.js';
 
 export function applyTheme() {
   const pref = S.theme || 'auto';
@@ -169,6 +170,10 @@ export function openHelp(onChange) {
       <span class="small" style="min-width:5.5em">Sound</span>
       <button class="chip" type="button" id="snd" data-on="${S.soundOn ? 1 : 0}">${S.soundOn ? 'On' : 'Off'}</button>
     </div>
+    <div class="row" style="gap:6px;margin-bottom:10px">
+      <span class="small" style="min-width:5.5em">Music</span>
+      <button class="chip" type="button" id="mus" data-on="${S.musicOn ? 1 : 0}">${S.musicOn ? 'On' : 'Off'}</button>
+    </div>
     <div class="row" style="gap:6px">
       <span class="small" style="min-width:5.5em">Text size</span>
       <button class="chip" type="button" id="big" data-on="${S.bigText ? 1 : 0}">${S.bigText ? 'Large' : 'Normal'}</button>
@@ -187,6 +192,9 @@ export function openHelp(onChange) {
   }));
   body.querySelector('#snd').addEventListener('click', () => {
     S.soundOn = !S.soundOn; setSound(S.soundOn); save(); openHelp(onChange);
+  });
+  body.querySelector('#mus').addEventListener('click', () => {
+    S.musicOn = !S.musicOn; setMusic(S.musicOn); save(); openHelp(onChange);
   });
   body.querySelector('#big').addEventListener('click', () => {
     S.bigText = !S.bigText; save(); openHelp(onChange);
