@@ -13,6 +13,7 @@ const DEFAULT = {
   focusMode: false,
   chunkSize: 8,
   dailyGoal: 3,
+  stdGrade: 'all',   // Standards Quest filter: 'all' | '3' | '4'
   // adaptive difficulty per skill, 1..5
   levels: { add: 2, sub: 2, mul: 2, div: 2, frac: 1 },
   // rolling accuracy per skill

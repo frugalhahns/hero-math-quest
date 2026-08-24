@@ -11,6 +11,8 @@ import { mysteryMenu } from './modes/mystery.js';
 import { logicMenu } from './modes/logic.js';
 import { readingMenu } from './modes/reading.js';
 import { caseMenu } from './modes/detective.js';
+import { standardsMenu } from './modes/standards.js';
+import { TRACKS } from './content/standards.js';
 
 const SHOP = [
   { key: 'speedster', name: 'Dash the Speedster', price: 0 },
@@ -92,6 +94,12 @@ export function home() {
         <b>Story Zone</b><span>Reading comprehension drills and stories</span>
       </button>
 
+      <button class="world" data-c="std" data-go="standards">
+        <span class="lvlpill">GRADE 3-4</span>
+        <div class="art">${U.sp.star()}</div>
+        <b>Standards Quest</b><span>Ten worlds built from the Common Core standards</span>
+      </button>
+
       <button class="world" data-c="boss" data-go="boss">
         <span class="lvlpill">HARD</span>
         <div class="art">${U.sp.crown()}</div>
@@ -124,6 +132,7 @@ export function home() {
       sfx.tap();
       if (v.startsWith('drill:')) return startDrill(v.split(':')[1], home);
       if (v === 'frac') return startFractions(home);
+      if (v === 'standards') return standardsMenu(home);
       if (v === 'mystery') return mysteryMenu(home);
       if (v === 'cases') return caseMenu(home);
       if (v === 'logic') return logicMenu(home);
@@ -190,6 +199,7 @@ function grownUp() {
         <li>Multiplication: level <b>${S.levels.mul}</b> (${acc('mul')})</li>
         <li>Division: level <b>${S.levels.div}</b> (${acc('div')})</li>
         <li>Fractions: level <b>${S.levels.frac}</b> (${acc('frac')})</li>
+        <li>Standards Quest: ${TRACKS.map(t => `${U.esc(t.label)} <b>${S.levels['std_' + t.id] || 1}</b>`).join(' | ')}</li>
         <li>Badges: <b>${Object.keys(S.badges).length} of ${BADGES.length}</b></li>
       </ul>
       <p class="muted">Levels move on their own: 85% or better on a round bumps the level up, under 50% eases it back down. Levels 1 to 5 run from

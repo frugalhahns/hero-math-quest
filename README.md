@@ -8,8 +8,8 @@ no ads, no network calls. Everything saves in the browser on the device it is pl
 
 ## What is in it
 
-Ten worlds. Nine come straight off the printed practice pages; Fraction Falls is
-the one addition that does not, and is marked as such:
+Eleven worlds. Nine come straight off the printed practice pages; Fraction Falls and
+Standards Quest are the two additions that do not, and are marked as such:
 
 | World | Skill | Source material |
 |---|---|---|
@@ -22,12 +22,46 @@ the one addition that does not, and is marked as such:
 | Detective Casebook | Deduction, memory, inference | A Detective's Casebook, all 3 cases plus the master memory challenge |
 | Logic Lab | Patterns, comparisons, odd-one-out, logic grids, sequencing, if-then | Complete Math and Logic Workbook, chapter 7 |
 | Story Zone | Reading comprehension | Complete Math and Logic Workbook, chapter 8, plus one grade-4 stretch story |
+| Standards Quest | Ten sub-worlds, Grade 3 and 4 | *Not from the worksheets.* Built from the Common Core standards |
 | Boss Battle | All four operations, shuffled | Boss Battle Friday, Kumon-style Level C |
 
 Every problem printed on the worksheets is in the game. Where the worksheets would run
 out, generators produce new problems in the same difficulty band, so a level never
 runs dry and never drifts off target. Fraction Falls is the exception: there were no
 fraction pages in the stack, so all of it is generated.
+
+## Standards coverage
+
+Everything above grew out of a specific stack of worksheets. **Standards Quest** works
+the other way round: it starts from the
+[Common Core math standards](https://corestandards.org/wp-content/uploads/2023/09/Math_Standards1.pdf)
+for Grade 3 and Grade 4 and fills in what the worksheets never touched. Ten sub-worlds,
+each with its own adaptive level, covering **46 standards**:
+
+| Sub-world | Grade | Standards |
+|---|---|---|
+| Groups & Arrays | 3 | 3.OA.A.1-4, 3.OA.B.5-6, 3.OA.D.9 |
+| Place Value Peak | 3-4 | 3.NBT.A.1, 3.NBT.A.3, 4.NBT.A.1-3, 4.NBT.B.5-6 |
+| Fraction Frontier | 3-4 | 3.NF.A.2-3, 4.NF.A.2, 4.NF.B.3-4 |
+| Decimal Depot | 4 | 4.NF.C.5-7 |
+| Clock Tower | 3-4 | 3.MD.A.1-2, 4.MD.A.1-2 |
+| Data Depot | 3-4 | 3.MD.B.3-4, 4.MD.B.4 |
+| Area Arena | 3-4 | 3.MD.C.5-7, 3.MD.D.8, 4.MD.A.3 |
+| Shape Shrine | 3-4 | 3.G.A.1-2, 4.G.A.2-3 |
+| Angle Academy | 4 | 4.MD.C.5, 4.MD.C.7, 4.G.A.1 |
+| Factor Forest | 4 | 4.OA.A.1-3, 4.OA.B.4, 4.OA.C.5 |
+
+The four-operation drills already covered 3.OA.C.7, 3.NBT.A.2 and 4.NBT.B.4; Mystery Lab
+covers 3.OA.D.8; Fraction Falls covers 3.NF.A.1 and 4.NF.A.1.
+
+Fourteen of these standards are about reading a picture rather than a sentence, so the
+picture is generated as SVG and *is* the question: an analog clock, a scaled bar graph, a
+line plot in eighths, a number line, tiled unit squares, angles, polygons and line pairs.
+All of it is drawn from CSS variables, so it works in both themes.
+
+**One standard is deliberately left out.** 4.MD.C.6 asks a kid to measure and sketch angles
+*with a protractor*. That wants a real protractor and paper, not a tap target, so it stays
+on paper. The in-game coverage screen says so too, rather than quietly claiming it.
 
 ## How the difficulty works
 
@@ -151,8 +185,8 @@ js/
   audio.js         WebAudio synth, no audio files
   sprites.js       original SVG characters and icons
   theme.js         light / dark / auto color theme
-  content/         mathbanks, fractions, wordproblems, logic, reading, cases
-  modes/           drill, mystery, logic, reading, detective
+  content/         mathbanks, fractions, standards, artkit, wordproblems, logic, reading, cases
+  modes/           drill, fractions, standards, mystery, logic, reading, detective
 ```
 
 Adding content means editing one file in `js/content/`. The runner in `session.js`

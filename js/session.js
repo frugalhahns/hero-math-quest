@@ -3,6 +3,8 @@
 
    Question kinds:
      numeric   { expr | prompt, answer, hint?, flavor?, passage?, art? }
+               expr gets " = ?" appended unless it already holds a ?, so an
+               unknown can sit anywhere: "8 x ? = 48", "3/8 + 2/8 = ?/8".
      choice    { prompt, choices[], answer(index), explain?, tag?, passage?, art? }
    art is trusted inline SVG (fraction bars), so it is injected unescaped.
      seq2      { prompt, seq[], answers[2], rule }
@@ -97,7 +99,7 @@ export function runSession(cfg) {
         ${item.flavor ? `<div class="muted" style="font-size:15px;margin-bottom:6px">${U.esc(item.flavor)}</div>` : ''}
         ${item.prompt ? `<div class="qtext">${U.markNumbers(item.prompt)}</div>` : ''}
         ${item.art ? `<div class="artbox">${item.art}</div>` : ''}
-        ${item.expr ? `<div class="bigexpr">${U.esc(item.expr)} = ?</div>` : ''}
+        ${item.expr ? `<div class="bigexpr">${U.esc(item.expr)}${item.expr.includes('?') ? '' : ' = ?'}</div>` : ''}
       </div>
       <div class="answerline"><div id="answerbox">?</div></div>
       ${U.keypad()}
