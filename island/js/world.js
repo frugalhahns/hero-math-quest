@@ -145,13 +145,16 @@ export function drawMap(ctx, map, cam, frame, S) {
   }
 
   for (const e of visibleEntities(map, S)) {
-    if (!e.art) continue;
     // residents are <img> elements in #actors so they stay crisp and animated;
-    // the hand-drawn 16x16 is only drawn if that image failed to load
+    // the canvas only draws one if that image failed to load
     if (e.kind === 'wild' && BASE_DEX[e.species] && !isBroken(e.species)) continue;
+    // not every resident has bespoke pixel art, but every resident has to stay
+    // findable, so fall back to a generic shape rather than drawing nothing
+    const art = e.art || (e.kind === 'wild' ? 'mon_unknown' : null);
+    if (!art) continue;
     const sx = (e.x - x0) * TS - ox, sy = (e.y - y0) * TS - oy;
     if (sx < -TS || sy < -TS || sx > VIEW_W * TS || sy > VIEW_H * TS) continue;
-    ctx.drawImage(bake(e.art, 1, false), sx, sy);
+    ctx.drawImage(bake(art, 1, false), sx, sy);
   }
 }
 

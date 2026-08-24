@@ -17,7 +17,10 @@ export const GLOSSARY = {
   tide:      'The way the sea rises and falls again every day.',
   hollow:    'A dip or a low hole in the ground.',
   gravel:    'Lots of little loose stones.',
-  attention: 'Really looking and really listening, so you notice things.'
+  attention: 'Really looking and really listening, so you notice things.',
+  burrow:    'A hole an animal digs in the ground to live in.',
+  fleece:    'A thick woolly coat, like a sheep has.',
+  steady:    'Going on the same way without changing or wobbling.'
 };
 
 export function define(word) {

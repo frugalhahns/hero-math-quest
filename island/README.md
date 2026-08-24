@@ -29,7 +29,9 @@ Three loops, all driven by text:
    jobs, and *which* is something you have to read to find out. Finishing one
    rewrites the map and opens the region holding the next documents.
 
-The chain cannot be short-circuited: the reed walkway needs a digger → the diggers
+Most jobs now have more than one animal who can do them — digging is Diglett or
+Krabby, planting is Chikorita, Bulbasaur or Oddish — so missing one animal is
+never a dead end. But the *order* still cannot be short-circuited: the reed walkway needs a digger → the diggers
 are in the grove → the grove is behind a rope crossing → the tablet explaining that
 crossing is the only thing that says it needs a carrier *and* a planter.
 
@@ -61,18 +63,18 @@ than 3 pages, and no single page may run over 60 words.
 
 | Region | Opened by | Animals | Documents |
 |---|---|---|---|
-| Landing Beach | start | Pidgey, Psyduck | Notice, tide chart, who-can-do-what |
-| Meadow Hollow | The Channel Gate | Chikorita, Machop, Pikachu | The tablet by the stone circle |
-| Whispering Grove | The Rope Crossing | Bulbasaur, Diglett | The plaque in the clearing |
-| Reed Marsh | The Reed Walkway | Wooper, Chinchou | The water notebook |
-| Tidepool Caves | The Light Line | Snorlax | Words cut into the cave wall |
+| Landing Beach | start | Pidgey, Psyduck, Krabby | Notice, tide chart, who-can-do-what |
+| Meadow Hollow | The Channel Gate | Chikorita, Machop, Pikachu, Mareep | The tablet by the stone circle |
+| Whispering Grove | The Rope Crossing | Bulbasaur, Diglett, Hoothoot, Oddish | The plaque in the clearing |
+| Reed Marsh | The Reed Walkway | Wooper, Chinchou, Marill | The water notebook |
+| Tidepool Caves | The Light Line | Snorlax, Geodude | Words cut into the cave wall |
 | Ash Ridge | The Rock Slide | Ditto | The last page |
 
 - **6 regions**, hand-drawn as tile maps, 34 x 24 tiles each
-- **11 animals** in **24 forms**, each with a paged field-note passage and 5 questions
+- **17 animals** in **39 forms**, each with a paged field-note passage and 5 questions
 - **11 documents**, each with 3 or 4 questions
 - **12 signs** and scenery notes, two of which carry a detail a document relies on
-- **91 comprehension questions** in total
+- **121 comprehension questions** in total
 - **22 steps** in the chain
 - **6 build projects**, one of them optional and worth nothing but doing
 
@@ -151,8 +153,8 @@ technique there is, wearing a Pokémon costume. The kid sees his Pokémon levell
 up; what he is actually doing is being tested on a text he read half an hour ago
 without being allowed to look at it.
 
-**24 forms across the 11 animals**, of which 9 can grow — six two-stage lines and
-three three-stage ones. Snorlax and Ditto do not change, and their cards say so
+**39 forms across the 17 animals**, of which 15 can grow — nine two-stage lines and
+six three-stage ones. Snorlax and Ditto do not change, and their cards say so
 rather than leaving you waiting for something that will not come.
 
 The species id never changes when an animal grows, only its stage. Quest steps
@@ -258,7 +260,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,365
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,675
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one

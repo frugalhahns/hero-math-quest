@@ -171,8 +171,8 @@ again, something you have to read.
 The reading comes a few sentences at a time: every passage is a stack of short pages
 with Next and Back, and no page runs over 60 words. There is a cozy soundtrack, and
 still not a single audio file in the repo — every note is generated in the browser,
-one theme per region, and it ducks out of the way while a passage is on screen. Six regions, eleven animals in
-twenty-four forms, 91 comprehension questions, a Team Rocket subplot about the
+one theme per region, and it ducks out of the way while a passage is on screen. Six regions, seventeen animals in
+thirty-nine forms, 121 comprehension questions, a Team Rocket subplot about the
 perils of not reading the instructions, no fighting and no failure states.
 Animals evolve, and evolution is earned by *recall*: some time after you read an
 animal's notes, it asks you to answer questions about them with the notes shut, and deliberately no

@@ -119,8 +119,14 @@ for (const e of ENTITIES) {
 head('coverage');
 for (const sp of SPECIES) {
   ok(ENTITIES.some(e => e.kind === 'wild' && e.species === sp.id), `${sp.name} is placed on a map`);
-  ok(!!ART[sp.id], `${sp.name} has sprite art`);
+  // residents are drawn as animated <img>; the canvas only needs a fallback for
+  // when that file fails. Check the exact key world.js will reach for, which is
+  // the entity's own art if it has one and the generic shape if it does not.
+  const ent = ENTITIES.find(e => e.kind === 'wild' && e.species === sp.id);
+  const fallback = (ent && ent.art) || 'mon_unknown';
+  ok(!!ART[fallback], `${sp.name} has a canvas fallback sprite (${fallback})`);
 }
+ok(!!ART.mon_unknown, 'the generic fallback shape exists, so no resident can be invisible');
 for (const id of Object.keys(DOCS)) {
   ok(ENTITIES.some(e => (e.kind === 'doc' || e.kind === 'rocket') && e.doc === id),
     `document "${id}" is placed on a map`);

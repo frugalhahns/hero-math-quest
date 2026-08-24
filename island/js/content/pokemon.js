@@ -123,6 +123,60 @@ export const SPECIES = [
     }
   },
 
+  {
+    id: 'krabby', name: 'Krabby', kind: 'River Crab', region: 'beach',
+    job: 'dig', jobName: 'Digging', jobDesc: 'Sinks posts and opens up blocked ground.',
+    found: 'the wet sand at the tide line, on the Landing Beach',
+    line: [
+      { name: 'Krabby', dex: 98 },
+      { name: 'Kingler', dex: 99,
+        blurb: 'Kingler\'s big claw is enormous now, strong enough to crack a rock. It still uses it as a shovel most of the time. It can move a whole bank of sand in an hour.' }
+    ],
+    passage: {
+      title: 'Field Notes: Krabby',
+      source: 'Ranger Elm, note 18',
+      text: [
+        'Krabby lives where the sand stays wet. It digs a {burrow} down into the shallow water and backs into it when anything comes near.',
+        'Its two claws do not match. One is always bigger. If a Krabby loses the big one, the small one grows to take its place, and a new small one grows on the other side.',
+        'The big claw is not really for fighting. It is a shovel. A Krabby can move a pile of wet sand faster than a person with a spade.',
+        'Elm used them to sink the first posts on the dock. He wrote that a Krabby will dig all day, as long as the sand stays wet.',
+        'They are shy. Stand still and one will come out and get back to work right in front of you. Move fast and you will be looking at an empty hole.'
+      ]
+    },
+    questions: [
+      { tag: 'Detail',
+        q: 'What does a Krabby do when something comes near?',
+        choices: ['It backs into its burrow', 'It waves both claws', 'It runs up the beach', 'It buries its claws'],
+        answer: 0,
+        why: 'The first page says it digs a burrow and "backs into it when anything comes near." Hiding is its first move, not fighting.' },
+      { tag: 'Word meaning',
+        q: 'A {burrow} is —',
+        choices: ['a hole an animal digs to live in', 'a pile of wet sand', 'a large claw', 'a kind of shell'],
+        answer: 0,
+        why: 'The Krabby digs one down into the sand and then backs into it, so it must be a hole it lives in.' },
+      { tag: 'Main idea',
+        q: 'What is the big claw really for?',
+        choices: ['Digging, like a shovel', 'Fighting off other crabs', 'Holding on to rocks', 'Cracking open shells'],
+        answer: 0,
+        why: 'The notes say it straight out: "It is not really for fighting. It is a shovel." That is why Elm used them on the dock posts.' },
+      { tag: 'Cause and effect',
+        q: 'What happens if a Krabby loses its big claw?',
+        choices: ['The small one grows big, and a new small one grows', 'It cannot dig any more', 'It grows two new big ones', 'The big one grows straight back'],
+        answer: 0,
+        why: 'The claws swap over. The small one takes the big one\'s place, and a new small one appears on the other side.' },
+      { tag: 'What to do',
+        q: 'How do you get a Krabby to keep working while you watch?',
+        choices: ['Stand still', 'Bring it wet sand', 'Move slowly toward it', 'Wait until dark'],
+        answer: 0,
+        why: 'They are shy. Stand still and it comes back out; move fast and all you get is an empty hole.' }
+    ],
+    lines: {
+      rapport: 'The Krabby edges out of its hole and lifts the big claw at you.',
+      catch: 'It sidles over and settles by your boot, claw up like a salute.',
+      flee: 'A puff of wet sand, and the burrow is empty.'
+    }
+  },
+
   /* ------------------------------------------------------------ meadow */
   {
     id: 'chikorita', name: 'Chikorita', kind: 'Leaf', region: 'meadow',
@@ -289,6 +343,62 @@ export const SPECIES = [
     }
   },
 
+  {
+    id: 'mareep', name: 'Mareep', kind: 'Wool', region: 'meadow',
+    job: 'power', jobName: 'Sparking', jobDesc: 'Puts power into something dead.',
+    found: 'the tall grass on the south side of Meadow Hollow',
+    line: [
+      { name: 'Mareep', dex: 179 },
+      { name: 'Flaaffy', dex: 180,
+        blurb: 'Flaaffy has less wool now. The bare pink skin under it holds power better than the fleece did. A Flaaffy is smaller than a Mareep, but it carries much more.' },
+      { name: 'Ampharos', dex: 181,
+        blurb: 'The light on an Ampharos tail is bright enough to be seen from out at sea. Boats used to steer by them on bad nights. Elm called it the brightest thing on the island.' }
+    ],
+    passage: {
+      title: 'Field Notes: Mareep',
+      source: 'Ranger Elm, note 34',
+      text: [
+        'Mareep is covered in a thick white {fleece}. The wool rubs against itself while the animal walks, and that rubbing is where all of its power comes from.',
+        'So the more it walks, the more it holds. The tip of its tail glows brighter as the day goes on.',
+        'That makes a Mareep easy to read. Dim tail, walk it further. Bright tail, it is ready.',
+        'Do not brush a Mareep. The fleece is doing a job. A brushed Mareep holds almost nothing until the wool grows back.',
+        'Elm kept one by the sluice gate for a whole summer. He wrote that it never once gave him a shock he had not asked for.'
+      ]
+    },
+    questions: [
+      { tag: 'Cause and effect',
+        q: 'Where does a Mareep\'s power come from?',
+        choices: ['Its wool rubbing together as it walks', 'The sun on its fleece', 'The glow in its tail', 'Standing still for a long time'],
+        answer: 0,
+        why: 'The first page names it: the wool "rubs against itself while the animal walks, and that rubbing is where all of its power comes from."' },
+      { tag: 'Word meaning',
+        q: 'A {fleece} is —',
+        choices: ['a thick woolly coat', 'a long tail', 'a bright light', 'a kind of grass'],
+        answer: 0,
+        why: 'It is the thick white wool covering the animal, the same word you would use for a sheep.' },
+      { tag: 'Detail',
+        q: 'How can you tell a Mareep is ready to give you power?',
+        choices: ['Its tail tip glows bright', 'Its wool stands up', 'It stops walking', 'It makes a sound'],
+        answer: 0,
+        why: '"Dim tail, walk it further. Bright tail, it is ready." The tail is the gauge.' },
+      { tag: 'Inference',
+        q: 'Why should you not brush a Mareep?',
+        choices: ['The fleece is what makes the power', 'It does not like being touched', 'The wool is needed for rope', 'Brushing makes it walk less'],
+        answer: 0,
+        why: 'No wool means no rubbing, and no rubbing means no power. A brushed Mareep "holds almost nothing until the wool grows back."' },
+      { tag: 'Main idea',
+        q: 'What did Elm say about the Mareep he kept all summer?',
+        choices: ['It never shocked him without being asked', 'It walked away every night', 'It needed brushing every day', 'It was the brightest one he saw'],
+        answer: 0,
+        why: 'That is the whole point of his note about it, and it is why he trusted them around the gate.' }
+    ],
+    lines: {
+      rapport: 'The tail tip brightens a little. The Mareep takes a step closer.',
+      catch: 'It leans its woolly side against your leg and stays there.',
+      flee: 'It trots off into the tall grass, tail dimming as it goes.'
+    }
+  },
+
   /* ------------------------------------------------------------ grove */
   {
     id: 'bulbasaur', name: 'Bulbasaur', kind: 'Seed', region: 'grove',
@@ -397,6 +507,115 @@ export const SPECIES = [
       rapport: 'The Diglett rises another inch out of the dirt, listening.',
       catch: 'It comes up beside your boot and waits to be told what to do.',
       flee: 'The dirt closes over. No sound at all.'
+    }
+  },
+
+  {
+    id: 'hoothoot', name: 'Hoothoot', kind: 'Owl', region: 'grove',
+    job: 'scout', jobName: 'Scouting', jobDesc: 'Finds a path and remembers it.',
+    found: 'the dark side of Whispering Grove, at dusk',
+    line: [
+      { name: 'Hoothoot', dex: 163 },
+      { name: 'Noctowl', dex: 164,
+        blurb: 'Noctowl can see when there is almost no light. It flies without a sound. It can hold a whole night of flying in its head. Then it gives it all back to you, in order.' }
+    ],
+    passage: {
+      title: 'Field Notes: Hoothoot',
+      source: 'Ranger Elm, note 56',
+      text: [
+        'Hoothoot stands on one foot. The other one is tucked up in its feathers. It swaps them over so fast that most people never see it happen.',
+        'It has a very good clock inside it. A Hoothoot turns its head at the same {steady} beat all night long, like something ticking.',
+        'That clock is what makes it useful. A Hoothoot always knows how long it has been flying. So it always knows how far it has gone.',
+        'Send one out over the trees and it comes back and tells you the distance, not just the way.',
+        'It sleeps through the day. If you want a Hoothoot, come to the grove at dusk and wait for the ticking to start.'
+      ]
+    },
+    questions: [
+      { tag: 'Detail',
+        q: 'How does a Hoothoot stand?',
+        choices: ['On one foot', 'On both feet', 'Hanging upside down', 'Flat on its front'],
+        answer: 0,
+        why: 'It stands on one foot with the other tucked up in its feathers, and swaps them faster than you can see.' },
+      { tag: 'Word meaning',
+        q: '{steady} means —',
+        choices: ['going on the same way, without changing', 'very fast', 'very quiet', 'happening once'],
+        answer: 0,
+        why: 'The head turns at the same beat all night, "like something ticking." A steady beat does not speed up or slow down.' },
+      { tag: 'Main idea',
+        q: 'Why is a Hoothoot so useful for finding a path?',
+        choices: ['It knows how far it went, not just which way', 'It can fly higher than other birds', 'It never sleeps', 'It can see in the dark'],
+        answer: 0,
+        why: 'The clock inside it means it knows how long it flew, and so how far. It brings back a distance as well as a direction.' },
+      { tag: 'Cause and effect',
+        q: 'Why does a Hoothoot always know the distance?',
+        choices: ['It keeps time like a clock', 'It counts the trees below it', 'It follows the same path each time', 'It never flies very far'],
+        answer: 0,
+        why: 'Steady time plus flying speed gives you distance. That is why the ticking head matters.' },
+      { tag: 'What to do',
+        q: 'When should you go looking for a Hoothoot?',
+        choices: ['At dusk', 'Early in the morning', 'In the middle of the day', 'After a storm'],
+        answer: 0,
+        why: 'It sleeps all day. The last page tells you to come at dusk and wait for the ticking to start.' }
+    ],
+    lines: {
+      rapport: 'The ticking stops. Both eyes are on you now.',
+      catch: 'It drops onto your shoulder, and the ticking starts again.',
+      flee: 'It lifts off without a sound and the grove goes quiet.'
+    }
+  },
+  {
+    id: 'oddish', name: 'Oddish', kind: 'Weed', region: 'grove',
+    job: 'plant', jobName: 'Planting', jobDesc: 'Makes roots, vines and rope grass grow.',
+    found: 'bare ground in Whispering Grove, where nothing else is growing',
+    line: [
+      { name: 'Oddish', dex: 43 },
+      { name: 'Gloom', dex: 44,
+        blurb: 'Gloom drips a smell most people cannot stand. The drips are worth having, though. Ground where a Gloom has stood grows better than any soil on this island.' },
+      { name: 'Vileplume', dex: 45,
+        blurb: 'Vileplume has the biggest flower of anything here. It can shake out a cloud of dust that makes seeds take root in a single night. Stand upwind of it.' }
+    ],
+    passage: {
+      title: 'Field Notes: Oddish',
+      source: 'Ranger Elm, note 63',
+      text: [
+        'Oddish spends the whole day buried. Only the leaves on its head show, and from a step away they look exactly like a small plant.',
+        'It is not hiding from you. It is drinking. An Oddish sits in the ground all day and takes water up through its feet.',
+        'At dusk it pulls itself out and walks. It goes a long way for something so small, and it plants seeds the whole time it is moving.',
+        'Sun hurts an Oddish. It looks for {shade} before it looks for food.',
+        'So if you want one, look for leaves in a patch of ground with no other plants in it. Then wait for the sun to go down.'
+      ]
+    },
+    questions: [
+      { tag: 'Inference',
+        q: 'Why does an Oddish stay buried all day?',
+        choices: ['It is drinking water through its feet', 'It is hiding from people', 'It is asleep', 'It is waiting for rain'],
+        answer: 0,
+        why: 'The notes correct the obvious guess: "It is not hiding from you. It is drinking."' },
+      { tag: 'Detail',
+        q: 'When does an Oddish walk about?',
+        choices: ['At dusk', 'At noon', 'Only in the rain', 'It never walks'],
+        answer: 0,
+        why: 'At dusk it pulls itself out of the ground and walks, because sun hurts it.' },
+      { tag: 'Word meaning',
+        q: 'In this passage, {shade} means —',
+        choices: ['a cool spot out of the sun', 'a kind of leaf', 'wet ground', 'a dark colour'],
+        answer: 0,
+        why: 'Sun hurts an Oddish, so it looks for somewhere the sun does not reach before it even looks for food.' },
+      { tag: 'Main idea',
+        q: 'What does an Oddish do while it is walking?',
+        choices: ['It plants seeds', 'It drinks water', 'It looks for other Oddish', 'It digs new holes'],
+        answer: 0,
+        why: 'It "plants seeds the whole time it is moving." That is what makes it worth having on a hillside.' },
+      { tag: 'What to do',
+        q: 'How do you spot an Oddish?',
+        choices: ['Leaves in bare ground with no other plants', 'A hole in the wet sand', 'A bright light at dusk', 'Tracks along the brook'],
+        answer: 0,
+        why: 'The last page gives you the trick: leaves in a patch of ground where nothing else is growing. The leaves are the only part showing.' }
+    ],
+    lines: {
+      rapport: 'The leaves turn toward you. Something shuffles under the soil.',
+      catch: 'It hauls itself out of the ground and waits by your feet.',
+      flee: 'The leaves sink out of sight and the ground looks empty again.'
     }
   },
 
@@ -510,6 +729,60 @@ export const SPECIES = [
     }
   },
 
+  {
+    id: 'marill', name: 'Marill', kind: 'Aqua Mouse', region: 'marsh',
+    job: 'water', jobName: 'Finding Water', jobDesc: 'Sniffs out fresh water and carries it.',
+    found: 'the deep water of the Reed Marsh, near the boardwalk',
+    line: [
+      { name: 'Marill', dex: 183 },
+      { name: 'Azumarill', dex: 184,
+        blurb: 'Azumarill can hold its breath for ten minutes and hear a fish move right across a pool. It still floats on its tail whenever it can. It is far stronger than it looks.' }
+    ],
+    passage: {
+      title: 'Field Notes: Marill',
+      source: 'Ranger Elm, note 74',
+      text: [
+        'Marill has a round blue tail with a ball on the end of it. The ball floats. The Marill itself does not.',
+        'So it uses the tail like a life ring. It holds the ball up on top of the water and lets the rest of itself hang underneath.',
+        'That is how it crosses the deep parts of the {marsh} without swimming at all. It floats across and walks out the other side.',
+        'The tail stores food as well, which is why a Marill can work a long day without stopping to eat.',
+        'Elm liked them for one reason. A Marill can tell you how deep any water is before you step into it. Watch how much of the tail is showing.'
+      ]
+    },
+    questions: [
+      { tag: 'Main idea',
+        q: 'What does a Marill use its tail for?',
+        choices: ['As a float, like a life ring', 'To swim faster', 'To hold on to reeds', 'To dig in the mud'],
+        answer: 0,
+        why: 'The ball on the end floats even though the animal does not, so it holds the ball up and hangs underneath it.' },
+      { tag: 'Word meaning',
+        q: 'A {marsh} is —',
+        choices: ['soft wet land with tall grass', 'a deep cave', 'a fast river', 'a sandy beach'],
+        answer: 0,
+        why: 'It is the wet reedy ground where the river meets the sea, which is where Marill live.' },
+      { tag: 'Inference',
+        q: 'How can a Marill cross deep water without swimming?',
+        choices: ['The floating ball carries it across', 'It walks along the bottom', 'It jumps from reed to reed', 'It holds its breath'],
+        answer: 0,
+        why: 'Put the first two pages together: the ball floats, the animal does not, so the ball carries it and it drifts across.' },
+      { tag: 'Detail',
+        q: 'What else does the tail hold?',
+        choices: ['Food', 'Water', 'Air', 'Seeds'],
+        answer: 0,
+        why: 'The tail stores food too, which is why a Marill can work all day without stopping to eat.' },
+      { tag: 'What to do',
+        q: 'How does a Marill tell you how deep the water is?',
+        choices: ['By how much of its tail is showing', 'By how fast it swims', 'By the sound it makes', 'By which way it faces'],
+        answer: 0,
+        why: 'Elm\'s reason for liking them. Watch the tail and you know whether to step in.' }
+    ],
+    lines: {
+      rapport: 'The tail ball bobs once. The Marill watches you with both eyes.',
+      catch: 'It floats over, stands up in the shallows, and shakes itself off.',
+      flee: 'It ducks under, and only the ball is left, drifting away.'
+    }
+  },
+
   /* ------------------------------------------------------------ caverns */
   {
     id: 'snorlax', name: 'Snorlax', kind: 'Sleeping', region: 'caverns',
@@ -562,6 +835,62 @@ export const SPECIES = [
       rapport: 'One eye opens a crack. The breathing changes.',
       catch: 'It sits up, has a good look at you, and gets to its feet.',
       flee: 'It rolls over. The cave shakes a little, then goes still.'
+    }
+  },
+
+  {
+    id: 'geodude', name: 'Geodude', kind: 'Rock', region: 'caverns',
+    job: 'shove', jobName: 'Pushing', jobDesc: 'Moves what nothing else can move.',
+    found: 'the south chamber of the Tidepool Caves',
+    line: [
+      { name: 'Geodude', dex: 74 },
+      { name: 'Graveler', dex: 75,
+        blurb: 'Graveler has arms enough to climb with and still hold on. It eats rock, and it is not fussy about which rock. Do not leave one beside a stone wall you want to keep.' },
+      { name: 'Golem', dex: 76,
+        blurb: 'Golem sheds its shell once a year, and the old shell is harder than anything else on the island. It can roll straight through a rock pile. Get out of the way first.' }
+    ],
+    passage: {
+      title: 'Field Notes: Geodude',
+      source: 'Ranger Elm, note 85',
+      text: [
+        'A Geodude looks exactly like a rock until it opens its eyes. People have sat on them. People have picked them up and thrown them.',
+        'It does not seem to mind. A Geodude is hard all the way through, and it has no interest in being anywhere in particular.',
+        'It moves by rolling, and it rolls downhill by choice. Uphill it uses its arms, one pull at a time, and it is slow.',
+        'The older a Geodude is, the smoother it gets. All the sharp edges wear off over the years. A round Geodude is an old Geodude.',
+        'For work, a Geodude will lean on anything you point it at. It does not push fast. It just does not stop, and the {gravel} gives way in the end.'
+      ]
+    },
+    questions: [
+      { tag: 'Detail',
+        q: 'What does a Geodude look like?',
+        choices: ['A rock', 'A small tree', 'A pile of sand', 'A shell'],
+        answer: 0,
+        why: 'It looks exactly like a rock until it opens its eyes, which is why people have sat on them by mistake.' },
+      { tag: 'Cause and effect',
+        q: 'Why is a round Geodude an old Geodude?',
+        choices: ['The sharp edges wear off over the years', 'It rolls itself into a ball to sleep', 'Young ones are always round', 'Roundness helps it roll faster'],
+        answer: 0,
+        why: 'The notes say the older it is, the smoother it gets, because the edges wear away with time.' },
+      { tag: 'Detail',
+        q: 'How does a Geodude go uphill?',
+        choices: ['It pulls itself with its arms, slowly', 'It rolls up', 'It waits to be carried', 'It goes around instead'],
+        answer: 0,
+        why: 'Downhill it rolls by choice. Uphill is arms only, "one pull at a time, and it is slow."' },
+      { tag: 'Main idea',
+        q: 'How does a Geodude move something heavy?',
+        choices: ['It leans on it and does not stop', 'It pushes as hard as it can, all at once', 'It rolls into it fast', 'It digs underneath it'],
+        answer: 0,
+        why: 'The last page is the whole method: not fast, just never stopping, until the ground gives way.' },
+      { tag: 'Word meaning',
+        q: '{gravel} is —',
+        choices: ['lots of little loose stones', 'a large boulder', 'wet clay', 'a kind of sand'],
+        answer: 0,
+        why: 'It is the loose stony ground that finally shifts when a Geodude keeps leaning on it.' }
+    ],
+    lines: {
+      rapport: 'The rock opens one eye, then the other.',
+      catch: 'It rolls over to your feet and stops, waiting to be pointed at something.',
+      flee: 'It shuts its eyes. Now it is just a rock again, and you cannot tell which one.'
     }
   },
 

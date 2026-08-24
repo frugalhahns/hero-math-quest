@@ -7,7 +7,12 @@
      item    -- a thing you can pick up, possibly more than once
      wild    -- a resident who may agree to join you
      project -- a build site
-   `when` hides an entity until it is true; `gone` removes it for good. */
+   `when` hides an entity until it is true; `gone` removes it for good.
+
+   `art` is the 16x16 fallback the canvas draws. Residents normally do not need
+   one because they are drawn as animated <img> in the #actors layer, so `art:
+   null` is fine for them -- world.js falls back to a generic shape if the image
+   file ever fails, which is better than an invisible, unfindable animal. */
 
 export const ENTITIES = [
   /* ------------------------------------------------ Landing Beach */
@@ -32,6 +37,7 @@ export const ENTITIES = [
   { map: 'beach', x: 2,  y: 17, art: 'rocket_a', kind: 'rocket', doc: 'rocketBeach',
     when: s => !!s.flags.tidechart,
     label: 'Somebody in a black uniform, digging.' },
+  { map: 'beach', x: 20, y: 18, art: null,      kind: 'wild', species: 'krabby' },
   { map: 'beach', x: 17, y: 1,  art: null,      kind: 'project', project: 'gate' },
 
   /* ------------------------------------------------ Meadow Hollow */
@@ -41,6 +47,7 @@ export const ENTITIES = [
   { map: 'meadow', x: 26, y: 14, art: 'machop',    kind: 'wild', species: 'machop' },
   { map: 'meadow', x: 19, y: 19, art: 'chikorita', kind: 'wild', species: 'chikorita' },
   { map: 'meadow', x: 17, y: 5,  art: 'pikachu',   kind: 'wild', species: 'pikachu' },
+  { map: 'meadow', x: 22, y: 20, art: null, kind: 'wild', species: 'mareep' },
   { map: 'meadow', x: 4,  y: 12, art: null, kind: 'project', project: 'bridge' },
   { map: 'meadow', x: 32, y: 9,  art: null, kind: 'project', project: 'boardwalk' },
   { map: 'meadow', x: 12, y: 20, art: 'marker', kind: 'project', project: 'garden' },
@@ -55,6 +62,8 @@ export const ENTITIES = [
   { map: 'grove', x: 10, y: 13, art: 'sign', kind: 'sign', sign: 'brookSign' },
   { map: 'grove', x: 12, y: 10, art: 'diglett',   kind: 'wild', species: 'diglett' },
   { map: 'grove', x: 17, y: 13, art: 'bulbasaur', kind: 'wild', species: 'bulbasaur' },
+  { map: 'grove', x: 14, y: 8,  art: null, kind: 'wild', species: 'hoothoot' },
+  { map: 'grove', x: 20, y: 13, art: null, kind: 'wild', species: 'oddish' },
   { map: 'grove', x: 17, y: 2,  art: null, kind: 'project', project: 'rockslide' },
 
   /* ------------------------------------------------ Reed Marsh */
@@ -67,6 +76,7 @@ export const ENTITIES = [
     when: s => !!s.flags.ledger, label: 'Two black uniforms at the edge of the reeds.' },
   { map: 'marsh', x: 10, y: 5,  art: 'rocket_a', kind: 'rocket', doc: 'rocketMarsh',
     when: s => !!s.flags.ledger, label: 'Two black uniforms at the edge of the reeds.' },
+  { map: 'marsh', x: 10, y: 16, art: null, kind: 'wild', species: 'marill' },
   { map: 'marsh', x: 17, y: 22, art: null, kind: 'project', project: 'lantern' },
 
   /* ------------------------------------------------ Tidepool Caves */
@@ -80,6 +90,7 @@ export const ENTITIES = [
     when: s => !!s.flags.vault, label: 'Two black uniforms, taking turns on a drum.' },
   { map: 'caverns', x: 12, y: 10, art: 'rocket_b', kind: 'rocket', doc: 'rocketCaves',
     when: s => !!s.flags.vault, label: 'Two black uniforms, taking turns on a drum.' },
+  { map: 'caverns', x: 8,  y: 16, art: null, kind: 'wild', species: 'geodude' },
   { map: 'caverns', x: 4,  y: 12, art: 'lockbox', kind: 'sign', sign: 'vaultCache' },
 
   /* ------------------------------------------------ Ash Ridge */

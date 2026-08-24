@@ -29,7 +29,13 @@ export const BASE_DEX = {
   snorlax: 143,
   chikorita: 152,
   chinchou: 170,
-  wooper: 194
+  wooper: 194,
+  oddish: 43,
+  geodude: 74,
+  krabby: 98,
+  hoothoot: 163,
+  mareep: 179,
+  marill: 183
 };
 
 /* On-screen height in map tiles, out on the island. Set by eye rather than
@@ -48,7 +54,13 @@ export const TILES_TALL = {
   pikachu: 1.5,
   psyduck: 1.7,
   machop: 1.7,
-  snorlax: 2.8
+  snorlax: 2.8,
+  krabby: 1.2,
+  geodude: 1.2,
+  oddish: 1.3,
+  marill: 1.3,
+  mareep: 1.5,
+  hoothoot: 1.5
 };
 
 /* These take a dex number, not a species id, because a species has more than
