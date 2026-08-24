@@ -70,6 +70,23 @@ picture is generated as SVG and *is* the question: an analog clock, a scaled bar
 line plot in eighths, a number line, tiled unit squares, angles, polygons and line pairs.
 All of it is drawn from CSS variables, so it works in both themes.
 
+**Every world teaches before it tests.** The game used to open straight into questions,
+which meant a kid could meet the word "perpendicular" for the first time in a question
+about it, get it wrong, and learn nothing except that they got it wrong. Each of the ten
+worlds now opens on a short primer, 91 pages in total:
+
+- **What to know** — one idea per page, under about 45 words, with the *same drawing the
+  questions use*, so nothing is new at quiz time except the question.
+- **How to solve it** — every question type with two routes, always in this order:
+  **the sure way** (foundational: count the squares, fold the shape, skip-count) and
+  **the fast way** (efficient: length × width, look for the square-corner box, ×5 then
+  adjust). A kid taught only the shortcut has nothing to fall back on when memory fails;
+  a kid taught only the long way stays slow.
+
+Geometry has the longest deck (17 pages for shapes, 12 for angles) because it carries the
+most vocabulary. Nothing is forced: "Skip, just quiz me" is always there, and a tick on the
+world marks a primer you have read.
+
 **Denominators are held to the grades' own limits.** The 3.NF footnote limits Grade 3 to
 denominators 2, 3, 4, 6 and 8; the 4.NF footnote allows 2, 3, 4, 5, 6, 8, 10, 12 and 100.
 Nothing outside that list appears anywhere, including in wrong answers and in the
@@ -205,8 +222,9 @@ js/
   audio.js         WebAudio synth, no audio files
   sprites.js       original SVG characters and icons
   theme.js         light / dark / auto color theme
-  content/         mathbanks, fractions, standards, artkit, wordproblems, logic, reading, cases
-  modes/           drill, fractions, standards, mystery, logic, reading, detective
+  content/         mathbanks, fractions, standards, artkit, lessons, wordproblems,
+                   logic, reading, cases
+  modes/           drill, fractions, standards, learn, mystery, logic, reading, detective
 ```
 
 Adding content means editing one file in `js/content/`. The runner in `session.js`

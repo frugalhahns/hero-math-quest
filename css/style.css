@@ -252,6 +252,28 @@ button{font-family:inherit}
 .world[data-c="std"]{border-color:var(--std)}
 .world[data-c="boss"]{border-color:var(--boss-line)}
 
+
+/* ---------- learn mode ---------- */
+.learnhead{display:flex;align-items:center;gap:10px;margin:2px 4px 8px}
+.learncard{padding:16px}
+.learntitle{font-size:20px;margin:0 0 8px;line-height:1.25}
+.learnbody p{margin:.5em 0;font-size:16px;line-height:1.5}
+.pathbox{border-radius:12px;padding:10px 12px;margin-top:10px;border:2px solid var(--line);background:var(--sunk)}
+.pathbox p{margin:.35em 0;font-size:15px;line-height:1.45}
+.pathbox.sure{border-color:var(--logic)}
+.pathbox.fast{border-color:var(--accent-line)}
+.pathlabel{font-weight:800;font-size:13px;letter-spacing:.02em;margin-bottom:4px}
+.pathbox.sure .pathlabel{color:var(--logic)}
+.pathbox.fast .pathlabel{color:var(--accent-ink)}
+.pathlabel span{font-weight:600;opacity:.75;font-size:11px;margin-left:6px}
+.pagedots{display:flex;gap:5px;justify-content:center;margin-top:12px;flex-wrap:wrap}
+.pagedots i{width:7px;height:7px;border-radius:50%;background:var(--line);opacity:.5}
+.pagedots i.done{opacity:.85}
+.pagedots i.on{background:var(--accent-line);opacity:1;transform:scale(1.5)}
+.readtick{position:absolute;top:8px;left:10px;color:var(--good);font-weight:800;font-size:14px}
+.introhero{height:78px;display:flex;align-items:center;justify-content:center;margin-bottom:6px}
+.introhero svg{height:78px;width:auto;display:block}
+
 /* ---------- question screen ---------- */
 .qhead{display:flex;align-items:center;gap:10px;margin-bottom:10px}
 .qhead .sprite{width:56px;height:56px;flex:0 0 56px}

@@ -22,6 +22,7 @@ const DEFAULT = {
   owned: ['speedster'],// unlocked heroes / cosmetics
   seen: {},            // contentId -> times answered right
   completed: {},       // questId -> true (cases, stories)
+  learned: {},         // trackId -> date the primer was read
   streak: 0,
   lastPlayed: null,    // YYYY-MM-DD
   daysPlayed: [],
@@ -56,6 +57,7 @@ function load() {
        before a new skill existed would come back without its level. Re-apply the
        defaults underneath whatever the save already had. */
     merged.levels = Object.assign(structuredClone(DEFAULT.levels), parsed.levels || {});
+    merged.learned = Object.assign({}, parsed.learned || {});
     return merged;
   } catch (e) {
     return structuredClone(DEFAULT);

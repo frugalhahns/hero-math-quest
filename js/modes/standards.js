@@ -3,6 +3,7 @@
    shows which standard codes a track answers to so a grown-up can check. */
 
 import { S, save } from '../state.js';
+import { trackIntro, wasLearned, deckSize } from './learn.js';
 import { TRACKS, TRACK_BY_ID, skillKey, makeStdChunk, ALL_CODES } from '../content/standards.js';
 import { runSession } from '../session.js';
 import * as U from '../ui.js';
@@ -17,6 +18,8 @@ export function standardsMenu(onDone) {
       <h2>Standards Quest</h2>
       <p class="muted">Ten worlds built from the Common Core Grade 3 and Grade 4 math standards.
         Each one keeps its own level, 1 to 5.</p>
+      <p class="muted" style="font-size:12px">Every world starts with a short primer: what to know,
+        then how to solve it the sure way and the fast way. A &#10003; means you have read it.</p>
       <div class="row">
         ${['all', '3', '4'].map(v => `<button class="chip ${g === v ? 'on' : ''}" data-grade="${v}">${
           v === 'all' ? 'All' : 'Grade ' + v}</button>`).join('')}
@@ -25,10 +28,11 @@ export function standardsMenu(onDone) {
     <div class="worldgrid">
       ${shown.map(t => `<button class="world" data-c="${t.color}" data-track="${t.id}">
         <span class="lvlpill">LV ${S.levels[skillKey(t.id)] || 1}</span>
+        ${wasLearned(t.id) ? '<span class="readtick" title="primer read">&#10003;</span>' : ''}
         <div class="art">${U.sp.heroSvg(t.hero, 'idle')}</div>
         <b>${U.esc(t.label)}</b>
         <span>${U.esc(t.blurb)}</span>
-        <span class="codestrip">${t.codes.map(c => U.esc(c)).join(' · ')}</span>
+        <span class="codestrip">${deckSize(t.id)} learn pages &nbsp;·&nbsp; ${t.codes.map(c => U.esc(c)).join(' · ')}</span>
       </button>`).join('')}
     </div>
     <div class="row" style="margin-top:14px">
@@ -43,7 +47,12 @@ export function standardsMenu(onDone) {
     b.onclick = () => { S.stdGrade = b.dataset.grade; save(); sfx.tap(); standardsMenu(onDone); };
   });
   document.querySelectorAll('[data-track]').forEach(b => {
-    b.onclick = () => startTrack(b.dataset.track, onDone);
+    /* Straight into the quiz used to be the only option. Now the track opens on
+       a short screen offering the primer first, since the game was testing
+       vocabulary it had never taught. */
+    b.onclick = () => trackIntro(b.dataset.track,
+      () => startTrack(b.dataset.track, onDone),
+      () => standardsMenu(onDone));
   });
 }
 
