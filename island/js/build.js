@@ -22,7 +22,7 @@ export function openBuildList(onChange) {
     if (!known(p)) {
       return `<div class="card locked">
         <div><div class="nm">Not yet described</div>
-        <div class="jb">Something on this island explains this one. You have not read it.</div></div>
+        <div class="jb">Something on this island explains this one. You have not read it yet.</div></div>
       </div>`;
     }
     const done = !!S.projects[p.id];
@@ -44,8 +44,8 @@ export function openBuildList(onChange) {
 
   const body = U.openSheet(`
     <h2>Projects</h2>
-    <p class="kicker">Six things Warden Elm never finished</p>
-    <p class="muted small">Every project needs particular kinds of work done. Which kinds, and by whom, is written down somewhere on the island rather than listed here.</p>
+    <p class="kicker">Six jobs Ranger Elm never finished</p>
+    <p class="muted small">Every project needs certain jobs done. Which jobs, and who can do them, is written down somewhere on the island. It is not listed here.</p>
     <div class="grid2" style="margin-top:14px">${rows}</div>
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Close</button>
@@ -62,7 +62,7 @@ export function openProject(id, onChange) {
   if (!known(p)) {
     U.openSheet(`
       <h2>${U.esc(p.name)}</h2>
-      ${U.passageHTML([p.blurb, 'You do not know what this needs. Somewhere on this island there is a page that explains it, and you have not read that page yet.'])}
+      ${U.passageHTML([p.blurb, 'You do not know what this one needs yet. Somewhere on this island there is a page that explains it. Go and find it.'])}
       <div class="row end" style="margin-top:16px"><button class="btn" type="button" data-close>Close</button></div>`);
     return;
   }
@@ -73,7 +73,7 @@ export function openProject(id, onChange) {
       <h2>${U.esc(p.name)}</h2>
       <p class="kicker">Finished</p>
       ${U.passageHTML([p.finish])}
-      ${crew.length ? `<h3>Crew</h3><div class="grid2">${crew.map(sp => U.creatureCard(sp)).join('')}</div>` : ''}
+      ${crew.length ? `<h3>Who helped</h3><div class="grid2">${crew.map(sp => U.creatureCard(sp)).join('')}</div>` : ''}
       <div class="row end" style="margin-top:18px"><button class="btn" type="button" data-close>Close</button></div>`);
     return;
   }
@@ -88,7 +88,7 @@ export function openProject(id, onChange) {
       const candidates = teamFor(job).filter(sp =>
         !Object.entries(picked).some(([k, v]) => Number(k) !== i && v === sp.id));
       return `<h3>${U.esc(JOBS[job].name)}</h3>
-        <p class="muted small" style="margin:0 0 8px">${U.esc(candidates[0] ? candidates[0].jobDesc : 'Nobody on your team does this kind of work yet.')}</p>
+        <p class="muted small" style="margin:0 0 8px">${U.esc(candidates[0] ? candidates[0].jobDesc : 'Nobody you know does this job yet.')}</p>
         <div class="grid2">
           ${candidates.length
             ? candidates.map(sp => `
@@ -97,7 +97,7 @@ export function openProject(id, onChange) {
                 ${U.creatureImg(sp.id, 48)}
                 <div><div class="nm">${U.esc(sp.name)}</div><div class="jb">${U.esc(sp.jobName)}</div></div>
               </button>`).join('')
-            : '<div class="card locked"><div><div class="nm">No one yet</div><div class="jb">Keep reading. Somebody on this island does this.</div></div></div>'}
+            : '<div class="card locked"><div><div class="nm">No one yet</div><div class="jb">Keep reading. Somebody on this island can do this.</div></div></div>'}
         </div>`;
     }).join('');
 
@@ -113,15 +113,15 @@ export function openProject(id, onChange) {
       ${U.passageHTML([p.blurb, ...p.brief])}
       ${p.needsItem ? `<p class="${needItem ? 'why' : 'muted small'}" style="margin-top:14px">
         ${needItem
-          ? `<b>You need ${U.esc(p.needsItem.label)}.</b> Something you have read says where it is.`
-          : `Carrying ${U.esc(p.needsItem.label)}. <span class="tick">Yes</span>`}
+          ? `<b>You need ${U.esc(p.needsItem.label)}.</b> Something you already read says where it is.`
+          : `You have ${U.esc(p.needsItem.label)}. <span class="tick">Yes</span>`}
       </p>` : ''}
       ${slots}
       <div class="row end" style="margin-top:18px">
         <button class="btn ghost" type="button" data-close>Later</button>
-        <button class="btn" type="button" id="go" ${ready ? '' : 'disabled'}>Begin work</button>
+        <button class="btn" type="button" id="go" ${ready ? '' : 'disabled'}>Start work</button>
       </div>
-      ${ready ? '' : '<p class="muted small" style="margin-top:10px">Fill every job above to begin.</p>'}
+      ${ready ? '' : '<p class="muted small" style="margin-top:10px">Pick somebody for every job above to start.</p>'}
     `);
 
     body.querySelectorAll('.card.pick').forEach(b => b.addEventListener('click', () => {
@@ -149,8 +149,8 @@ function complete(p, crew, onChange) {
     <h2>${U.esc(p.name)}</h2>
     <p class="kicker">Finished</p>
     ${U.passageHTML([p.finish])}
-    ${p.opens ? `<div class="why"><b>${U.esc(p.opens)}</b> is open to you now.</div>` : ''}
-    <h3>Crew</h3>
+    ${p.opens ? `<div class="why"><b>${U.esc(p.opens)}</b> is open now.</div>` : ''}
+    <h3>Who helped</h3>
     <div class="grid2">${crew.map(i => U.creatureCard(BY_ID[i])).join('')}</div>
     ${before !== now.id ? `<h3>Next</h3><div class="passage"><p>${U.esc(now.objective)}</p></div>` : ''}
     <div class="row end" style="margin-top:18px">

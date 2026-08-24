@@ -76,20 +76,18 @@ function meterHTML(sp, got, need, left, patience) {
     <div class="meter"><i style="width:${Math.round((got / need) * 100)}%"></i></div>`;
 }
 
-function intro(sp, entity, need, patience, onDone) {
-  const body = U.openSheet(`
-    ${meterHTML(sp, 0, need, patience, patience)}
-    <h2>${U.esc(sp.passage.title)}</h2>
-    <p class="kicker">${U.esc(sp.passage.source)}</p>
-    ${U.passageHTML(sp.passage.text)}
-    <p class="muted small" style="margin-top:12px">Tap any underlined word for its meaning. You can bring the page back up during the questions.</p>
-    <div class="row" style="margin-top:14px">
-      <span class="spacer"></span>
-      <button class="btn ghost" type="button" data-close>Not yet</button>
-      <button class="btn" type="button" id="begin">I have read it</button>
-    </div>`);
-  body.querySelector('#begin').addEventListener('click', () =>
-    round(sp, entity, { got: 0, left: patience, need, patience, pool: poolFor(sp) }, onDone));
+function intro(sp, entity, need, patience, onDone, first = true) {
+  U.readPages({
+    title: sp.passage.title,
+    kicker: sp.passage.source,
+    head: meterHTML(sp, 0, need, patience, patience) +
+      '<p class="muted small" style="margin:0 0 12px">Tap any underlined word to see what it means.</p>',
+    pages: sp.passage.text,
+    closeLabel: 'Not yet',
+    doneLabel: 'I have read it',
+    first,
+    onDone: () => round(sp, entity, { got: 0, left: patience, need, patience, pool: poolFor(sp) }, onDone)
+  });
 }
 
 function round(sp, entity, st, onDone) {
@@ -98,13 +96,28 @@ function round(sp, entity, st, onDone) {
   if (!st.pool.length) st.pool = poolFor(sp);
 
   const q = st.pool.shift();
+  ask(sp, entity, st, q, onDone);
+}
+
+function ask(sp, entity, st, q, onDone) {
   const body = U.updateSheet(`
     ${meterHTML(sp, st.got, st.need, st.left, st.patience)}
-    <details style="margin:12px 0 14px">
-      <summary class="muted small" style="cursor:pointer">Show the field notes again</summary>
-      ${U.passageHTML(sp.passage.text)}
-    </details>
+    <div class="row" style="margin:12px 0 14px">
+      <button class="btn ghost small" type="button" id="reread">Read the notes again</button>
+    </div>
     <div id="qhost"></div>`);
+
+  body.querySelector('#reread').addEventListener('click', () => {
+    U.readPages({
+      title: sp.passage.title,
+      kicker: sp.passage.source,
+      head: meterHTML(sp, st.got, st.need, st.left, st.patience),
+      pages: sp.passage.text,
+      doneLabel: 'Back to the question',
+      first: false,
+      onDone: () => ask(sp, entity, st, q, onDone)
+    });
+  });
 
   U.askOne(body.querySelector('#qhost'), q, ok => {
     if (ok) {
@@ -130,10 +143,10 @@ function succeed(sp, entity, st, onDone) {
 
   const body = U.updateSheet(`
     ${meterHTML(sp, st.need, st.need, st.left, st.patience)}
-    <h2>${U.esc(sp.name)} joins the survey</h2>
+    <h2>${U.esc(sp.name)} comes with you</h2>
     <div class="passage">
       <p>${U.esc(sp.lines.catch)}</p>
-      <p class="muted">${U.esc(sp.name)} can do <b>${U.esc(sp.jobName.toLowerCase())}</b> work. ${U.esc(sp.jobDesc)}</p>
+      <p class="muted">${U.esc(sp.name)} can do the <b>${U.esc(sp.jobName.toLowerCase())}</b> job. ${U.esc(sp.jobDesc)}</p>
     </div>
     ${before !== now.id
       ? `<h3>Next</h3><div class="passage"><p>${U.esc(now.objective)}</p></div>`
@@ -153,12 +166,12 @@ function depart(sp, entity, st, onDone) {
     <h2>${U.esc(sp.name)} has had enough</h2>
     <div class="passage">
       <p>${U.esc(sp.lines.flee)}</p>
-      <p>Nothing is lost. Read the page properly &mdash; the answers are all in it &mdash; and it will be back where you found it.</p>
+      <p>Nothing is lost. Read the page again slowly. All the answers are in it. The animal will be right back where you found it.</p>
     </div>
     <div class="row end" style="margin-top:18px">
       <button class="btn ghost" type="button" id="reread">Read the notes again</button>
       <button class="btn" type="button" data-close>Leave it alone</button>
     </div>`);
   body.querySelector('#reread').addEventListener('click', () =>
-    intro(sp, entity, st.need, st.patience, onDone));
+    intro(sp, entity, st.need, st.patience, onDone, false));
 }

@@ -1,22 +1,23 @@
 /* Every word wrapped in {curly braces} in a passage gets a tap-for-meaning
-   definition. Definitions are written for the sentence the word appears in,
-   not as dictionary entries -- a word means one thing at a time. */
+   definition. The definitions are written for the sentence the word is in, not
+   as dictionary entries, and they are written for a 3rd grade reader: short,
+   plain, and using only easier words than the one being explained. */
 
 export const GLOSSARY = {
-  ubiquitous:  'Found everywhere; present in every part of a place.',
-  innocuous:   'Harmless. Not likely to cause any damage or offence.',
-  deliberate:  'Done on purpose, with intention behind it.',
-  coerced:     'Forced. Made to do something against your will.',
-  reciprocal:  'Going both ways. Each side gives something and gets something.',
-  buckle:      'To bend or collapse under a weight that is too heavy.',
-  yield:       'The amount something produces. (It can also mean "to give in" — not here.)',
-  malicious:   'Meaning to cause harm; spiteful.',
-  reservoir:   'A store of something held back and drawn on later.',
-  conjecture:  'A guess or opinion formed without proof.',
-  brackish:    'Slightly salty. The mix you get where fresh water meets the sea.',
-  vestigial:   'Left over from an earlier form and no longer serving its first purpose.',
-  aromatic:    'Strongly and distinctly scented.',
-  credential:  'Evidence that proves you are qualified or entitled to something.'
+  calm:      'Quiet and not upset. Not in a hurry.',
+  shallow:   'Not deep. Water you could stand up in.',
+  shade:     'A cool dark spot out of the sun.',
+  clumsy:    'Likely to drop things or knock them over.',
+  stiff:     'Held hard and straight. Not bending.',
+  vine:      'A long bendy plant stem that spreads along the ground.',
+  tunnel:    'A hole that goes along under the ground.',
+  marsh:     'Soft wet land with tall grass growing in it.',
+  glow:      'A soft steady light, like a night light.',
+  ripe:      'Grown all the way and ready to eat.',
+  tide:      'The way the sea rises and falls again every day.',
+  hollow:    'A dip or a low hole in the ground.',
+  gravel:    'Lots of little loose stones.',
+  attention: 'Really looking and really listening, so you notice things.'
 };
 
 export function define(word) {

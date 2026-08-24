@@ -1,9 +1,11 @@
 /* Documents and signs.
    A document is the unit of progress in this game: you read it, you answer its
-   questions, and answering them is what logs the step. Wrong answers are not
-   punished and never block -- the question goes to the back of the queue and
-   comes round again after you have read why. You cannot get stuck, but you
-   also cannot skip past something you did not understand. */
+   questions, and answering them is what logs the step. The reading happens a
+   few sentences at a time -- Next to go on, Back to re-read the page you just
+   left -- because a screen full of text is the fastest way to lose a reader
+   this age. Wrong answers are not punished and never block: the question goes
+   to the back of the queue and comes round again after you have read why. You
+   cannot get stuck, and you cannot skip past something you did not follow. */
 
 import { S, save } from './state.js';
 import { DOCS, SIGNS } from './content/quests.js';
@@ -16,14 +18,15 @@ let afterDoc = null;
 export function openSign(signId, label) {
   const lines = SIGNS[signId];
   if (!lines) return;
-  S.signs[signId] = true; save();
-  U.openSheet(`
-    <h2>You look closer</h2>
-    <p class="kicker">${U.esc(label || 'Somewhere on Verdant Isle')}</p>
-    ${U.passageHTML(lines)}
-    <div class="row end" style="margin-top:16px">
-      <button class="btn" type="button" data-close>Done</button>
-    </div>`);
+  S.signs[signId] = true;
+  save();
+  U.readPages({
+    title: 'You look closer',
+    kicker: label || 'Somewhere on Verdant Isle',
+    pages: lines,
+    doneLabel: 'Done',
+    onDone: () => U.closeSheet(true)
+  });
 }
 
 export function openDoc(docId, opts = {}) {
@@ -32,27 +35,18 @@ export function openDoc(docId, opts = {}) {
   S.read[docId] = (S.read[docId] || 0) + 1;
   save();
   afterDoc = opts.onDone || null;
-  const alreadyDone = !!S.flags[docId];
-  showPassage(doc, alreadyDone, !!opts.reread);
+  showPassage(doc, !!S.flags[docId]);
 }
 
-function showPassage(doc, alreadyDone, reread) {
-  U.openSheet(`
-    ${U.docHeaderHTML(doc)}
-    ${U.passageHTML(doc.text)}
-    <div class="row" style="margin-top:16px">
-      <span class="spacer"></span>
-      <button class="btn ghost" type="button" data-close>Put it back</button>
-      ${alreadyDone
-        ? `<button class="btn" type="button" id="again">Answer again</button>`
-        : `<button class="btn" type="button" id="go">I have read it. Ask me.</button>`}
-    </div>
-    ${alreadyDone ? '<p class="muted small" style="margin:14px 0 0">You have already worked through this one. It stays in your journal for as long as you need it.</p>' : ''}
-  `);
-
-  const body = U.$('#sheet-body');
-  const start = body.querySelector('#go') || body.querySelector('#again');
-  if (start) start.addEventListener('click', () => runQuestions(doc));
+function showPassage(doc, alreadyDone) {
+  U.readPages({
+    title: doc.title,
+    kicker: doc.source || '',
+    pages: doc.text,
+    closeLabel: 'Put it back',
+    doneLabel: alreadyDone ? 'Answer again' : 'Ask me about it',
+    onDone: () => runQuestions(doc)
+  });
 }
 
 function runQuestions(doc) {
@@ -61,31 +55,48 @@ function runQuestions(doc) {
   queue.forEach(q => { delete q._missed; });
   let firstTry = 0;
   let seen = 0;
+  let current = null;
 
-  const nextQ = () => {
-    if (!queue.length) return finish(doc, firstTry, total);
-    const q = queue.shift();
-    seen++;
+  function showQuestion() {
     const body = U.updateSheet(`
       <h2>${U.esc(doc.title)}</h2>
-      <p class="kicker">Comprehension check</p>
-      <details style="margin-bottom:14px">
-        <summary class="muted small" style="cursor:pointer">Show the text again</summary>
-        ${U.passageHTML(doc.text)}
-      </details>
+      <p class="kicker">Question ${Math.min(seen, total)} of ${total}</p>
+      <div class="row" style="margin-bottom:14px">
+        <button class="btn ghost small" type="button" id="reread">Read it again</button>
+      </div>
       <div id="qhost"></div>`);
-    U.askOne(body.querySelector('#qhost'), q, ok => {
+
+    body.querySelector('#reread').addEventListener('click', () => {
+      U.readPages({
+        title: doc.title,
+        kicker: doc.source || '',
+        pages: doc.text,
+        doneLabel: 'Back to the question',
+        first: false,
+        onDone: showQuestion
+      });
+    });
+
+    U.askOne(body.querySelector('#qhost'), current, ok => {
       if (ok) {
-        if (!q._missed) firstTry++;
+        if (!current._missed) firstTry++;
       } else {
-        q._missed = true;
-        queue.push(q);
-        U.toast('That one comes back round. Read the note and try it again.', 3000);
+        current._missed = true;
+        queue.push(current);
+        U.toast('We will come back to that one. Read the note first.', 3000);
       }
-      nextQ();
-    }, { progress: `${Math.min(seen, total)} of ${total}` });
-  };
-  nextQ();
+      nextQuestion();
+    });
+  }
+
+  function nextQuestion() {
+    if (!queue.length) return finish(doc, firstTry, total);
+    current = queue.shift();
+    seen++;
+    showQuestion();
+  }
+
+  nextQuestion();
 }
 
 function finish(doc, firstTry, total) {
@@ -100,16 +111,16 @@ function finish(doc, firstTry, total) {
   const clean = firstTry === total;
 
   U.updateSheet(`
-    <h2>Understood</h2>
+    <h2>You read it</h2>
     <p class="kicker">${U.esc(doc.title)}</p>
     <div class="passage">
       <p>${clean
-        ? 'Every question first time. That is what Elm meant about paying attention.'
-        : `You got there: <b>${firstTry} of ${total}</b> first time, and the rest after reading why.`}</p>
-      ${wasNew ? `<p><b>Logged.</b> ${U.esc(nowStep.log || '')}</p>` : ''}
+        ? 'Every question right the first time. That is what paying attention looks like.'
+        : `You got there. <b>${firstTry} of ${total}</b> right the first time, and the rest after you read why.`}</p>
+      ${wasNew ? `<p><b>Written in your journal.</b> ${U.esc(nowStep.log || '')}</p>` : ''}
     </div>
     ${before !== nowStep.id
-      ? `<h3>Next</h3><div class="passage"><p>${U.esc(nowStep.objective)}</p></div>`
+      ? `<h3>What now</h3><div class="passage"><p>${U.esc(nowStep.objective)}</p></div>`
       : ''}
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Back to the island</button>

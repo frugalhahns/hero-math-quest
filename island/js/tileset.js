@@ -289,7 +289,7 @@ const PAINT = {
 
   /* ---- barriers, cleared by projects ---- */
 
-  1: (g, r) => {                                   // the windlass gate
+  1: (g, r) => {                                   // the channel gate
     PAINT.C(g, rng(5));
     px(g, 1, 2, 14, 12, C.woodD);
     px(g, 2, 3, 12, 10, C.wood);

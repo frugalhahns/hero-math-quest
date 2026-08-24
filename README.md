@@ -90,21 +90,25 @@ current level per skill, rounds finished, day streak and badges. It also explain
 the levels mean. Everything is local to the device; there is no server and nothing is
 uploaded.
 
-## Verdant Isle: a second game, for an older reader
+## Verdant Isle: a second game, all reading
 
-`island/` is a separate game in this repo, aimed at an 8th grade reader instead of a
-3rd/4th grade one. It is an exploration game where reading comprehension is the only
-thing that moves you forward: the game never marks your objective on the map, and every
-step is written on a notice, a tide chart, a tablet or a cave wall that you have to
-understand before you know where to go. You earn the island's residents by answering
-questions about the warden's field notes on them, and each one does a job that a build
-project needs — which project needs which job is, again, something you have to read.
+`island/` is a separate game in this repo. It is an exploration game where reading
+comprehension is the only thing that moves you forward: the game never marks your
+objective on the map, and every step is written on a notice, a tide chart, a tablet or
+a cave wall that you have to understand before you know where to go. You make friends
+with the island's animals by answering questions about the ranger's notes on them, and
+each one does a job that a build project needs — which project needs which job is,
+again, something you have to read.
 
-Six regions, eleven residents, 78 comprehension questions, no fighting and no failure
-states, and deliberately no read-aloud button — comprehension is the skill being
-practised, so having the browser read the passage out would route around the point.
-See [island/README.md](island/README.md) for the design, and `island/selftest.html`
-for the ~1,020 assertions that prove the whole thing is still solvable in order.
+The reading comes a few sentences at a time: every passage is a stack of short pages
+with Next and Back, and no page runs over 60 words. Six regions, eleven animals, 82
+comprehension questions, no fighting and no failure states, and deliberately no
+read-aloud button — comprehension is the skill being practised here, so having the
+browser read the passage out would route around the point.
+
+See [island/README.md](island/README.md) for the design, and `island/selftest.html` for
+the ~1,090 assertions that prove the whole thing is still solvable in order and still
+reading at grade level (measured with Flesch-Kincaid; it currently averages 2.3).
 
 **Play it:** https://frugalhahns.github.io/hero-math-quest/island/
 

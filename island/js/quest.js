@@ -1,6 +1,6 @@
-/* The expedition tracker. The current step is the only guidance the game ever
-   gives, and it is deliberately written as a reminder of what you read rather
-   than as a direction: "the chart says where the crank is", never "go to 5,18". */
+/* The trip tracker. The current step is the only nudge the game ever gives, and
+   it is deliberately worded as a reminder of what you read rather than as a
+   direction: "the chart says where the handle is", never "go to 5,18". */
 
 import { S, save } from './state.js';
 import { QUEST } from './content/quests.js';
@@ -26,7 +26,7 @@ export function advance() {
   if (moved) {
     save();
     sfx.unlock();
-    toast('Expedition log: ' + step().objective, 4200);
+    toast('New in your journal: ' + step().objective, 4200);
   }
   return moved;
 }

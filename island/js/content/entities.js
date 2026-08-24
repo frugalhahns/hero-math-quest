@@ -12,28 +12,28 @@
 export const ENTITIES = [
   /* ------------------------------------------------ Landing Beach */
   { map: 'beach', x: 6,  y: 6,  art: 'post',    kind: 'doc',  doc: 'notice',
-    label: 'A notice, nailed at eye height to the cabin door.' },
+    label: 'A notice, nailed to the cabin door at eye height.' },
   { map: 'beach', x: 10, y: 8,  art: 'post',    kind: 'doc',  doc: 'fieldguide',
-    label: 'A page pinned to a post, weighted with a stone.' },
+    label: 'A page pinned to a post, held down with a stone.' },
   { map: 'beach', x: 15, y: 11, art: 'sign',    kind: 'sign', sign: 'beachSign' },
   { map: 'beach', x: 24, y: 17, art: 'sign',    kind: 'sign', sign: 'dockSign' },
   { map: 'beach', x: 26, y: 22, art: 'lockbox', kind: 'doc',  doc: 'tidechart',
-    label: 'An iron lockbox bolted to the last plank.' },
+    label: 'A metal box bolted to the last board.' },
   { map: 'beach', x: 3,  y: 16, art: 'sign',    kind: 'sign', sign: 'rockFinger' },
   { map: 'beach', x: 5,  y: 7,  art: null,      kind: 'sign', sign: 'cabinDoor' },
   /* two dug spots. The chart says which one, and it is not the obvious one. */
   { map: 'beach', x: 5,  y: 18, art: 'mound',   kind: 'dig', id: 'moundBase',
-    empty: 'Loose gravel, already turned over once and refilled. Whoever dug here found nothing, and said so in writing.' },
+    empty: 'Loose gravel. Somebody already dug here and filled it back in. They found nothing, and they wrote that down.' },
   { map: 'beach', x: 1,  y: 18, art: 'mound',   kind: 'dig', id: 'moundTip',
-    gives: 'crank', giveLabel: 'the iron windlass crank',
-    found: 'Half a metre down, wrapped in oiled canvas: a crank handle, iron, heavier than it looks.' },
+    gives: 'crank', giveLabel: 'the iron handle',
+    found: 'Down under the gravel, wrapped in oiled cloth: an iron handle. It is heavier than it looks.' },
   { map: 'beach', x: 11, y: 15, art: 'pidgey',  kind: 'wild', species: 'pidgey' },
   { map: 'beach', x: 8,  y: 19, art: 'psyduck', kind: 'wild', species: 'psyduck' },
   { map: 'beach', x: 17, y: 1,  art: null,      kind: 'project', project: 'gate' },
 
   /* ------------------------------------------------ Meadow Hollow */
   { map: 'meadow', x: 27, y: 15, art: 'sign', kind: 'doc', doc: 'cairns',
-    label: 'A tablet set flat into the ground at the edge of the circle.' },
+    label: 'A tablet set flat in the ground at the edge of the circle.' },
   { map: 'meadow', x: 16, y: 10, art: 'sign', kind: 'sign', sign: 'pondSign' },
   { map: 'meadow', x: 26, y: 14, art: 'machop',    kind: 'wild', species: 'machop' },
   { map: 'meadow', x: 19, y: 19, art: 'chikorita', kind: 'wild', species: 'chikorita' },
@@ -44,38 +44,38 @@ export const ENTITIES = [
 
   /* ------------------------------------------------ Whispering Grove */
   { map: 'grove', x: 16, y: 11, art: 'sign', kind: 'doc', doc: 'shrine',
-    label: 'A bronze plaque bolted to the largest of the shrine stones.' },
+    label: 'A metal plaque bolted to the biggest stone in the clearing.' },
   { map: 'grove', x: 19, y: 11, art: 'berry', kind: 'item', id: 'rowan',
     gives: 'berries', giveLabel: 'a Rowan berry', repeat: true,
-    found: 'You pick a berry. The smell gets on your hands immediately and stays there.' },
+    found: 'You pick a berry. The smell gets on your hands right away and stays there.' },
   { map: 'grove', x: 20, y: 11, art: null, kind: 'sign', sign: 'rowanTree' },
   { map: 'grove', x: 10, y: 13, art: 'sign', kind: 'sign', sign: 'brookSign' },
   { map: 'grove', x: 12, y: 10, art: 'diglett',   kind: 'wild', species: 'diglett' },
   { map: 'grove', x: 17, y: 13, art: 'bulbasaur', kind: 'wild', species: 'bulbasaur' },
   { map: 'grove', x: 17, y: 2,  art: null, kind: 'project', project: 'rockslide' },
 
-  /* ------------------------------------------------ Brackish Marsh */
+  /* ------------------------------------------------ Reed Marsh */
   { map: 'marsh', x: 2,  y: 7,  art: 'post', kind: 'doc', doc: 'ledger',
-    label: 'A ledger in a tin sleeve, chained to the landing post.' },
+    label: 'A notebook in a tin cover, chained to the landing post.' },
   { map: 'marsh', x: 4,  y: 5,  art: 'sign', kind: 'sign', sign: 'marshPost' },
   { map: 'marsh', x: 14, y: 13, art: 'wooper',   kind: 'wild', species: 'wooper' },
   { map: 'marsh', x: 18, y: 20, art: 'chinchou', kind: 'wild', species: 'chinchou' },
   { map: 'marsh', x: 17, y: 22, art: null, kind: 'project', project: 'lantern' },
 
-  /* ------------------------------------------------ Tidepool Caverns */
+  /* ------------------------------------------------ Tidepool Caves */
   { map: 'caverns', x: 19, y: 3,  art: 'sign', kind: 'sign', sign: 'cavernWall' },
   { map: 'caverns', x: 9,  y: 11, art: 'sign', kind: 'doc', doc: 'vault',
-    label: 'Letters cut deep into the wall, beside a gap you cannot get through.' },
+    label: 'Words cut deep into the wall, next to a gap you cannot get through.' },
   { map: 'caverns', x: 7,  y: 12, art: 'snorlax', kind: 'wild', species: 'snorlax',
     needsItem: { key: 'berries', count: 2 },
-    without: 'It fills the gap completely and does not stir. Shouting does nothing at all. You are going to need something else.' },
+    without: 'It fills the whole gap and does not move at all. Shouting does nothing. You are going to need something else.' },
   { map: 'caverns', x: 4,  y: 12, art: 'lockbox', kind: 'sign', sign: 'vaultCache' },
 
-  /* ------------------------------------------------ Ashen Ridge */
+  /* ------------------------------------------------ Ash Ridge */
   { map: 'ridge', x: 8,  y: 12, art: 'sign', kind: 'sign', sign: 'ridgeMarker' },
   { map: 'ridge', x: 7,  y: 14, art: 'sign', kind: 'sign', sign: 'terrace' },
   { map: 'ridge', x: 14, y: 3,  art: null, kind: 'doc', doc: 'summit',
-    label: 'The summit cairn. A slate is wedged into the top course of stones.' },
+    label: 'The stone pile at the top. A flat slate is wedged in near the top.' },
   { map: 'ridge', x: 16, y: 4,  art: 'ditto', kind: 'wild', species: 'ditto',
     when: s => !!s.flags.summit }
 ];
@@ -85,9 +85,9 @@ export const REGIONS = {
   beach:   { name: 'Landing Beach',    dark: false },
   meadow:  { name: 'Meadow Hollow',    dark: false },
   grove:   { name: 'Whispering Grove', dark: false },
-  marsh:   { name: 'Brackish Marsh',   dark: false },
-  caverns: { name: 'Tidepool Caverns', dark: true },
-  ridge:   { name: 'Ashen Ridge',      dark: false }
+  marsh:   { name: 'Reed Marsh',       dark: false },
+  caverns: { name: 'Tidepool Caves',   dark: true },
+  ridge:   { name: 'Ash Ridge',        dark: false }
 };
 
 /* Edge crossings. Each is a single tile you walk onto. */

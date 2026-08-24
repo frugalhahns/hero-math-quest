@@ -233,6 +233,74 @@ note('authored positions do not matter because ui.askOne shuffles every render â
   ok(!slots.has(-1), 'the correct answer is always present after shuffling');
 }
 
+/* ---------------- reading level and page size ---------------- */
+head('reading level');
+
+/* Flesch-Kincaid grade level. The syllable count is the usual heuristic --
+   strip a silent trailing e/ed/es, then count vowel runs -- which is a couple
+   of tenths off a human count but plenty good enough to catch a passage that
+   has drifted well above the target. */
+function syllables(word) {
+  let w = word.toLowerCase().replace(/[^a-z]/g, '');
+  if (!w) return 0;
+  if (w.length <= 3) return 1;
+  w = w.replace(/(?:[^laeiouy]es|ed|[^laeiouy]e)$/, '').replace(/^y/, '');
+  const m = w.match(/[aeiouy]{1,2}/g);
+  return m ? m.length : 1;
+}
+
+function grade(text) {
+  const clean = String(text).replace(/[{}]/g, '');
+  const sentences = clean.split(/[.!?]+/).filter(t => /[a-z]/i.test(t));
+  const words = clean.split(/\s+/).filter(w => /[a-z]/i.test(w));
+  if (!sentences.length || !words.length) return { fk: 0, words: 0, sentences: 0 };
+  const syl = words.reduce((n, w) => n + syllables(w), 0);
+  const fk = 0.39 * (words.length / sentences.length) + 11.8 * (syl / words.length) - 15.59;
+  return { fk, words: words.length, sentences: sentences.length, syl };
+}
+
+const TARGET = 5.0;          // 3rd grade, with slack for the heuristic
+const MAX_PAGE_WORDS = 60;   // a page has to stay bite sized
+let worst = { fk: -99, what: '' };
+const grades = [];
+
+function checkPassage(what, pages) {
+  ok(pages.length >= 3, `${what}: split into at least 3 pages`, `${pages.length} pages`);
+  const long = pages
+    .map((t, i) => ({ i, n: grade(t).words }))
+    .filter(x => x.n > MAX_PAGE_WORDS);
+  ok(long.length === 0, `${what}: no page over ${MAX_PAGE_WORDS} words`,
+    long.map(x => `page ${x.i + 1} = ${x.n}`).join(', '));
+
+  const g = grade(pages.join(' '));
+  grades.push(g.fk);
+  if (g.fk > worst.fk) worst = { fk: g.fk, what };
+  ok(g.fk <= TARGET, `${what}: reading level ${g.fk.toFixed(1)} is at or under ${TARGET.toFixed(1)}`,
+    `${g.words} words, ${g.sentences} sentences, ${(g.words / g.sentences).toFixed(1)} words per sentence`);
+}
+
+for (const sp of SPECIES) checkPassage(`${sp.id} notes`, sp.passage.text);
+for (const [id, d] of Object.entries(DOCS)) checkPassage(`doc ${id}`, d.text);
+
+/* the questions have to be readable too, or the passage level is meaningless */
+{
+  const all = [];
+  for (const sp of SPECIES) for (const q of sp.questions) all.push(q);
+  for (const d of Object.values(DOCS)) for (const q of d.questions) all.push(q);
+  const longStems = all.filter(q => grade(q.q).words > 18);
+  ok(longStems.length === 0, 'no question stem runs over 18 words',
+    longStems.slice(0, 3).map(q => q.q).join(' | '));
+  const longChoices = all.flatMap(q => q.choices).filter(c => grade(c).words > 14);
+  ok(longChoices.length === 0, 'no answer choice runs over 14 words',
+    longChoices.slice(0, 3).join(' | '));
+  const qg = grade(all.map(q => q.q + ' ' + q.choices.join('. ')).join(' '));
+  ok(qg.fk <= TARGET, `questions and choices read at ${qg.fk.toFixed(1)}, at or under ${TARGET.toFixed(1)}`);
+}
+
+const avg = grades.reduce((a, b) => a + b, 0) / grades.length;
+note(`average passage reading level ${avg.toFixed(2)} (Flesch-Kincaid); hardest is ${worst.what} at ${worst.fk.toFixed(1)}`);
+ok(avg <= 4.0, 'the corpus averages 4th grade or easier', avg.toFixed(2));
+
 /* ---------------- glossary ---------------- */
 head('glossary');
 const used = new Set();

@@ -1,6 +1,7 @@
 /* Journal, team, help and settings, and the closing screen.
    The journal is the important one: every document stays re-readable forever,
-   because a game about comprehension should never take the text away. */
+   a page at a time, because a game about comprehension should never take the
+   text away. */
 
 import { S, save, resetAll, accuracy } from './state.js';
 import { QUEST, DOCS } from './content/quests.js';
@@ -35,7 +36,7 @@ export function openJournal() {
     ? docIds.map(id => `
       <div class="entry ${S.flags[id] ? 'done' : ''}">
         <div class="t">${U.esc(DOCS[id].title)}</div>
-        <div class="d">${U.esc(DOCS[id].source || '')}${S.flags[id] ? '' : ' &middot; questions not finished'}</div>
+        <div class="d">${U.esc(DOCS[id].source || '')}${S.flags[id] ? '' : ' &middot; questions not done yet'}</div>
         <button class="reread" type="button" data-doc="${id}">Read it again</button>
       </div>`).join('')
     : '<p class="muted">Nothing yet. There is a notice on the cabin door.</p>';
@@ -48,27 +49,27 @@ export function openJournal() {
         <div class="d">${U.esc(sp.passage.source)}</div>
         <button class="reread" type="button" data-sp="${sp.id}">Read it again</button>
       </div>`).join('')
-    : '<p class="muted">Field notes appear here once you have earned the animal they describe.</p>';
+    : '<p class="muted">Animal notes show up here once you have made friends with that animal.</p>';
 
   const body = U.openSheet(`
     <h2>Journal</h2>
     <p class="kicker">Step ${Math.min(S.step + 1, QUEST.length)} of ${QUEST.length}</p>
 
-    <h3>Where you are up to</h3>
+    <h3>What you have done</h3>
     ${steps}
 
-    <h3>Documents</h3>
+    <h3>Pages you have read</h3>
     ${docs}
 
-    <h3>Field notes</h3>
+    <h3>Animal notes</h3>
     ${noteList}
 
-    <h3>Reading record</h3>
+    <h3>Your reading</h3>
     <div class="passage">
       <p>Questions answered: <b>${S.asked}</b><br>
-      Right first time or after re-reading: <b>${S.right}</b> (<b>${accuracy()}%</b>)<br>
-      Words looked up in the glossary: <b>${S.looked}</b><br>
-      Residents on the survey: <b>${S.team.length}</b> of <b>${SPECIES.length}</b><br>
+      Got right: <b>${S.right}</b> (<b>${accuracy()}%</b>)<br>
+      Words you looked up: <b>${S.looked}</b><br>
+      Animal friends: <b>${S.team.length}</b> of <b>${SPECIES.length}</b><br>
       Projects finished: <b>${Object.keys(S.projects).length}</b> of <b>${PROJECTS.length}</b></p>
     </div>
 
@@ -85,17 +86,17 @@ export function openJournal() {
 function showFieldNote(id) {
   const sp = BY_ID[id];
   if (!sp) return;
-  const body = U.openSheet(`
-    <div class="speaker">
+  U.readPages({
+    title: sp.passage.title,
+    kicker: sp.passage.source,
+    head: `<div class="speaker">
       ${U.creatureImg(sp.id, 84)}
       <div><b>${U.esc(sp.name)}</b><br><span>${U.esc(sp.kind)} &middot; ${U.esc(sp.jobName)}</span></div>
-    </div>
-    <h2>${U.esc(sp.passage.title)}</h2>
-    <p class="kicker">${U.esc(sp.passage.source)}</p>
-    ${U.passageHTML(sp.passage.text)}
-    <div class="row end" style="margin-top:16px">
-      <button class="btn" type="button" data-close>Close</button>
-    </div>`);
+    </div>`,
+    pages: sp.passage.text,
+    doneLabel: 'Close',
+    onDone: () => U.closeSheet(true)
+  });
 }
 
 /* ---------------- team ---------------- */
@@ -105,8 +106,8 @@ export function openTeam() {
   const rest = SPECIES.filter(sp => !S.team.includes(sp.id));
 
   const body = U.openSheet(`
-    <h2>The survey</h2>
-    <p class="kicker">${mine.length} of ${SPECIES.length} residents</p>
+    <h2>Your friends</h2>
+    <p class="kicker">${mine.length} of ${SPECIES.length} animals</p>
     ${mine.length
       ? `<div class="grid2">${mine.map(sp =>
           `<button class="card pick" type="button" data-sp="${sp.id}">
@@ -115,10 +116,10 @@ export function openTeam() {
           </button>`).join('')}</div>`
       : '<p class="muted">Nobody yet. Read the notice on the cabin door and start there.</p>'}
 
-    ${rest.length ? `<h3>Not yet met</h3>
+    ${rest.length ? `<h3>Not met yet</h3>
       <div class="grid2">${rest.map(() =>
         `<div class="card locked"><div><div class="nm">&mdash;</div>
-        <div class="jb">Somewhere on the isle</div></div></div>`).join('')}</div>` : ''}
+        <div class="jb">Somewhere on the island</div></div></div>`).join('')}</div>` : ''}
 
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Close</button>
@@ -131,28 +132,30 @@ export function openTeam() {
 
 export function openHelp(onChange) {
   const body = U.openSheet(`
-    <h2>How Verdant Isle works</h2>
-    <p class="kicker">Reading is the mechanic</p>
+    <h2>How to play</h2>
+    <p class="kicker">Reading is how you win</p>
 
     <div class="passage">
-      <p><b>Nothing marks your objective on the map.</b> Every step of the expedition
-      is written on a notice, a chart, a tablet or a wall, and the writing is the only
-      place the answer exists. Read it, understand it, and you will know where to go.</p>
-      <p><b>You earn residents by understanding them.</b> Walk up to one and you get
-      Warden Elm's field notes on it. Answer questions about those notes and it decides
-      you are worth trusting. Answer badly and it wanders off &mdash; then you read the
-      page again and try once more. Nothing is ever lost for good.</p>
-      <p><b>Residents do work people cannot.</b> Each one has a job. Projects need
-      particular jobs, and which jobs is something you have to read to find out.
-      Finishing a project changes the island and opens somewhere new.</p>
-      <p><b>Tap any underlined word</b> for what it means in that sentence.</p>
+      <p><b>Nothing shows up on your map.</b> Every step is written down somewhere &mdash;
+      a notice, a chart, a tablet, a cave wall. The writing is the only place the answer
+      is. Read it, work out what it means, and you will know where to go.</p>
+      <p><b>You read a little bit at a time.</b> Press Next for the next few sentences.
+      Press Back to read the page you just left again. There is no rush.</p>
+      <p><b>You make friends by understanding them.</b> Walk up to any animal and you get
+      Ranger Elm's notes about it. Answer questions about those notes and it starts to
+      trust you. Get too many wrong and it walks off &mdash; then you read the page again
+      and try once more. Nothing is ever lost for good.</p>
+      <p><b>Animals do work people cannot do.</b> Each one has a job. Every project needs
+      certain jobs, and you have to read to find out which ones. Finishing a project
+      changes the island and opens up a new place.</p>
+      <p><b>Tap any underlined word</b> to see what it means.</p>
     </div>
 
-    <h3>Controls</h3>
+    <h3>Buttons</h3>
     <div class="passage">
-      <p>Walk: arrow keys, or W A S D, or the pad below the map.<br>
-      Look at / talk to whatever you are facing: <b>Space</b>, <b>Enter</b>, <b>E</b>, or the big button.<br>
-      Journal <b>J</b> &middot; Team <b>T</b> &middot; Projects <b>B</b> &middot; Close a panel <b>Esc</b></p>
+      <p>Walk: arrow keys, or W A S D, or the pad under the map.<br>
+      Look at whatever you are facing: <b>Space</b>, <b>Enter</b>, <b>E</b>, or the big green button.<br>
+      Journal <b>J</b> &middot; Team <b>T</b> &middot; Projects <b>B</b> &middot; Close a window <b>Esc</b></p>
     </div>
 
     <h3>Settings</h3>
@@ -172,7 +175,7 @@ export function openHelp(onChange) {
     </div>
 
     <h3>Start over</h3>
-    <p class="muted small">This wipes the whole expedition on this device. There is no undo.</p>
+    <p class="muted small">This erases the whole game on this device. You cannot get it back.</p>
     <div class="row" style="margin-top:8px">
       <button class="btn ghost" type="button" id="reset">Erase and start again</button>
       <span class="spacer"></span>
@@ -191,7 +194,7 @@ export function openHelp(onChange) {
   body.querySelector('#reset').addEventListener('click', () => {
     const b2 = U.updateSheet(`
       <h2>Erase everything?</h2>
-      ${U.passageHTML(['Every document you have understood, every resident, every project. All of it, on this device.'])}
+      ${U.passageHTML(['Every page you have read, every animal, every project. All of it, on this device.'])}
       <div class="row end" style="margin-top:18px">
         <button class="btn ghost" type="button" data-close>Keep it</button>
         <button class="btn" type="button" id="yes">Erase it all</button>
@@ -207,28 +210,28 @@ export function openHelp(onChange) {
 
 export function openEnding() {
   const body = U.openSheet(`
-    <h2>The survey is yours</h2>
-    <p class="kicker">Verdant Isle, end of season</p>
+    <h2>The island is yours</h2>
+    <p class="kicker">Verdant Isle, end of the summer</p>
     <div class="passage">
-      <p>The Ditto follows you down off the ridge and does not turn into anything for the
-      whole walk, which you decide to take as a compliment.</p>
-      <p>Elm's cabin is still locked. The notice is still nailed to the door, and you leave
-      it there, because the next person off the boat is going to need it. Underneath it you
-      pin a page of your own: the tide chart is in the lockbox at the seaward end of the
+      <p>The Ditto walks down off the ridge with you. It does not turn into anything the
+      whole way, and you decide that is a compliment.</p>
+      <p>Elm's cabin is still locked. The notice is still nailed to the door and you leave
+      it there, because the next person off the boat is going to need it. Under it you pin
+      a page of your own. It says: the tide chart is in the metal box at the far end of the
       dock. Read the chart before you touch anything else.</p>
       <p>Then you go and sit on the dock, and the island gets on with what it was doing.</p>
     </div>
 
     <h3>What you read</h3>
     <div class="passage">
-      <p>Documents understood: <b>${Object.keys(DOCS).filter(id => S.flags[id]).length}</b> of <b>${Object.keys(DOCS).length}</b><br>
-      Field notes worked through: <b>${S.team.length}</b> of <b>${SPECIES.length}</b><br>
-      Questions answered: <b>${S.asked}</b>, right <b>${accuracy()}%</b> of the time<br>
-      Words looked up: <b>${S.looked}</b><br>
+      <p>Pages read all the way through: <b>${Object.keys(DOCS).filter(id => S.flags[id]).length}</b> of <b>${Object.keys(DOCS).length}</b><br>
+      Animal notes finished: <b>${S.team.length}</b> of <b>${SPECIES.length}</b><br>
+      Questions answered: <b>${S.asked}</b>, and you got <b>${accuracy()}%</b> right<br>
+      Words you looked up: <b>${S.looked}</b><br>
       Projects finished: <b>${Object.keys(S.projects).length}</b> of <b>${PROJECTS.length}</b></p>
     </div>
-    <p class="muted small">The island stays open. Anything you have not read is still out there,
-    and every page is in your journal for as long as you want it.</p>
+    <p class="muted small">The island stays open. Anything you have not read yet is still out
+    there, and every page stays in your journal as long as you want it.</p>
     <div class="row end" style="margin-top:18px">
       <button class="btn" type="button" data-close>Keep exploring</button>
     </div>`);

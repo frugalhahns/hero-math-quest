@@ -284,7 +284,28 @@ body {
 }
 .passage p { margin: 0 0 1em; }
 .passage p:last-child { margin-bottom: 0; }
-.passage.big { font-size: 1.2rem; line-height: 1.8; }
+.passage.big { font-size: 1.26rem; line-height: 1.85; min-height: 7.4em; }
+
+/* page counter and dots for the bite-sized reader */
+.pagebar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 10px;
+}
+.dots { display: flex; gap: 5px; }
+.dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--line);
+  display: block;
+}
+.dots .dot.seen { background: color-mix(in srgb, var(--accent) 55%, var(--line)); }
+.dots .dot.on {
+  background: var(--accent);
+  transform: scale(1.35);
+}
 
 .gloss-word {
   font: inherit;

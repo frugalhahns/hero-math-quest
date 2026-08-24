@@ -87,6 +87,56 @@ export function docHeaderHTML(doc) {
     <p class="kicker">${esc(doc.source || '')}</p>`;
 }
 
+/* ---------------- bite-sized reading ---------------- */
+
+/* One short chunk per screen, Next to go on. A wall of text is the fastest way
+   to lose an 8 year old, so nothing here ever shows more than a few sentences
+   at once, and Back is always available for the page you just left. */
+export function readPages(opts) {
+  const pages = opts.pages || [];
+  const total = pages.length;
+  let i = Math.min(opts.start || 0, Math.max(0, total - 1));
+  let first = opts.first !== false;
+
+  function draw() {
+    const dots = pages.map((_, n) =>
+      `<i class="dot${n === i ? ' on' : ''}${n < i ? ' seen' : ''}"></i>`).join('');
+    const html = `
+      <h2>${esc(opts.title || '')}</h2>
+      ${opts.kicker ? `<p class="kicker">${esc(opts.kicker)}</p>` : ''}
+      ${opts.head || ''}
+      <div class="pagebar">
+        <span class="small muted">Page ${i + 1} of ${total}</span>
+        <span class="spacer"></span>
+        <span class="dots" aria-hidden="true">${dots}</span>
+      </div>
+      <div class="passage big"><p>${fmt(pages[i] || '')}</p></div>
+      <div class="row" style="margin-top:18px">
+        ${i > 0 ? '<button class="btn ghost" type="button" id="pg-back">Back</button>' : ''}
+        ${opts.closeLabel ? `<button class="btn ghost" type="button" data-close>${esc(opts.closeLabel)}</button>` : ''}
+        <span class="spacer"></span>
+        ${i < total - 1
+          ? '<button class="btn" type="button" id="pg-next">Next &rarr;</button>'
+          : `<button class="btn" type="button" id="pg-done">${esc(opts.doneLabel || 'Done')}</button>`}
+      </div>`;
+
+    const body = first ? openSheet(html) : updateSheet(html);
+    first = false;
+
+    const back = body.querySelector('#pg-back');
+    if (back) back.addEventListener('click', () => { i--; draw(); });
+    const next = body.querySelector('#pg-next');
+    if (next) next.addEventListener('click', () => { i++; sfx.page(); draw(); });
+    const done = body.querySelector('#pg-done');
+    if (done) done.addEventListener('click', () => { if (opts.onDone) opts.onDone(); });
+    // the Next button is where the eye already is, so put focus there
+    const focus = next || done;
+    if (focus) focus.focus({ preventScroll: true });
+  }
+
+  draw();
+}
+
 /* ---------------- glossary tooltip ---------------- */
 
 export function wireGlossary(root = document) {

@@ -45,7 +45,7 @@ requestAnimationFrame(loop);
 
 /* First visit gets a nudge toward the only thing on the beach that is written on. */
 if (!S.flags.notice && !S.read.notice) {
-  U.toast('Warden Elm is gone. Something is nailed to the cabin door.', 5200);
+  U.toast('Ranger Elm is gone. Something is nailed to the cabin door.', 5200);
 }
 
 /* ---------------- the loop ---------------- */
@@ -198,7 +198,7 @@ function facingEntity() {
 }
 
 const KIND_VERB = {
-  doc: 'Read', sign: 'Look', dig: 'Dig', item: 'Take', wild: 'Approach', project: 'Inspect'
+  doc: 'Read', sign: 'Look', dig: 'Dig', item: 'Take', wild: 'Say hello', project: 'Look'
 };
 
 function updatePrompt() {
@@ -244,7 +244,7 @@ function act() {
         U.openSheet(`
           <h2>You dig</h2>
           ${U.passageHTML([S.flags[key]
-            ? 'Only the hole you made yourself last time.'
+            ? 'Just the hole you dug here last time.'
             : (e.empty || 'Gravel, and more gravel. Nothing here.')])}
           <div class="row end" style="margin-top:16px">
             <button class="btn" type="button" data-close>Fill it back in</button>
