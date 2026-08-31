@@ -8,11 +8,21 @@
    the whole save can be written to a file and read back, which is the only way
    to move a game to another device or to survive a browser that clears its
    storage. Slot 1 deliberately keeps the original key, so anyone who was
-   already playing before slots existed is still in their game. */
+   already playing before slots existed is still in their game.
+
+   A slot is a place, not a person. The person is a profile: a name and a
+   stable random id that is minted once and then never changes, not even when
+   the island is renamed or carried to another device. Nothing here talks to a
+   server, but if it ever does, that id is the row it syncs to, `rev` says which
+   copy is newer without having to trust two devices' clocks, and the device id
+   says which of them a copy came from. Those three fields are the whole reason
+   a real account could adopt these saves later instead of starting over. */
 
 const SLOT_KEY = 'vi.slot';
-const NAMES_KEY = 'vi.slots';
+const NAMES_KEY = 'vi.slots';       // profile per slot; held the bare names in v1
+const DEVICE_KEY = 'vi.device';
 export const SLOTS = ['1', '2', '3'];
+export const PROFILES_VERSION = 2;
 
 /* Kept in step with the inline theme script in index.html, which has to build
    this same key before any module has loaded. */
@@ -54,7 +64,9 @@ const DEFAULT = {
   looked: 0,              // glossary words tapped
   finished: false,
   started: null,          // ISO date of first play
-  updatedAt: null         // ISO timestamp of the last write, shown in the slot list
+  updatedAt: null,        // ISO timestamp of the last write, shown in the slot list
+  rev: 0                  // writes so far; only ever counts up, so two copies of
+                          // one island can be compared without trusting clocks
 };
 
 export let S = load();
@@ -112,6 +124,7 @@ function fresh() {
 
 export function save() {
   S.updatedAt = new Date().toISOString();
+  S.rev = (typeof S.rev === 'number' && isFinite(S.rev) ? S.rev : 0) + 1;
   try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* private browsing */ }
 }
 
@@ -119,54 +132,151 @@ export function resetAll() {
   const theme = S.theme, soundOn = S.soundOn, musicOn = S.musicOn, bigText = S.bigText;
   const s = fresh();
   s.theme = theme; s.soundOn = soundOn; s.musicOn = musicOn; s.bigText = bigText;
+  // starting over is still the same island to anything counting revisions
+  s.rev = (typeof S.rev === 'number' && isFinite(S.rev)) ? S.rev : 0;
   for (const k of Object.keys(S)) delete S[k];
   Object.assign(S, s);
   save();
 }
 
-/* ---------------- slots ---------------- */
+/* ---------------- profiles and slots ---------------- */
 
-function readNames() {
+/* Random, opaque, and minted exactly once per island. Not derived from the name
+   or the slot number, because both of those change and an identity must not. */
+function newId() {
   try {
-    const n = parse(localStorage.getItem(NAMES_KEY) || '{}');
-    return (n && typeof n === 'object' && !Array.isArray(n)) ? n : {};
+    const b = new Uint8Array(8);
+    crypto.getRandomValues(b);
+    return 'vi_' + [...b].map(n => n.toString(16).padStart(2, '0')).join('');
   } catch (e) {
-    return {};
+    return 'vi_' + Date.now().toString(16) + Math.random().toString(16).slice(2, 10);
   }
 }
 
-export function slotName(slot) {
-  const n = readNames()[slot];
-  return (typeof n === 'string' && n) ? n : `Player ${slot}`;
+/* One id per browser, so a copy of an island can later be told apart from the
+   island it was copied from. Nothing is sent anywhere; it exists so that a
+   merge, if there is ever anything to merge with, has something to go on. */
+export function deviceId() {
+  try {
+    let d = localStorage.getItem(DEVICE_KEY);
+    if (!d || typeof d !== 'string') {
+      d = newId();
+      localStorage.setItem(DEVICE_KEY, d);
+    }
+    return d;
+  } catch (e) {
+    return 'vi_nodevice';
+  }
 }
 
+function today() { return new Date().toISOString().slice(0, 10); }
+
+/* v1 stored `{ "2": "Ada" }` -- a name and nothing else. v2 stores a profile,
+   and any slot that has a game but no profile gets one, so every island that
+   already exists on this device ends up with an id it keeps from here on. */
+function readProfiles() {
+  let raw = null;
+  try { raw = parse(localStorage.getItem(NAMES_KEY) || '{}'); } catch (e) { raw = null; }
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) raw = {};
+
+  const out = { version: PROFILES_VERSION, bySlot: {} };
+  const src = (raw.version >= 2 && raw.bySlot && typeof raw.bySlot === 'object') ? raw.bySlot : raw;
+  for (const slot of SLOTS) {
+    const rec = src[slot];
+    if (typeof rec === 'string') {                       // the v1 shape
+      if (rec) out.bySlot[slot] = { id: newId(), name: rec.slice(0, 16), createdAt: today() };
+    } else if (rec && typeof rec === 'object' && !Array.isArray(rec)) {
+      out.bySlot[slot] = {
+        id: typeof rec.id === 'string' && rec.id ? rec.id : newId(),
+        name: typeof rec.name === 'string' ? rec.name.slice(0, 16) : '',
+        createdAt: typeof rec.createdAt === 'string' ? rec.createdAt : today()
+      };
+    }
+  }
+  return out;
+}
+
+function writeProfiles(p) {
+  try { localStorage.setItem(NAMES_KEY, JSON.stringify(p)); } catch (e) { /* ignore */ }
+}
+
+function rawSlot(slot) {
+  try {
+    const d = parse(localStorage.getItem(keyFor(slot)) || 'null');
+    return (d && typeof d === 'object' && !Array.isArray(d)) ? d : null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/* Runs at load: upgrade the stored shape, and give an id to any island that
+   predates profiles. Writes only when something actually changed, so a normal
+   load does not touch storage before the game has even started. Idempotent and
+   exported so the self test can hand it a v1 fixture and watch it convert. */
+export function ensureProfiles() {
+  let raw = null;
+  try { raw = parse(localStorage.getItem(NAMES_KEY) || 'null'); } catch (e) { raw = null; }
+  const p = readProfiles();
+  let changed = !raw || raw.version !== PROFILES_VERSION;
+  for (const slot of SLOTS) {
+    if (p.bySlot[slot]) continue;
+    const d = rawSlot(slot);
+    if (!d) continue;                                    // an empty slot needs no profile yet
+    p.bySlot[slot] = {
+      id: newId(),
+      name: '',
+      createdAt: typeof d.started === 'string' ? d.started : today()
+    };
+    changed = true;
+  }
+  if (changed) writeProfiles(p);
+  return p;
+}
+ensureProfiles();
+
+export function slotProfile(slot) {
+  return readProfiles().bySlot[slot] || null;
+}
+
+export function slotName(slot) {
+  const rec = readProfiles().bySlot[slot];
+  return (rec && rec.name) ? rec.name : `Player ${slot}`;
+}
+
+/* Mints the profile if this slot never had one, which is what happens the first
+   time a name is typed on the home page. */
 export function renameSlot(slot, name) {
-  if (!SLOTS.includes(slot)) return;
-  const names = readNames();
-  const clean = String(name || '').replace(/\s+/g, ' ').trim().slice(0, 16);
-  if (clean) names[slot] = clean; else delete names[slot];
-  try { localStorage.setItem(NAMES_KEY, JSON.stringify(names)); } catch (e) { /* ignore */ }
+  if (!SLOTS.includes(slot)) return null;
+  const p = readProfiles();
+  const clean = String(name || '').replace(/[{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16);
+  const rec = p.bySlot[slot] || { id: newId(), name: '', createdAt: today() };
+  rec.name = clean;
+  p.bySlot[slot] = rec;
+  writeProfiles(p);
+  return rec.id;
 }
 
 /* A summary of every slot, read straight out of storage so looking at the list
-   never disturbs the game currently loaded. */
+   never disturbs the game currently loaded. This is what the home page draws. */
 export function slots() {
   const active = activeSlot();
+  const p = readProfiles();
   return SLOTS.map(slot => {
-    let d = null;
-    try {
-      const raw = localStorage.getItem(keyFor(slot));
-      if (raw) d = parse(raw);
-    } catch (e) { /* unreadable slot reads as empty */ }
-    if (!d || typeof d !== 'object' || Array.isArray(d)) d = null;
+    const d = rawSlot(slot);
+    const rec = p.bySlot[slot] || null;
     return {
       slot,
-      name: slotName(slot),
+      id: rec ? rec.id : null,
+      name: (rec && rec.name) ? rec.name : `Player ${slot}`,
+      named: !!(rec && rec.name),
       active: slot === active,
       used: !!d,
       step: d && typeof d.step === 'number' ? d.step : 0,
       team: d && Array.isArray(d.team) ? d.team.length : 0,
+      map: d && typeof d.map === 'string' ? d.map : null,
+      rev: d && typeof d.rev === 'number' ? d.rev : 0,
       started: d && typeof d.started === 'string' ? d.started : null,
+      createdAt: rec ? rec.createdAt : null,
       updatedAt: d && typeof d.updatedAt === 'string' ? d.updatedAt : null,
       finished: !!(d && d.finished)
     };
@@ -181,23 +291,65 @@ export function useSlot(slot) {
 export function eraseSlot(slot) {
   if (!SLOTS.includes(slot)) return;
   try { localStorage.removeItem(keyFor(slot)); } catch (e) { /* ignore */ }
-  renameSlot(slot, '');
+  const p = readProfiles();
+  delete p.bySlot[slot];               // a different kid here later is a different person
+  writeProfiles(p);
+}
+
+/* ---------------- the home page ---------------- */
+
+/* Which island this tab has already been sent into. The home page is meant to
+   be the first thing you see every visit, but switching players reloads the
+   page, and a reload must not drop you back on the page you just finished with.
+   sessionStorage is exactly the right lifetime for that: it survives a reload
+   and dies with the tab. Kept here with the other storage keys, and read again
+   inline in index.html, which has to decide before the first paint. */
+const GO_KEY = 'vi.go';
+
+export function markEntered(slot) {
+  try { sessionStorage.setItem(GO_KEY, slot); } catch (e) { /* ignore */ }
+}
+
+export function enteredThisSession() {
+  try { return sessionStorage.getItem(GO_KEY) === activeSlot(); } catch (e) { return false; }
+}
+
+/* Asking for the home page from inside the game. Forgetting the mark and
+   reloading is the whole implementation: the game saves continuously, so there
+   is nothing to lose, and it leaves one path into the home page rather than
+   two. */
+export function clearEntered() {
+  try { sessionStorage.removeItem(GO_KEY); } catch (e) { /* ignore */ }
 }
 
 /* ---------------- save files ---------------- */
 
 export const FILE_KIND = 'verdant-isle-save';
+export const FILE_VERSION = 2;
 
+/* v1 files carry a name and a save. v2 adds the profile, so a file is a whole
+   island rather than a heap of progress: load it on a second device and both
+   copies know they are the same island, which is what a later account would
+   need in order to adopt them instead of making duplicates. `player` is still
+   written for the v1 readers of already-downloaded files, and still read for
+   the v1 files those readers produced. */
 export function exportObject(slot = activeSlot()) {
   let data = S;
   if (slot !== activeSlot()) {
     try { data = sanitize(parse(localStorage.getItem(keyFor(slot)) || '{}')); } catch (e) { data = fresh(); }
   }
+  const rec = slotProfile(slot);
   return {
     kind: FILE_KIND,
-    version: 1,
+    version: FILE_VERSION,
     exported: new Date().toISOString(),
     player: slotName(slot),
+    profile: {
+      id: rec ? rec.id : newId(),
+      name: slotName(slot),
+      createdAt: rec ? rec.createdAt : today()
+    },
+    device: deviceId(),
     save: structuredClone(data)
   };
 }
@@ -212,6 +364,10 @@ export function fileName(slot = activeSlot()) {
 export function checkFile(d) {
   if (!d || typeof d !== 'object' || Array.isArray(d)) return 'That file is not a saved game.';
   if (d.kind !== FILE_KIND) return 'That file is from a different game, not Verdant Isle.';
+  // a file from a later version may hold things this copy would silently drop
+  if (typeof d.version === 'number' && d.version > FILE_VERSION) {
+    return 'That saved game is from a newer Verdant Isle than this one.';
+  }
   const s = d.save;
   if (!s || typeof s !== 'object' || Array.isArray(s)) return 'That saved game is missing its island.';
   if (typeof s.step !== 'number' || !isFinite(s.step) || s.step < 0) return 'That saved game is damaged.';
@@ -236,6 +392,13 @@ export function describeFile(d) {
   return `${name || 'A player'} — step ${step + 1}, ${team} animal${team === 1 ? '' : 's'}, saved ${when}`;
 }
 
+/* The island moves, identity and all. A v2 file brings its profile with it, so
+   the same island loaded onto a second device stays one island rather than
+   becoming two -- unless it is already open in another slot here, in which case
+   this really is a copy and gets an identity of its own. A v1 file has no
+   profile, so one is minted, and the name is taken from the old `player` field.
+   Any profile already in the target slot is being written over along with the
+   game, so it does not survive. */
 export function importInto(d, slot) {
   const bad = checkFile(d);
   if (bad) return bad;
@@ -247,6 +410,18 @@ export function importInto(d, slot) {
   } catch (e) {
     return 'This browser would not let the game save. Turn off private browsing and try again.';
   }
+
+  const incoming = (d.profile && typeof d.profile === 'object' && !Array.isArray(d.profile)) ? d.profile : {};
+  const name = typeof incoming.name === 'string' && incoming.name ? incoming.name
+    : typeof d.player === 'string' ? d.player : '';
+  const p = readProfiles();
+  const taken = SLOTS.some(s => s !== slot && p.bySlot[s] && p.bySlot[s].id === incoming.id);
+  p.bySlot[slot] = {
+    id: (typeof incoming.id === 'string' && incoming.id && !taken) ? incoming.id : newId(),
+    name: name.replace(/[{}]/g, '').replace(/\s+/g, ' ').trim().slice(0, 16),
+    createdAt: typeof incoming.createdAt === 'string' ? incoming.createdAt : today()
+  };
+  writeProfiles(p);
   return null;
 }
 

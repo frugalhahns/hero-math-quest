@@ -7,16 +7,25 @@
 <meta name="description" content="Explore an island, read the field notes, work out where to go next, and earn the trust of the creatures who live there. Grade 8 reading.">
 <meta name="theme-color" content="#0a1a17">
 <script>
-  /* Resolve the saved theme before first paint so light mode never flashes dark.
-     This has to know which slot is active, and it has to stay synchronous, so
-     the key is rebuilt here rather than imported from js/state.js. */
+  /* Resolve the saved theme before first paint so light mode never flashes dark,
+     and decide in the same breath whether the home page or the island is the
+     first thing drawn. Both have to know which slot is active and both have to
+     stay synchronous, so the keys are rebuilt here rather than imported from
+     js/state.js -- which the self test checks for drift. */
   (function () {
     var pref = 'auto';
+    var slot = '1';
     try {
-      var slot = localStorage.getItem('vi.slot') || '1';
+      slot = localStorage.getItem('vi.slot') || '1';
+      if (slot !== '2' && slot !== '3') slot = '1';   // same fallback as activeSlot()
       var key = slot === '1' ? 'vi.save.v1' : 'vi.save.v1.s' + slot;
       pref = (JSON.parse(localStorage.getItem(key) || '{}').theme) || 'auto';
     } catch (e) {}
+    /* The home page shows every visit. It does not show again after the reload
+       that switching players causes, which is what the session key records. */
+    var entered = null;
+    try { entered = sessionStorage.getItem('vi.go'); } catch (e) {}
+    document.documentElement.dataset.home = entered === slot ? 'off' : 'on';
     var light = pref === 'light' ||
       (pref !== 'dark' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
     document.documentElement.dataset.theme = light ? 'light' : 'dark';
@@ -64,6 +73,15 @@
     <button class="dbtn right" data-dir="right" type="button" aria-label="Walk east">&#9654;</button>
   </div>
   <button id="btn-act" type="button">Look / Talk</button>
+</div>
+
+<!-- The home page. js/title.js fills this in, but the shell is here and opaque
+     from the first paint so no island is ever visible behind it. -->
+<div id="title">
+  <div class="home-inner">
+    <h1 class="home-title">&#127796; Verdant Isle</h1>
+    <p class="home-kicker">A reading expedition</p>
+  </div>
 </div>
 
 <div id="sheet" class="hidden" role="dialog" aria-modal="true" aria-labelledby="sheet-title">

@@ -602,6 +602,95 @@ body {
   outline-offset: 1px;
 }
 
+/* ---------------- the home page ---------------- */
+
+/* Below the sheet (40) on purpose: Settings and the file picker open over it. */
+#title {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  background: var(--bg);
+  overflow-y: auto;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top)) 14px 32px;
+}
+html[data-home="off"] #title { display: none; }
+
+.home-inner { width: 100%; max-width: 30rem; margin: auto; }
+
+.home-title {
+  margin: 0;
+  font-size: clamp(1.6rem, 7vw, 2.2rem);
+  letter-spacing: .01em;
+  text-align: center;
+}
+.home-kicker {
+  margin: 2px 0 0;
+  text-align: center;
+  color: var(--ink-dim);
+}
+.home-lead {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: var(--read);
+}
+
+.home-list { display: grid; gap: 10px; margin-top: 20px; }
+
+/* Every card is the same shape: who and how far, then the buttons on their own
+   row underneath. Letting them sit inline when the text happens to be short
+   enough made a list where no two cards agreed, and it shrank the one button
+   that matters into a corner. */
+.home-card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 14px;
+}
+.home-card.lead {
+  background: var(--card2);
+  border-color: var(--accent);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.home-card.new { border-style: dashed; }
+.home-who { min-width: 0; }
+.home-who b { font-size: 1.12rem; }
+.home-go {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  margin-top: 12px;
+}
+.home-card.lead .home-go .btn { font-size: 1.06rem; }
+.home-card input[type="text"] {
+  width: 100%;
+  margin-top: 10px;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+.home-card input[type="text"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.home-full { margin: 10px 2px 0; }
+.home-feet {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 22px;
+}
+.home-note { text-align: center; margin: 14px 0 0; }
+
 /* ---------------- responsive ---------------- */
 
 @media (min-width: 760px) {

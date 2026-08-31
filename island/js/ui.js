@@ -56,7 +56,13 @@ export function updateSheet(html) {
   return body;
 }
 
-export function sheetOpen() { return !$('#sheet').classList.contains('hidden'); }
+/* The home page is not a sheet, but every question of the form "is something in
+   front of the world right now?" wants the same answer while it is up, and they
+   all come through here. */
+let blocked = false;
+export function setInputBlock(v) { blocked = !!v; }
+
+export function sheetOpen() { return blocked || !$('#sheet').classList.contains('hidden'); }
 
 export function setLocked(v) {
   closeLocked = !!v;

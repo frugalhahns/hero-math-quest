@@ -3,7 +3,7 @@
    a page at a time, because a game about comprehension should never take the
    text away. */
 
-import { S, save, resetAll, accuracy, slotName, activeSlot } from './state.js';
+import { S, save, resetAll, accuracy, slotName, activeSlot, clearEntered } from './state.js';
 import { QUEST, DOCS } from './content/quests.js';
 import { SPECIES, BY_ID } from './content/pokemon.js';
 import { PROJECTS } from './content/projects.js';
@@ -232,11 +232,13 @@ export function openHelp(onChange) {
     Three players can share this device, and saving your island to a file keeps it safe
     if this browser ever forgets it &mdash; or carries it to another computer.</p>
     <div class="row" style="margin-top:8px">
+      <button class="btn ghost" type="button" id="home">Home page</button>
       <button class="btn ghost" type="button" id="saves">Players and backups</button>
     </div>
 
     <h3>Start over</h3>
-    <p class="muted small">This erases the whole game on this device. You cannot get it back.</p>
+    <p class="muted small">This erases ${U.esc(slotName(activeSlot()))}'s island and nobody
+    else's. You cannot get it back.</p>
     <div class="row" style="margin-top:8px">
       <button class="btn ghost" type="button" id="reset">Erase and start again</button>
       <span class="spacer"></span>
@@ -256,10 +258,14 @@ export function openHelp(onChange) {
     S.bigText = !S.bigText; save(); openHelp(onChange);
   });
   body.querySelector('#saves').addEventListener('click', openSaves);
+  body.querySelector('#home').addEventListener('click', () => { clearEntered(); location.reload(); });
   body.querySelector('#reset').addEventListener('click', () => {
     const b2 = U.updateSheet(`
-      <h2>Erase everything?</h2>
-      ${U.passageHTML(['Every page you have read, every animal, every project. All of it, on this device.'])}
+      <h2>Erase ${U.esc(slotName(activeSlot()))}'s island?</h2>
+      ${U.passageHTML([
+        'Every page you have read, every animal, every project. All of it.',
+        'Only yours. The other islands on this device are not touched.'
+      ])}
       <div class="row end" style="margin-top:18px">
         <button class="btn ghost" type="button" data-close>Keep it</button>
         <button class="btn" type="button" id="yes">Erase it all</button>

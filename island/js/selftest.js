@@ -19,8 +19,11 @@ import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as mu
 import { askOne as U_askOne } from './ui.js';
 import {
   S, SLOTS, activeSlot, slots, slotName, renameSlot, useSlot, eraseSlot,
-  FILE_KIND, exportObject, fileName, checkFile, describeFile, importInto, roundTrip
+  FILE_KIND, FILE_VERSION, PROFILES_VERSION, exportObject, fileName, checkFile,
+  describeFile, importInto, roundTrip, slotProfile, ensureProfiles, deviceId,
+  save as saveNow, markEntered, enteredThisSession, clearEntered
 } from './state.js';
+import { homeHTML } from './title.js';
 
 const out = [];
 let fails = 0;
@@ -501,7 +504,7 @@ function same(a, b, path = 'save') {
 
 const mine = exportObject();
 ok(mine.kind === FILE_KIND, 'an export says which game it came from', String(mine.kind));
-ok(mine.version === 1, 'an export carries a version number', String(mine.version));
+ok(mine.version === FILE_VERSION, 'an export carries a version number', String(mine.version));
 ok(typeof mine.exported === 'string' && !isNaN(Date.parse(mine.exported)), 'an export is dated', String(mine.exported));
 ok(typeof mine.player === 'string' && !!mine.player, 'an export says whose game it is', String(mine.player));
 ok(checkFile(mine) === null, 'the game accepts its own export', checkFile(mine) || '');
@@ -644,6 +647,12 @@ head('save slots');
     ok(!!saveKeys(page) && saveKeys(page) === saveKeys(mod) && page.includes('vi.slot') && mod.includes('vi.slot'),
       'index.html and state.js build the save key the same way',
       `page: ${page.join(' ')} | module: ${mod.join(' ')}`);
+    // the page reads three keys before any module loads; none may be one state.js
+    // has since renamed
+    const stray = page.filter(k => !mod.includes(k));
+    ok(stray.length === 0, 'index.html reads no storage key state.js has stopped writing', stray.join(' '));
+    ok(page.includes('vi.go') && mod.includes('vi.go'),
+      'both agree on the key that decides whether the home page shows');
   } else {
     note('could not read the sources over fetch here, so the duplicated storage key was not compared');
   }
@@ -725,6 +734,79 @@ head('slots on disk');
         ok(!two.used, 'erasing a slot empties it');
         ok(two.name === 'Player 2', 'and takes the name with it', two.name);
       }
+
+      /* --- profiles on disk --- */
+
+      /* The v1 shape was a bare name per slot. Anyone playing before profiles
+         existed has one of these, and must come out the other side with their
+         name, their game, and a new id that then never moves again. */
+      {
+        const p1 = { kind: FILE_KIND, version: 1, exported: new Date().toISOString(),
+          player: 'Ada', save: Object.assign({}, mine.save, { step: 5, map: 'grove' }) };
+        ok(importInto(p1, '2') === null, 'a v1 file with no profile still loads');
+        localStorage.setItem('vi.slots', JSON.stringify({ '2': 'Ada' }));   // back to the v1 shape
+        const p = ensureProfiles();
+        ok(p.version === PROFILES_VERSION, 'the stored profiles are upgraded in place', String(p.version));
+        ok(slotName('2') === 'Ada', 'an island named before profiles existed keeps its name', slotName('2'));
+        const id = slotProfile('2') && slotProfile('2').id;
+        ok(typeof id === 'string' && id.startsWith('vi_'), 'and is given an id', String(id));
+        ensureProfiles();
+        ok(slotProfile('2').id === id, 'the id is minted once, not once per read', slotProfile('2').id);
+        renameSlot('2', 'Bea');
+        ok(slotProfile('2').id === id && slotName('2') === 'Bea', 'renaming does not change who you are');
+
+        eraseSlot('2');
+        ok(slotProfile('2') === null, 'erasing an island takes its identity with it');
+        renameSlot('2', 'Cal');
+        ok(slotProfile('2').id !== id, 'a different kid in the same slot is a different person',
+          `${id} -> ${slotProfile('2').id}`);
+      }
+
+      /* --- what a file carries, and what happens to it --- */
+      {
+        const out = exportObject('2');
+        ok(out.version === FILE_VERSION, 'a file says which format it is in', String(out.version));
+        ok(out.profile && out.profile.id === slotProfile('2').id, 'a file carries the island it came from',
+          JSON.stringify(out.profile));
+        ok(out.device === deviceId(), 'and the device it was written on', String(out.device));
+        ok(checkFile(out) === null, 'and is still a file this game will take', checkFile(out) || '');
+
+        const newer = Object.assign({}, out, { version: FILE_VERSION + 1 });
+        ok(typeof checkFile(newer) === 'string', 'a file from a newer game is turned away rather than half read',
+          String(checkFile(newer)));
+
+        /* Carried to a device that has never seen it: the island keeps its
+           identity, which is the whole point -- an account looking at both
+           devices later sees one island, not two. */
+        const away = Object.assign({}, out, { profile: Object.assign({}, out.profile, { id: 'vi_fromsomewhereelse' }) });
+        ok(importInto(away, '3') === null, 'a file from another device loads');
+        ok(slotProfile('3').id === 'vi_fromsomewhereelse',
+          'and the same island stays the same island', slotProfile('3').id);
+
+        /* But the original is still sitting in slot 2 here, so loading it a
+           second time alongside itself is a copy, and a copy is its own island. */
+        ok(importInto(out, '3') === null, 'the island already open here loads again elsewhere');
+        ok(slotProfile('3').id !== out.profile.id && slotProfile('2').id === out.profile.id,
+          'a second copy on one device gets an identity of its own',
+          `${slotProfile('3').id} vs ${slotProfile('2').id}`);
+
+        // restoring your own island from your own backup is not a copy
+        ok(importInto(out, '2') === null, 'a backup loads back over the island it came from');
+        ok(slotProfile('2').id === out.profile.id, 'and that is still the same island',
+          slotProfile('2').id);
+
+        const v1 = { kind: FILE_KIND, version: 1, exported: out.exported, player: 'Old Ada', save: out.save };
+        ok(importInto(v1, '3') === null, 'a v1 file loads too');
+        ok(slotName('3') === 'Old Ada', 'and its name is taken from where v1 kept it', slotName('3'));
+        ok(slotProfile('3').id.startsWith('vi_'), 'and it is given an id on arrival', slotProfile('3').id);
+      }
+
+      /* --- rev --- */
+      {
+        const before = S.rev;
+        saveNow();
+        ok(S.rev === before + 1, 'every write counts up, so two copies can be compared', `${before} -> ${S.rev}`);
+      }
     } finally {
       try {
         for (const k of Object.keys(read())) localStorage.removeItem(k);
@@ -733,6 +815,129 @@ head('slots on disk');
     }
     const diff = same(read(), before, 'storage');
     ok(!diff, 'the game already on this browser was put back exactly as it was', diff || '');
+  }
+}
+
+/* ---------------- coming back to the home page ---------------- */
+/* The home page shows every visit, but not twice in a row when switching players
+   reloads the page. sessionStorage is what remembers that, so it is borrowed and
+   put back the same way localStorage is. */
+head('the home page mark');
+{
+  let before = null, had = false;
+  try {
+    had = sessionStorage.getItem('vi.go') !== null;
+    before = sessionStorage.getItem('vi.go');
+  } catch (e) { before = undefined; }
+
+  if (before === undefined) {
+    note('sessionStorage is not available here, so the home page mark was not exercised');
+  } else {
+    try {
+      clearEntered();
+      ok(enteredThisSession() === false, 'a fresh visit has not chosen anybody yet');
+      markEntered(activeSlot());
+      ok(enteredThisSession() === true, 'choosing a player is remembered across the reload it causes');
+      markEntered(SLOTS.find(s => s !== activeSlot()));
+      ok(enteredThisSession() === false, 'a mark for a different island does not count');
+      clearEntered();
+      ok(enteredThisSession() === false, 'asking for the home page again forgets it');
+    } finally {
+      try {
+        if (had) sessionStorage.setItem('vi.go', before);
+        else sessionStorage.removeItem('vi.go');
+      } catch (e) { /* nothing better to do */ }
+    }
+  }
+}
+
+/* ---------------- profiles ---------------- */
+/* A slot is a place; a profile is a person. The id is the part that has to
+   outlive renaming, being carried to another device, and one day being handed to
+   an account, so it is the part worth asserting hardest. */
+head('profiles');
+{
+  const list = slots();
+  ok(list.every(s => !s.used || (typeof s.id === 'string' && s.id.startsWith('vi_'))),
+    'every island that exists has an id', JSON.stringify(list.map(s => [s.used, s.id])));
+  const ids = list.filter(s => s.id).map(s => s.id);
+  ok(new Set(ids).size === ids.length, 'no two islands share an id', ids.join(' '));
+  ok(typeof deviceId() === 'string' && deviceId() === deviceId(), 'the device id is stable', deviceId());
+}
+
+/* ---------------- the home page ---------------- */
+/* homeHTML is a string builder on purpose, so what the page will say can be
+   read here without a page to put it on. */
+head('the home page');
+{
+  const row = (slot, over) => Object.assign({
+    slot, id: 'vi_' + slot, name: 'Player ' + slot, named: false, active: false, used: false,
+    step: 0, team: 0, map: null, rev: 0, started: null, createdAt: null, updatedAt: null, finished: false
+  }, over);
+
+  const two = [
+    row('1', { name: 'Ada', named: true, used: true, active: true, step: 3, team: 2, map: 'marsh', updatedAt: '2026-08-31T09:00:00.000Z' }),
+    row('2', { name: 'Sam', named: true, used: true, step: 11, team: 5, map: 'ridge', updatedAt: '2026-08-24T09:00:00.000Z' }),
+    row('3', {})
+  ];
+  const html = homeHTML(two);
+  ok(html.includes('Ada') && html.includes('Sam'), 'the home page names both players');
+  ok(html.includes('step 4 of ' + QUEST.length) && html.includes('step 12 of ' + QUEST.length),
+    'and says how far each one has got');
+  ok((html.match(/Keep going/g) || []).length === 1, 'exactly one card offers to keep going');
+  ok(html.indexOf('Ada') < html.indexOf('Sam'), 'the island you were last on comes first');
+  ok(html.includes('Reed Marsh') && !html.includes('Ash Ridge'),
+    'and it is the only one that says where you were');
+  ok(html.includes('animals · played') && !html.includes('· </div>'),
+    'when it was played sits on the line above, with nothing left dangling');
+  ok(html.includes('data-new="3"'), 'a free slot offers a new player');
+  ok(html.includes('data-play="1"') && html.includes('data-play="2"'), 'both islands can be played');
+  ok(html.includes('data-rename="1"'), 'and renamed');
+
+  // the lead card is the active one even when another was played more recently
+  const stale = [
+    row('1', { name: 'Ada', named: true, used: true, active: true, updatedAt: '2026-01-01T00:00:00.000Z' }),
+    row('2', { name: 'Sam', named: true, used: true, updatedAt: '2026-08-30T00:00:00.000Z' }),
+    row('3', {})
+  ];
+  ok(homeHTML(stale).indexOf('Ada') < homeHTML(stale).indexOf('Sam'),
+    'the island already loaded stays the one offered first');
+
+  // nothing played yet
+  const empty = [row('1', {}), row('2', {}), row('3', {})];
+  const first = homeHTML(empty);
+  ok(first.includes('Who is playing?'), 'a brand new device asks who is playing');
+  ok(!first.includes('Keep going'), 'and has nothing to keep going with');
+  ok((first.match(/data-new=/g) || []).length === 1, 'and offers exactly one new island, not three');
+
+  // full house
+  const full = [
+    row('1', { used: true, name: 'Ada', named: true }),
+    row('2', { used: true, name: 'Sam', named: true }),
+    row('3', { used: true, name: 'Kit', named: true })
+  ];
+  const packed = homeHTML(full);
+  ok(!packed.includes('data-new='), 'three islands is the most it offers');
+  ok(packed.includes('erase one from'), 'and it says how to make room');
+
+  // named but not yet saved: still theirs
+  const justNamed = [row('1', { name: 'Ada', named: true, used: false }), row('2', {}), row('3', {})];
+  const jn = homeHTML(justNamed);
+  ok(jn.includes('Ada') && jn.includes('data-play="1"'),
+    'an island keeps its name from the moment it is typed, before the first save');
+  ok(jn.includes('data-new="2"') && !jn.includes('data-new="1"'),
+    'and the slot it is in is not offered to the next player');
+
+  // a name is text, not markup
+  const nasty = [row('1', { used: true, named: true, name: '<img src=x>' }), row('2', {}), row('3', {})];
+  const escaped = homeHTML(nasty);
+  ok(!escaped.includes('<img src=x>') && escaped.includes('&lt;img'),
+    'a name is escaped before it is drawn', escaped.slice(escaped.indexOf('home-who'), escaped.indexOf('home-who') + 90));
+
+  for (const l of [two, stale, empty, full, nasty]) {
+    const h = homeHTML(l);
+    ok(!h.includes('undefined') && !h.includes('NaN') && !h.includes('null'),
+      'the page never draws a hole where a field was missing');
   }
 }
 

@@ -2,8 +2,9 @@
 
 A browser exploration game where **reading comprehension is the only mechanic that
 moves you forward**. Written for a 3rd grade reader, a few sentences at a time.
-No install, no accounts, no ads, no network calls. It saves in the browser, three
-players to a device, and the whole game can be written to a file you keep.
+No install, no accounts, no ads, no network calls. It opens on a home page that
+asks who is playing, saves in the browser three players to a device, and the whole
+game can be written to a file you keep.
 
 **Play it:** https://frugalhahns.github.io/hero-math-quest/island/
 
@@ -245,6 +246,50 @@ it is not automated: `OfflineAudioContext` proved too flaky to rely on, finishin
 one short render per page and then stalling, and an await that never resolves
 would stop the self test printing its report at all.
 
+## The home page
+
+The first thing you see is your own island with your own name on it:
+
+```
+        🌴  V E R D A N T   I S L E
+            A reading expedition
+
+   ┌────────────────────────────────┐
+   │ Ada                            │
+   │ step 4 of 22 · 2 animals ·     │
+   │   played today                 │
+   │ last seen in Reed Marsh        │
+   │        [ Keep going ▸ ] [Rename]
+   └────────────────────────────────┘
+   ┌────────────────────────────────┐
+   │ Sam                            │
+   │ step 12 of 22 · 5 animals ·    │
+   │   played 24 Aug                │
+   │             [ Play ▸ ] [Rename]│
+   └────────────────────────────────┘
+   ┌ + New player ──────────────────┐
+   │ An empty island starts here    │
+   │                   [ Start one ]│
+   └────────────────────────────────┘
+
+     Load a saved file      Settings
+```
+
+It exists because the save panel was two taps deep behind the `?` button, which
+in practice meant nobody was ever asked their name and a second kid would quietly
+play on top of the first one's island. A name is optional and takes one tap to
+set; the island you were last on is the card offered first, so carrying on is a
+single tap on a button that says what it does.
+
+It shows every visit, and not twice in a row: switching players reloads the page,
+and the tab remembers where it was sent so the reload lands in the game rather
+than back here. `Settings → Home page` comes back to it, since the game saves
+continuously and there is nothing to lose by leaving.
+
+The world is built behind it either way, so *Keep going* is instant. Nothing
+walks and no nudges appear until a player has been chosen -- a toast about an
+animal being ready to grow is no use to somebody still deciding who they are.
+
 ## Saving
 
 The save lives in `localStorage`, which is the right place for a game with no
@@ -254,7 +299,9 @@ when disk runs short, and "clear browsing data" takes it every time. So there ar
 three answers, in order of how much they can be relied on.
 
 **Three slots.** One device, three islands, so siblings do not overwrite each
-other. Slot 1 deliberately keeps the original storage key, so anyone who was
+other. A slot is a place; the person in it is a profile -- a name and a stable
+random id, minted once and never changed again, not by renaming and not by being
+carried to another device. Slot 1 deliberately keeps the original storage key, so anyone who was
 already playing before slots existed is still in their game. The active slot is
 fixed for the life of the page — switching players reloads rather than swapping
 the save out from under fifteen modules that already hold a reference to it. The
@@ -275,6 +322,22 @@ stripped at the JSON reviver so an imported save cannot write through to
 `Object.prototype`. Every rejection comes back as one sentence at the same reading
 level as the rest of the game, because that sentence is the whole error handling a
 player ever sees.
+
+**If there is ever an account.** There is no server and nothing leaves the
+device, but three fields exist so that a real account could adopt these saves
+later instead of asking everyone to start over: the profile `id` is the row it
+would sync to, `rev` counts every write so two copies of one island can be
+compared without trusting either device's clock, and a per-browser device id says
+which copy came from where. Save files carry all three. Loading a file onto a
+device that has never seen that island keeps its id, so both copies stay one
+island; loading it alongside itself mints a new id, because that really is a
+copy. v1 files, which predate profiles, still load and are given an id on
+arrival.
+
+That is the whole preparation, deliberately. Sync itself would be offline-first
+-- localStorage stays the source of truth for the running game, and a backend
+would push and pull in the background -- which is why none of the game had to
+become asynchronous to leave the door open.
 
 **Asking the browser to keep it.** `navigator.storage.persist()` is the only way
 to opt out of eviction. It is granted on engagement, so it is asked for on the
@@ -301,7 +364,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,766
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,820
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -348,7 +411,16 @@ checks in the browser, including:
   key is copied first and put back afterwards, with no `await` in between, and
   the last check in that section proves the browser's own save came back exactly
   as it was
-- `index.html` and `state.js` still build the storage key the same way
+- `index.html` and `state.js` still build the storage keys the same way, and the
+  page reads no key state.js has stopped writing
+- **identity survives what should not change it** -- a rename, a v1 save that
+  predates profiles, a backup loaded back over the island it came from -- and
+  changes when it should: a second copy on one device, or a different kid in an
+  erased slot
+- what the home page will say is asserted against fabricated slot lists: the
+  right card leads, exactly one offers to keep going, a free slot is offered once
+  rather than three times, three islands is the most it offers, a name is escaped
+  before it is drawn, and no card ever renders a hole where a field was missing
 - all six regions render without throwing
 
 The report is flushed to the page after every section rather than only at the end,
@@ -374,7 +446,8 @@ js/
   pixels.js         original 16x16 pixel art, baked to canvas on first use
   creatures.js      dex numbers, sprite paths, and how tall each one stands
   evolve.js         growing up: the gap, the from-memory test, the forms
-  state.js          the save file, the three slots, and the file format
+  state.js          the save file, the profiles, and the file format
+  title.js          the home page: who is playing, and how far they have got
   saves.js          the save panel: players, backups, and keeping the save
   ui.js             the sheet, the paged reader, glossary, question runner
   reading.js        documents and signs

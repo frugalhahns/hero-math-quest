@@ -37,9 +37,21 @@ function slotLine(s) {
   return bits.join(' · ');
 }
 
+/* Where "never mind" goes. The file flow is reached both from this panel and
+   straight off the home page, and on the home page there is no panel to go back
+   to -- closing the sheet is the whole way out. */
+let back = openSaves;
+
+/* The sheet may or may not already be open depending on which of those two
+   doors was used. */
+function sheet(html) {
+  return U.sheetOpen() ? U.updateSheet(html) : U.openSheet(html);
+}
+
 /* ---------------- the panel ---------------- */
 
 export function openSaves() {
+  back = openSaves;
   const list = slots();
   const rows = list.map(s => `
     <div class="slot${s.active ? ' on' : ''}">
@@ -204,6 +216,23 @@ function download() {
   }
 }
 
+/* The home page's "Load a saved file": no panel, just the picker, and then
+   straight into choosing where it goes. */
+export function openImport() {
+  back = () => U.closeSheet(true);
+  const file = document.createElement('input');
+  file.type = 'file';
+  file.accept = '.json,application/json';
+  file.hidden = true;
+  document.body.appendChild(file);
+  file.addEventListener('change', () => {
+    const f = file.files && file.files[0];
+    file.remove();
+    if (f) readFile(f);
+  });
+  file.click();
+}
+
 async function readFile(f) {
   let data = null;
   try {
@@ -230,7 +259,7 @@ function chooseTarget(data) {
       </div>
     </button>`).join('');
 
-  const body = U.updateSheet(`
+  const body = sheet(`
     <h2>Load this game</h2>
     ${U.passageHTML([describeFile(data), 'Which island should it go on? Anything already there is written over.'])}
     <div class="slot-list" style="margin-top:12px">${rows}</div>
@@ -238,7 +267,7 @@ function chooseTarget(data) {
       <button class="btn ghost" type="button" id="back">Never mind</button>
     </div>`);
 
-  body.querySelector('#back').addEventListener('click', openSaves);
+  body.querySelector('#back').addEventListener('click', () => back());
   body.querySelectorAll('[data-into]').forEach(b => b.addEventListener('click', () => {
     const slot = b.dataset.into;
     const s = slots().find(x => x.slot === slot);

@@ -13,6 +13,7 @@ import { openDoc, openSign } from './reading.js';
 import { meet } from './encounter.js';
 import { openBuildList, openProject } from './build.js';
 import { openJournal, openTeam, openHelp, openEnding, applyTheme } from './panels.js';
+import * as title from './title.js';
 import { pending, form } from './evolve.js';
 import { REGIONS } from './content/entities.js';
 import { BASE_DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
@@ -46,8 +47,23 @@ W.buildWorld(S);
 U.wireGlossary(document);
 advance();
 refreshBar(P.map);
-checkGrowth();
 requestAnimationFrame(loop);
+
+/* The home page owns the first screen. The world is built behind it either way,
+   so "Keep going" is instant, but nothing walks and no nudges appear until a
+   player has actually been chosen -- a toast about an animal growing is no use
+   to somebody still deciding who they are. */
+if (title.needed()) {
+  U.setInputBlock(true);
+  title.mount(begin);
+} else {
+  begin();
+}
+
+function begin() {
+  U.setInputBlock(false);
+  checkGrowth();
+}
 
 /* Browsers will not let audio start before the player has touched something, so
    the soundtrack waits for the first key press or tap rather than trying at boot
