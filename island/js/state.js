@@ -220,12 +220,20 @@ export function checkFile(d) {
 }
 
 /* A short line describing what is in a save file, so nobody overwrites a good
-   game with a worse one by accident. */
+   game with a worse one by accident. Every field is treated as suspect. This
+   describes a file the moment it is picked, which is before anyone has agreed
+   to load it, so it must not throw on a file that turns out to be nonsense --
+   the description is part of how you find out that it is. */
 export function describeFile(d) {
-  const s = (d && d.save) || {};
+  const f = (d && typeof d === 'object' && !Array.isArray(d)) ? d : {};
+  const s = (f.save && typeof f.save === 'object' && !Array.isArray(f.save)) ? f.save : {};
   const team = Array.isArray(s.team) ? s.team.length : 0;
-  const when = typeof d.exported === 'string' ? d.exported.slice(0, 10) : 'an unknown day';
-  return `${d.player || 'A player'} — step ${(s.step || 0) + 1}, ${team} animal${team === 1 ? '' : 's'}, saved ${when}`;
+  const step = (typeof s.step === 'number' && isFinite(s.step) && s.step >= 0) ? Math.floor(s.step) : 0;
+  // braces are glossary markup once this reaches a passage, and the line has to
+  // stay one line, so a name is trimmed of both
+  const name = typeof f.player === 'string' ? f.player.replace(/[{}]/g, '').trim().slice(0, 24) : '';
+  const when = typeof f.exported === 'string' ? f.exported.slice(0, 10) : 'an unknown day';
+  return `${name || 'A player'} — step ${step + 1}, ${team} animal${team === 1 ? '' : 's'}, saved ${when}`;
 }
 
 export function importInto(d, slot) {

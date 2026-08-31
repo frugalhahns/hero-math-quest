@@ -515,6 +515,33 @@ ok(mine.save !== S, 'an export is a copy, not the live save');
   ok(typeof line === 'string' && line.includes(mine.player) && /step \d+/.test(line),
     'a file describes itself before anyone loads it', String(line));
 }
+/* The description is written before anyone has agreed to load the file, and for
+   a bad file it is part of how you find out it is bad -- so every one of these
+   has to come back as a line rather than an exception. */
+{
+  const shapes = [
+    [null, 'nothing at all'],
+    [undefined, 'nothing passed at all'],
+    ['a saved game, honest', 'a bare string'],
+    [[], 'a list'],
+    [{}, 'an empty object'],
+    [{ save: null }, 'no island inside'],
+    [{ save: [] }, 'an island that is a list'],
+    [{ player: 42, save: { step: 'three', team: 'everyone' } }, 'every field the wrong type'],
+    [{ player: '   ', exported: 7, save: {} }, 'a blank name and a numeric date'],
+    [{ player: '{marsh}', save: { step: -4 } }, 'braces in the name and a step before the start']
+  ];
+  for (const [d, what] of shapes) {
+    let line = null, threw = null;
+    try { line = describeFile(d); } catch (e) { threw = e.message; }
+    ok(threw === null && typeof line === 'string' && /step \d+, \d+ animals?, saved /.test(line)
+      && !line.includes('undefined') && !line.includes('NaN') && !/[{}]/.test(line)
+      && line.split('\n').length === 1,
+      `describes ${what} without throwing`, threw || String(line));
+  }
+  const long = describeFile({ player: 'Bartholomew Fitzgerald The Third Of That Name', save: {} });
+  ok(long.length < 80, 'a very long name cannot run the description off the line', long);
+}
 ok(/^verdant-isle-[a-z0-9]+(-[a-z0-9]+)*-\d{4}-\d{2}-\d{2}\.json$/.test(fileName()),
   'the download gets a tidy file name', fileName());
 

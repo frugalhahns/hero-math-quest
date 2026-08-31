@@ -301,7 +301,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,755
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,766
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -340,7 +340,9 @@ checks in the browser, including:
 - **a damaged or hostile file is turned away** — fourteen malformed files, each
   one refused with one plain sentence; unknown keys dropped; wrong types falling
   back to their defaults; and `__proto__` unable to reach `Object.prototype` from
-  either the top level of a save or one of its own lists
+  either the top level of a save or one of its own lists. The line describing a
+  file is written before anyone has agreed to load it, so it is checked against
+  ten kinds of nonsense too — it has to come back as a line, not an exception
 - the slot list, renaming, loading into a chosen slot, switching players and
   erasing all do what they say, run against real `localStorage` — every `vi.*`
   key is copied first and put back afterwards, with no `await` in between, and
