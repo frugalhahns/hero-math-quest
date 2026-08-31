@@ -17,6 +17,10 @@ import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
 import { form, nextForm, canGrow, growableCount } from './evolve.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
+import {
+  S, SLOTS, activeSlot, slots, slotName, renameSlot, useSlot, eraseSlot,
+  FILE_KIND, exportObject, fileName, checkFile, describeFile, importInto, roundTrip
+} from './state.js';
 
 const out = [];
 let fails = 0;
@@ -462,6 +466,248 @@ for (const q of QUEST) {
   ok(!threw, `${q.id}: done() survives both an empty and a finished save`);
 }
 ok(QUEST.filter(q => q.done(empty)).length === 0, 'no quest step is already complete on a new save');
+
+/* ---------------- save files ---------------- */
+/* The save is the only thing in here a player can actually lose, and since the
+   file is now the only real backup, the format gets checked harder than
+   anything else: what comes out of an export has to survive the trip back in
+   unchanged, and a damaged or hostile file has to be turned away at the door
+   rather than merged into a good game. */
+head('save files');
+
+/* Reports the first difference as a path, or null. JSON.stringify would nearly
+   do, but it hides which field moved and it depends on key order. */
+function same(a, b, path = 'save') {
+  if (Array.isArray(a) || Array.isArray(b)) {
+    if (!Array.isArray(a) || !Array.isArray(b)) return `${path}: one is a list, one is not`;
+    if (a.length !== b.length) return `${path}: ${a.length} vs ${b.length} items`;
+    for (let i = 0; i < a.length; i++) {
+      const d = same(a[i], b[i], `${path}[${i}]`);
+      if (d) return d;
+    }
+    return null;
+  }
+  if (a && b && typeof a === 'object' && typeof b === 'object') {
+    const ka = Object.keys(a).sort(), kb = Object.keys(b).sort();
+    if (ka.join() !== kb.join()) return `${path}: keys differ (${ka.join()} vs ${kb.join()})`;
+    for (const k of ka) {
+      const d = same(a[k], b[k], `${path}.${k}`);
+      if (d) return d;
+    }
+    return null;
+  }
+  return a === b ? null : `${path}: ${JSON.stringify(a)} vs ${JSON.stringify(b)}`;
+}
+
+const mine = exportObject();
+ok(mine.kind === FILE_KIND, 'an export says which game it came from', String(mine.kind));
+ok(mine.version === 1, 'an export carries a version number', String(mine.version));
+ok(typeof mine.exported === 'string' && !isNaN(Date.parse(mine.exported)), 'an export is dated', String(mine.exported));
+ok(typeof mine.player === 'string' && !!mine.player, 'an export says whose game it is', String(mine.player));
+ok(checkFile(mine) === null, 'the game accepts its own export', checkFile(mine) || '');
+ok(mine.save !== S, 'an export is a copy, not the live save');
+{
+  const diff = same(roundTrip(mine), mine.save);
+  ok(!diff, 'a save survives export and import unchanged', diff || '');
+}
+{
+  const line = describeFile(mine);
+  ok(typeof line === 'string' && line.includes(mine.player) && /step \d+/.test(line),
+    'a file describes itself before anyone loads it', String(line));
+}
+ok(/^verdant-isle-[a-z0-9]+(-[a-z0-9]+)*-\d{4}-\d{2}-\d{2}\.json$/.test(fileName()),
+  'the download gets a tidy file name', fileName());
+
+/* Every one of these has to come back as a sentence a 3rd grader can read,
+   because that sentence is the whole error handling the player ever sees. */
+const JUNK = [
+  [null, 'nothing at all'],
+  ['a saved game, honest', 'a bare string'],
+  [[1, 2, 3], 'a list'],
+  [{}, 'an object with no kind'],
+  [{ kind: 'some-other-game', save: mine.save }, 'a file from a different game'],
+  [{ kind: FILE_KIND }, 'a file with no island inside'],
+  [{ kind: FILE_KIND, save: 'beach' }, 'an island that is a string'],
+  [{ kind: FILE_KIND, save: [] }, 'an island that is a list'],
+  [{ kind: FILE_KIND, save: { map: 'beach' } }, 'a save with no step'],
+  [{ kind: FILE_KIND, save: { step: '3', map: 'beach' } }, 'a step that is text'],
+  [{ kind: FILE_KIND, save: { step: -3, map: 'beach' } }, 'a step before the beginning'],
+  [{ kind: FILE_KIND, save: { step: Infinity, map: 'beach' } }, 'a step that is not a real number'],
+  [{ kind: FILE_KIND, save: { step: 0 } }, 'a save with nowhere to stand'],
+  [{ kind: FILE_KIND, save: { step: 0, map: '' } }, 'a save whose map has no name']
+];
+for (const [d, what] of JUNK) {
+  const msg = checkFile(d);
+  const said = typeof msg === 'string' && msg.length > 0;
+  ok(said, `turns away ${what}`, said ? '' : JSON.stringify(msg));
+  if (said) ok(/[.!]$/.test(msg) && msg.length < 90 && !/[{}[\]]/.test(msg),
+    `${what}: the reason reads as a plain sentence`, msg);
+}
+
+/* A file arriving from another device is not trustworthy. Anything the game
+   does not recognise is dropped, and anything of the wrong shape falls back to
+   its default rather than reaching the rest of the game. */
+{
+  const out = roundTrip({
+    kind: FILE_KIND, version: 1, exported: mine.exported, player: 'Test',
+    save: Object.assign({}, mine.save, {
+      nonsense: 41,
+      x: 'over by the rocks',
+      team: [SPECIES[0].id, 7, null, {}, SPECIES[1].id],
+      items: { crank: 1 },
+      finished: 'yes please'
+    })
+  });
+  ok(!('nonsense' in out), 'a key the game has never heard of is dropped');
+  ok(out.x === 17, 'a field of the wrong type keeps its default', JSON.stringify(out.x));
+  ok(out.finished === false, 'and so does a flag of the wrong type', JSON.stringify(out.finished));
+  ok(out.team.length === 2 && out.team[0] === SPECIES[0].id,
+    'a team list keeps only the names in it', JSON.stringify(out.team));
+  ok(out.items.crank === 1, 'the object fields still come through', JSON.stringify(out.items));
+  ok(Object.keys(out).join() === Object.keys(mine.save).join(), 'an imported save has exactly the fields the game expects');
+}
+
+/* JSON.parse hangs "__proto__" on the object as a real key, and assigning it
+   onward would write straight through to Object.prototype. Both the top level
+   and the nested lists are checked, because they are merged by different code. */
+{
+  const text = '{"kind":"' + FILE_KIND + '","version":1,"save":'
+    + '{"step":2,"map":"marsh","__proto__":{"pwned":true},"items":{"__proto__":{"owned":true},"crank":2}}}';
+  const out = roundTrip(JSON.parse(text));
+  ok({}.pwned === undefined, 'a save file cannot reach Object.prototype');
+  ok({}.owned === undefined, 'not even from inside one of its own lists');
+  ok(!Object.prototype.hasOwnProperty.call(out, '__proto__'), 'and __proto__ does not survive the import');
+  ok(!Object.prototype.hasOwnProperty.call(out.items, '__proto__'), 'in either place');
+  ok(out.step === 2 && out.map === 'marsh' && out.items.crank === 2,
+    'the honest half of that file still loads', `step ${out.step}, map ${out.map}`);
+}
+
+/* ---------------- save slots ---------------- */
+head('save slots');
+{
+  const list = slots();
+  ok(list.length === SLOTS.length, 'there is one slot for every player', String(list.length));
+  ok(list.map(s => s.slot).join() === SLOTS.join(), 'the slots come back in order', list.map(s => s.slot).join());
+  ok(list.filter(s => s.active).length === 1, 'exactly one slot is the one being played');
+  ok(list.find(s => s.active).slot === activeSlot(), 'and it is the one state.js loaded from', activeSlot());
+  ok(list.every(s => typeof s.name === 'string' && !!s.name), 'every slot has a name to show',
+    JSON.stringify(list.map(s => s.name)));
+  ok(list.every(s => Number.isInteger(s.step) && s.step >= 0 && Number.isInteger(s.team) && s.team >= 0),
+    'every slot reports a step and a team size', JSON.stringify(list.map(s => [s.step, s.team])));
+}
+
+/* index.html has to resolve the theme before any module loads, so it builds the
+   storage key itself, inline and synchronous. That means the key format is
+   written down in two places. This is the check that they have not drifted. */
+{
+  const names = t => [...new Set((t.match(/vi\.[A-Za-z0-9.]*/g) || []))].sort();
+  const saveKeys = ks => ks.filter(k => k.startsWith('vi.save')).join(' ');
+  let html = null;
+  try {
+    const r = await fetch('index.html');
+    if (r.ok) html = await r.text();
+  } catch (e) { /* file:// has no fetch for local pages */ }
+  let js = null;
+  try {
+    const r = await fetch('js/state.js');
+    if (r.ok) js = await r.text();
+  } catch (e) { /* same */ }
+  if (html && js) {
+    const page = names(html), mod = names(js);
+    ok(!!saveKeys(page) && saveKeys(page) === saveKeys(mod) && page.includes('vi.slot') && mod.includes('vi.slot'),
+      'index.html and state.js build the save key the same way',
+      `page: ${page.join(' ')} | module: ${mod.join(' ')}`);
+  } else {
+    note('could not read the sources over fetch here, so the duplicated storage key was not compared');
+  }
+}
+
+/* ---------------- slots on disk ---------------- */
+/* This section writes to localStorage -- the same storage the game on this
+   browser is using, since the self test is served from the same folder. Every
+   vi.* key is copied first and put back at the end, and there is no await
+   between the two, so nothing can run while storage is borrowed. */
+head('slots on disk');
+{
+  const PREFIX = 'vi.';
+  const read = () => {
+    const got = {};
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith(PREFIX)) got[k] = localStorage.getItem(k);
+    }
+    return got;
+  };
+  let before = null;
+  try { before = read(); } catch (e) { before = null; }
+
+  if (!before) {
+    note('localStorage is not available here, so writing to the slots was not exercised');
+  } else {
+    try {
+      for (const s of SLOTS) eraseSlot(s);
+      ok(slots().every(s => !s.used), 'erasing every slot leaves nothing behind',
+        JSON.stringify(slots().map(s => s.used)));
+      ok(slotName('2') === 'Player 2', 'a slot nobody has named is just its number', slotName('2'));
+
+      renameSlot('2', '   Ada   Mae   ');
+      ok(slotName('2') === 'Ada Mae', 'a name loses its extra spaces', slotName('2'));
+      renameSlot('2', 'Bartholomew Fitzgerald III');
+      ok(slotName('2').length === 16, 'a very long name is cut to fit the list', `"${slotName('2')}"`);
+      renameSlot('2', '   ');
+      ok(slotName('2') === 'Player 2', 'a name of nothing but spaces goes back to the default', slotName('2'));
+      renameSlot('2', 'Ada');
+
+      const file = {
+        kind: FILE_KIND, version: 1, exported: new Date().toISOString(), player: 'Ada',
+        save: Object.assign({}, mine.save, { step: 3, map: 'marsh', team: [SPECIES[0].id] })
+      };
+      const landed = importInto(file, '2');
+      ok(landed === null, 'a good file loads into an empty slot', landed || '');
+      {
+        const list = slots();
+        const two = list.find(s => s.slot === '2');
+        ok(two.used && two.step === 3 && two.team === 1, 'and the slot list shows what landed there', JSON.stringify(two));
+        ok(list.filter(s => s.used).length === 1, 'loading one slot leaves the other two alone',
+          JSON.stringify(list.map(s => s.used)));
+        ok(typeof two.updatedAt === 'string', 'an imported slot is stamped with when it arrived', String(two.updatedAt));
+      }
+      const nowhere = importInto(file, '4');
+      ok(typeof nowhere === 'string', 'there is no fourth island to load into', String(nowhere));
+      ok(typeof importInto({ kind: 'not-this-game' }, '3') === 'string', 'a file that fails the check is refused');
+      ok(!slots().find(s => s.slot === '3').used, 'and the slot it was aimed at stays empty');
+
+      {
+        const out = exportObject('2');
+        ok(out.player === 'Ada' && out.save.step === 3 && out.save.map === 'marsh',
+          'a slot can be saved to a file without being played first',
+          JSON.stringify([out.player, out.save.step, out.save.map]));
+        const diff = same(roundTrip(out), out.save);
+        ok(!diff, 'and that export round trips as well', diff || '');
+        ok(fileName('2').startsWith('verdant-isle-ada-'), "the file is named after the slot's player", fileName('2'));
+      }
+
+      ok(useSlot('2') === true, 'the game can hand over to another player');
+      ok(activeSlot() === '2', 'and that is the slot the next load will read', activeSlot());
+      ok(useSlot('zzz') === false, 'a slot that does not exist is refused');
+      ok(activeSlot() === '2', 'and a refused switch changes nothing', activeSlot());
+
+      eraseSlot('2');
+      {
+        const two = slots().find(s => s.slot === '2');
+        ok(!two.used, 'erasing a slot empties it');
+        ok(two.name === 'Player 2', 'and takes the name with it', two.name);
+      }
+    } finally {
+      try {
+        for (const k of Object.keys(read())) localStorage.removeItem(k);
+        for (const k of Object.keys(before)) localStorage.setItem(k, before[k]);
+      } catch (e) { /* nothing useful left to do about it */ }
+    }
+    const diff = same(read(), before, 'storage');
+    ok(!diff, 'the game already on this browser was put back exactly as it was', diff || '');
+  }
+}
 
 /* ---------------- render smoke test ---------------- */
 head('render');

@@ -7,10 +7,16 @@
 <meta name="description" content="Explore an island, read the field notes, work out where to go next, and earn the trust of the creatures who live there. Grade 8 reading.">
 <meta name="theme-color" content="#0a1a17">
 <script>
-  /* Resolve the saved theme before first paint so light mode never flashes dark. */
+  /* Resolve the saved theme before first paint so light mode never flashes dark.
+     This has to know which slot is active, and it has to stay synchronous, so
+     the key is rebuilt here rather than imported from js/state.js. */
   (function () {
     var pref = 'auto';
-    try { pref = (JSON.parse(localStorage.getItem('vi.save.v1') || '{}').theme) || 'auto'; } catch (e) {}
+    try {
+      var slot = localStorage.getItem('vi.slot') || '1';
+      var key = slot === '1' ? 'vi.save.v1' : 'vi.save.v1.s' + slot;
+      pref = (JSON.parse(localStorage.getItem(key) || '{}').theme) || 'auto';
+    } catch (e) {}
     var light = pref === 'light' ||
       (pref !== 'dark' && window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches);
     document.documentElement.dataset.theme = light ? 'light' : 'dark';
@@ -21,6 +27,11 @@
   })();
 </script>
 <link rel="stylesheet" href="css/island.css">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Verdant Isle">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><text y='26' font-size='26'>&#127796;</text></svg>">
 </head>
 <body>

@@ -2,8 +2,8 @@
 
 A browser exploration game where **reading comprehension is the only mechanic that
 moves you forward**. Written for a 3rd grade reader, a few sentences at a time.
-No install, no accounts, no ads, no network calls. Everything saves in the browser
-on the device it is played on.
+No install, no accounts, no ads, no network calls. It saves in the browser, three
+players to a device, and the whole game can be written to a file you keep.
 
 **Play it:** https://frugalhahns.github.io/hero-math-quest/island/
 
@@ -245,6 +245,47 @@ it is not automated: `OfflineAudioContext` proved too flaky to rely on, finishin
 one short render per page and then stalling, and an await that never resolves
 would stop the self test printing its report at all.
 
+## Saving
+
+The save lives in `localStorage`, which is the right place for a game with no
+accounts and the wrong place to leave something a kid cares about. Mobile Safari
+clears it after about a week of not visiting the site, any browser may evict it
+when disk runs short, and "clear browsing data" takes it every time. So there are
+three answers, in order of how much they can be relied on.
+
+**Three slots.** One device, three islands, so siblings do not overwrite each
+other. Slot 1 deliberately keeps the original storage key, so anyone who was
+already playing before slots existed is still in their game. The active slot is
+fixed for the life of the page — switching players reloads rather than swapping
+the save out from under fifteen modules that already hold a reference to it. The
+theme has to be resolved before any module loads, so `index.html` builds the same
+storage key inline; the self test compares the two so they cannot drift apart.
+
+**A file.** *Save to a file* writes a `.json` the family actually holds. It is the
+backup for all three ways a browser can lose the save, and it is also how you
+carry a game to another computer: load it there and carry on from the same step.
+Loading shows what is in the file and what is in each slot before it writes over
+anything, because that is the one action here that can quietly destroy a game
+further along than the one arriving.
+
+A file can come from another device, so it is not trusted. It is checked before
+it is offered, merged field by field against the defaults — unknown keys dropped,
+wrong shapes falling back rather than reaching the game — and `__proto__` is
+stripped at the JSON reviver so an imported save cannot write through to
+`Object.prototype`. Every rejection comes back as one sentence at the same reading
+level as the rest of the game, because that sentence is the whole error handling a
+player ever sees.
+
+**Asking the browser to keep it.** `navigator.storage.persist()` is the only way
+to opt out of eviction. It is granted on engagement, so it is asked for on the
+first tap rather than at load, and nothing waits on the answer. The panel reports
+what the browser actually said.
+
+There is also a web app manifest and a pair of icons. On iOS that matters more
+than it looks: an island added to the home screen is the one place Safari leaves
+its storage alone. The panel says so, and says to save to a file first, since the
+home screen copy starts out empty.
+
 ## Running it locally
 
 Plain HTML, CSS and ES modules. No build step, no dependencies.
@@ -260,7 +301,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,675
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,755
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -293,6 +334,19 @@ checks in the browser, including:
 - every region has a soundtrack theme with a sane tempo, root note, four bars of
   chords and a five-note scale, and the regions do not all sit in the same key
 - the note scheduler starts, changes region and stops without throwing
+- **a save survives the round trip** — what an export writes has to come back out
+  of an import identical, field for field, and a slot can be exported without
+  being the one loaded
+- **a damaged or hostile file is turned away** — fourteen malformed files, each
+  one refused with one plain sentence; unknown keys dropped; wrong types falling
+  back to their defaults; and `__proto__` unable to reach `Object.prototype` from
+  either the top level of a save or one of its own lists
+- the slot list, renaming, loading into a chosen slot, switching players and
+  erasing all do what they say, run against real `localStorage` — every `vi.*`
+  key is copied first and put back afterwards, with no `await` in between, and
+  the last check in that section proves the browser's own save came back exactly
+  as it was
+- `index.html` and `state.js` still build the storage key the same way
 - all six regions render without throwing
 
 The report is flushed to the page after every section rather than only at the end,
@@ -307,7 +361,9 @@ content.
 
 ```
 index.html          the shell: canvas, sprite layer, top bar, touch pad, sheet
-selftest.html       content, reachability and reading-level assertions
+selftest.html       content, reachability, reading-level and save-file assertions
+manifest.json       so it can be installed, which is how iOS keeps the save
+icons/              the two app icons, and the script that drew them
 css/island.css      one stylesheet, light and dark
 js/
   main.js           boot, input, frame loop, what the action button does
@@ -316,7 +372,8 @@ js/
   pixels.js         original 16x16 pixel art, baked to canvas on first use
   creatures.js      dex numbers, sprite paths, and how tall each one stands
   evolve.js         growing up: the gap, the from-memory test, the forms
-  state.js          the save file
+  state.js          the save file, the three slots, and the file format
+  saves.js          the save panel: players, backups, and keeping the save
   ui.js             the sheet, the paged reader, glossary, question runner
   reading.js        documents and signs
   encounter.js      meeting an animal

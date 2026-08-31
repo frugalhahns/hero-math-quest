@@ -3,13 +3,14 @@
    a page at a time, because a game about comprehension should never take the
    text away. */
 
-import { S, save, resetAll, accuracy } from './state.js';
+import { S, save, resetAll, accuracy, slotName, activeSlot } from './state.js';
 import { QUEST, DOCS } from './content/quests.js';
 import { SPECIES, BY_ID } from './content/pokemon.js';
 import { PROJECTS } from './content/projects.js';
 import { REGIONS } from './content/entities.js';
 import * as U from './ui.js';
 import { openDoc } from './reading.js';
+import { openSaves } from './saves.js';
 import { setSound } from './audio.js';
 import { setMusic } from './music.js';
 import { form, nextForm, canGrow, ready, stepsToGo, tryGrow, grownCount, growableCount, stage } from './evolve.js';
@@ -226,6 +227,14 @@ export function openHelp(onChange) {
       <button class="chip" type="button" id="big" data-on="${S.bigText ? 1 : 0}">${S.bigText ? 'Large' : 'Normal'}</button>
     </div>
 
+    <h3>Your game</h3>
+    <p class="muted small">You are playing as <b>${U.esc(slotName(activeSlot()))}</b>.
+    Three players can share this device, and saving your island to a file keeps it safe
+    if this browser ever forgets it &mdash; or carries it to another computer.</p>
+    <div class="row" style="margin-top:8px">
+      <button class="btn ghost" type="button" id="saves">Players and backups</button>
+    </div>
+
     <h3>Start over</h3>
     <p class="muted small">This erases the whole game on this device. You cannot get it back.</p>
     <div class="row" style="margin-top:8px">
@@ -246,6 +255,7 @@ export function openHelp(onChange) {
   body.querySelector('#big').addEventListener('click', () => {
     S.bigText = !S.bigText; save(); openHelp(onChange);
   });
+  body.querySelector('#saves').addEventListener('click', openSaves);
   body.querySelector('#reset').addEventListener('click', () => {
     const b2 = U.updateSheet(`
       <h2>Erase everything?</h2>

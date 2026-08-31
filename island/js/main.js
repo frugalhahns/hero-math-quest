@@ -1,7 +1,7 @@
 /* Boot, input, the frame loop, and deciding what happens when you press the
    action button. Everything else lives in its own module. */
 
-import { S, save, give } from './state.js';
+import { S, save, give, askToPersist } from './state.js';
 import { setSound, sfx } from './audio.js';
 import * as music from './music.js';
 import * as W from './world.js';
@@ -57,6 +57,9 @@ function firstGesture() {
   if (musicStarted) return;
   musicStarted = true;
   music.unlock(P.map);
+  // Persistence is granted on engagement, so the first tap is the earliest a
+  // browser is willing to say yes. Nothing waits on the answer.
+  askToPersist();
 }
 window.addEventListener('pointerdown', firstGesture, { once: true, capture: true });
 window.addEventListener('keydown', firstGesture, { once: true, capture: true });

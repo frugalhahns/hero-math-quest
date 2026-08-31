@@ -561,6 +561,47 @@ body {
   text-align: center;
 }
 
+/* ---------------- save slots ---------------- */
+
+.slot-list { display: grid; gap: 8px; }
+.slot {
+  background: var(--card2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  text-align: left;
+}
+.slot-who { flex: 1; min-width: 10em; }
+.slot.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.slot-tag {
+  font-size: .74rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--accent);
+  font-weight: 700;
+}
+.slot.pick { cursor: pointer; font: inherit; color: var(--ink); width: 100%; }
+.slot.pick:hover { background: var(--card); border-color: var(--accent); }
+
+#sheet-body input[type="text"] {
+  flex: 1;
+  min-width: 8em;
+  font: inherit;
+  color: var(--ink);
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 10px 12px;
+}
+#sheet-body input[type="text"]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
 /* ---------------- responsive ---------------- */
 
 @media (min-width: 760px) {
