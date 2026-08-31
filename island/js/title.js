@@ -159,7 +159,7 @@ let begin = null;
 export function mount(onStart) {
   root = document.getElementById('title');
   begin = onStart;
-  if (!root) { onStart(); return; }
+  if (!root) { onStart(false); return; }
   draw();
 }
 
@@ -222,5 +222,5 @@ function hide() {
   if (root) root.classList.add('hidden');
   const go = begin;
   begin = null;
-  if (go) go();
+  if (go) go(true);         // a finger got us here, which the soundtrack needs
 }

@@ -289,6 +289,11 @@ continuously and there is nothing to lose by leaving.
 The world is built behind it either way, so *Keep going* is instant. Nothing
 walks and no nudges appear until a player has been chosen -- a toast about an
 animal being ready to grow is no use to somebody still deciding who they are.
+The soundtrack waits for the same moment, rather than starting over the home page
+while a kid is still typing a name. Choosing an island other than the loaded one
+reloads, and a reload carries no user activation, so the music starts on the first
+tap inside the game instead: it retries until the audio context is really
+running, rather than hanging off one listener that fires once and gives up.
 
 ## Saving
 
@@ -364,7 +369,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,820
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,822
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -396,7 +401,10 @@ checks in the browser, including:
   page of its own to read, held to the same reading level as everything else
 - every region has a soundtrack theme with a sane tempo, root note, four bars of
   chords and a five-note scale, and the regions do not all sit in the same key
-- the note scheduler starts, changes region and stops without throwing
+- the note scheduler starts, changes region and stops without throwing, and
+  reports an audio context state main.js can act on -- it retries the soundtrack
+  on the next tap when the context came up blocked, and a rename of that field
+  would quietly turn the retry into never
 - **a save survives the round trip** — what an export writes has to come back out
   of an import identical, field for field, and a slot can be exported without
   being the one loaded

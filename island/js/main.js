@@ -37,6 +37,11 @@ let stepParity = 0;
 const announced = new Set();   // growth nudges already given this session
 let waterFrame = 0;
 let waterAt = 0;
+/* Up here with the rest of the module state because boot calls begin(), which
+   reads all three, long before the lines that use them appear below. */
+let playing = false;      // a player has been chosen and the island is in front
+let asked = false;        // storage persistence has been asked for
+let audioUp = false;      // the soundtrack has been told to start
 
 /* ---------------- boot ---------------- */
 
@@ -57,28 +62,45 @@ if (title.needed()) {
   U.setInputBlock(true);
   title.mount(begin);
 } else {
-  begin();
+  begin(false);
 }
 
-function begin() {
+/* `fromTap` says whether a finger got us here. Choosing a player on the home
+   page did; arriving after the reload that switching islands causes did not, and
+   building an audio context without one only earns a blocked-autoplay warning in
+   the console. */
+function begin(fromTap) {
+  playing = true;
   U.setInputBlock(false);
   checkGrowth();
+  if (fromTap) onGesture();
 }
 
 /* Browsers will not let audio start before the player has touched something, so
-   the soundtrack waits for the first key press or tap rather than trying at boot
-   and being silently blocked. */
-let musicStarted = false;
-function firstGesture() {
-  if (musicStarted) return;
-  musicStarted = true;
+   both of these wait for a gesture -- but they want different ones.
+
+   Persistence is granted on engagement, so it is asked for on the earliest tap
+   there is, home page included, and nothing waits on the answer.
+
+   The soundtrack belongs to the island. Starting it over the home page while a
+   kid is still typing their name is wrong, so it waits for the game to actually
+   begin. That makes it possible to arrive with no gesture left to use: choosing
+   an island other than the loaded one reloads the page, and a reload does not
+   carry user activation. Hence a retry rather than a once-only listener: the
+   first tap inside the game picks it up, and if a context did come up suspended,
+   audio.js resumes it every time it is asked for one. */
+function onGesture() {
+  if (!asked) {
+    asked = true;
+    askToPersist();
+  }
+  if (!playing) return;
+  if (audioUp && music.status().contextState === 'running') return;
+  audioUp = true;
   music.unlock(P.map);
-  // Persistence is granted on engagement, so the first tap is the earliest a
-  // browser is willing to say yes. Nothing waits on the answer.
-  askToPersist();
 }
-window.addEventListener('pointerdown', firstGesture, { once: true, capture: true });
-window.addEventListener('keydown', firstGesture, { once: true, capture: true });
+window.addEventListener('pointerdown', onGesture, { capture: true });
+window.addEventListener('keydown', onGesture, { capture: true });
 
 /* An animal becoming ready to grow is easy to miss, so say so once, and keep a
    dot on the Team button until it has been dealt with.
@@ -531,5 +553,5 @@ if (window.matchMedia) {
 /* Nothing should be playing into a background tab. */
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) music.suspend();
-  else if (musicStarted && S.musicOn) music.resume();
+  else if (audioUp && S.musicOn) music.resume();
 });

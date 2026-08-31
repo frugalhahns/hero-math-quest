@@ -972,6 +972,11 @@ head('soundtrack engine');
   ok(!threw, 'starting the soundtrack and changing region throws nothing', threw || '');
   const st = musicStatus();
   ok(st.running, 'the note scheduler is running', JSON.stringify(st));
+  /* main.js reads this field to decide whether the soundtrack really started or
+     came up blocked, and retries on the next tap if it did. A rename here would
+     silently turn that retry into "never". */
+  ok(['running', 'suspended', 'closed', 'interrupted', 'none'].includes(st.contextState),
+    'status() reports an audio context state main.js can act on', String(st.contextState));
   // a suspended context has a frozen clock, so only assert progress if it is live
   if (st.contextState === 'running') {
     ok(st.steps > 0, 'the scheduler queued notes', `${st.steps} steps`);
