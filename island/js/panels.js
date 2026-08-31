@@ -4,7 +4,7 @@
    text away. */
 
 import { S, save, resetAll, accuracy, slotName, activeSlot, clearEntered } from './state.js';
-import { QUEST, DOCS } from './content/quests.js';
+import { QUEST, DOCS, SIGNS } from './content/quests.js';
 import { SPECIES, BY_ID } from './content/pokemon.js';
 import { PROJECTS } from './content/projects.js';
 import { REGIONS } from './content/entities.js';
@@ -69,7 +69,9 @@ export function openJournal() {
 
     <h3>Your reading</h3>
     <div class="passage">
-      <p>Questions answered: <b>${S.asked}</b><br>
+      <p>Signs worked out: <b>${Object.keys(S.worked).length}</b> of <b>${
+        Object.values(SIGNS).filter(s => s.q).length}</b><br>
+      Questions answered: <b>${S.asked}</b><br>
       Got right: <b>${S.right}</b> (<b>${accuracy()}%</b>)<br>
       Words you looked up: <b>${S.looked}</b><br>
       Animal friends: <b>${S.team.length}</b> of <b>${SPECIES.length}</b><br>

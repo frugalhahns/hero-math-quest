@@ -51,7 +51,8 @@ const DEFAULT = {
   step: 0,                // index into content/quests.js QUEST
   flags: {},              // docId -> true, once its questions are answered
   read: {},               // docId -> times opened
-  signs: {},              // signId -> true
+  signs: {},              // signId -> true, once its text has been read
+  worked: {},             // signId -> true, once its question has been answered right
   team: [],               // species ids, in the order they joined
   stage: {},              // speciesId -> how many times it has grown
   joinedAt: {},           // speciesId -> the chain step it joined on

@@ -369,21 +369,217 @@ export const DOCS = {
   }
 };
 
-/* Short notes on signs and scenery. No questions. They reward looking around,
-   and two of them carry a detail that a document depends on. */
+/* Signs. Short notes on scenery, and the island's numbers.
+
+   Documents ask you what a page said. Signs ask you what the numbers on them
+   mean, which is the same skill with the answer checkable: a tide board, a
+   plank tally, a trail marker and a water intake all carry figures in real
+   life, so the arithmetic is written into the world rather than bolted onto
+   it. Every number a question needs is on the sign in front of you -- except
+   two, marked `from`, where it is on a sign in a region you have already been
+   through, and remembering it is the point.
+
+   `code` is the Common Core grade 3 standard the question answers to. Most of
+   these are 3.OA.D.8, two-step word problems, which is the one standard in the
+   grade that needs a story to exist -- and so the one the drill worlds in this
+   repo cannot cover. Keep the stems under 18 words and the choices under 14:
+   a word problem nobody can read is not a reading game.
+
+   `gives` is handed over once, the first time the question is answered right. */
 export const SIGNS = {
-  beachSign:  ['VERDANT ISLE RANGER STATION', 'Landing beach. Cabin to the northwest. Dock to the southeast.', 'Ranger E. Elm, nine years here. Please do not feed the Snorlax.'],
-  dockSign:   ['The boards past this post are older than the post is.', 'Walk out to the far end if you have to. Do not run.'],
-  cabinDoor:  ['The cabin door is locked from the inside. The key is gone.', 'A notice is nailed to it, right at eye height.'],
-  rockFinger: ['A long line of grey stone runs out into the water.', 'At low tide it throws a long shadow across the sand.'],
-  pondSign:   ['MEADOW WATER INTAKE. Keep the reeds off the screen.', 'Somebody scratched underneath: "the yellow one lives on the little island"'],
-  brookSign:  ['The brook runs from north to south. Mushrooms crowd both banks.', 'The dirt here sinks under your boot like bread.'],
-  rowanTree:  ['Rowan. The berries are small and orange and they smell very strong.', 'They are ripe all season long.'],
-  marshPost:  ['HALF SALT WATER. DO NOT CUT THE REEDS.', 'Underneath, in different writing: "second year. four years. never again."'],
-  cavernWall: ['Somebody scratched a line into the rock at shoulder height.', 'Above the line: HIGH WATER. Below the line: YOU DROWN.'],
-  ridgeMarker:['A trail marker, snapped off at the bottom and wedged back up.', 'The arrow points up.'],
-  terrace:    ['Old stone steps go down the west face and hold the slope together.', 'There is not one tool mark on any of the stones.'],
-  vaultCache: ['A tin box, dry inside. A spare pencil, a boot lace, and a note.', '"If you are reading this, you got it awake. That means you read the wall. You will be fine."']
+  beachSign: {
+    text: [
+      'VERDANT ISLE RANGER STATION',
+      'Landing beach. Cabin to the northwest. Dock to the southeast.',
+      'Ranger E. Elm, nine years here. Elm walks the beach twice a day, every day. Please do not feed the Snorlax.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.A.3',
+      q: 'Elm walks the beach twice a day. How many walks is that in one week?',
+      choices: ['14 walks', '7 walks', '9 walks', '21 walks'],
+      answer: 0,
+      why: 'Two walks a day, and seven days in a week. 2 times 7 is 14.'
+    }
+  },
+
+  dockSign: {
+    text: [
+      'The boards past this post are older than the post is.',
+      'Walk out to the far end if you have to. Do not run.',
+      'A tally is burned into the post: 24 BOARDS LAID. 6 SWAPPED FOR NEW ONES.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.NBT.A.2',
+      q: '24 boards, and 6 of them are new. How many are still the old ones?',
+      choices: ['18 boards', '6 boards', '30 boards', '24 boards'],
+      answer: 0,
+      why: '24 boards in all. Take away the 6 new ones and 18 old ones are left.'
+    }
+  },
+
+  cabinDoor: {
+    text: [
+      'The cabin door is locked from the inside. The key is gone.',
+      'A notice is nailed to it, right at eye height.',
+      'A card hangs in the window: GONE UP THE RIDGE. BACK IN 3 DAYS. The card is dated the 5th.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.MD.A.1',
+      q: 'The card is dated the 5th and says back in 3 days. Which day is that?',
+      choices: ['The 8th', 'The 3rd', 'The 5th', 'The 15th'],
+      answer: 0,
+      why: 'Start at the 5th and count on 3 days. 5 and 3 is 8.'
+    }
+  },
+
+  rockFinger: {
+    text: [
+      'A long line of grey stone runs out into the water.',
+      'At low tide it throws a long shadow across the sand.',
+      'A tide board is bolted to the first rock: LOW WATER 2:00. THE SEA COMES BACK UP 2 FEET AN HOUR. THIS ROCK STANDS 6 FEET ABOVE LOW WATER.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.D.8',
+      q: 'When does the sea come back up to the top of this rock?',
+      choices: ['5:00', '3:00', '6:00', '8:00'],
+      answer: 0,
+      why: '6 feet at 2 feet an hour is 3 hours. 3 hours after 2:00 is 5:00.'
+    }
+  },
+
+  pondSign: {
+    text: [
+      'MEADOW WATER INTAKE. Keep the reeds off the screen.',
+      'A card is wired to the frame: THIS PIPE FILLS THE DRUM. 5 LITRES A MINUTE. THE DRUM HOLDS 40 LITRES.',
+      'Somebody scratched underneath: "the yellow one lives on the little island"'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.MD.A.2',
+      q: 'The pipe gives 5 litres a minute. How long does the whole drum take?',
+      choices: ['8 minutes', '5 minutes', '40 minutes', '35 minutes'],
+      answer: 0,
+      why: '40 litres, and 5 litres each minute. 40 split into 5s is 8 minutes.'
+    }
+  },
+
+  brookSign: {
+    text: [
+      'The brook runs from north to south. Mushrooms crowd both banks.',
+      'The dirt here sinks under your boot like bread.',
+      'A stake by the water: 9 CLUMPS ON EACH BANK. 4 MUSHROOMS TO A CLUMP.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.D.8',
+      q: '9 clumps on each bank, 4 to a clump. How many mushrooms in all?',
+      choices: ['72 mushrooms', '36 mushrooms', '48 mushrooms', '13 mushrooms'],
+      answer: 0,
+      why: '9 times 4 is 36 on one bank. There are two banks, so 36 and 36 is 72.'
+    }
+  },
+
+  rowanTree: {
+    text: [
+      'Rowan. The berries are small and orange and they smell very strong.',
+      'They are ripe all season long.',
+      'A ranger tag hangs from a low branch: TAKE NO MORE THAN A THIRD OF ANY BUNCH. The bunch by your hand holds 12.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.A.2',
+      q: 'A third of the 12 berries in this bunch. How many may you take?',
+      choices: ['4 berries', '3 berries', '6 berries', '12 berries'],
+      answer: 0,
+      why: 'A third means one part out of three. 12 split into 3 equal parts is 4 in each.'
+    }
+  },
+
+  marshPost: {
+    text: [
+      'HALF SALT WATER. DO NOT CUT THE REEDS.',
+      'Underneath, in different writing: "second year. four years. never again."',
+      'A ranger note in pencil: THE MEADOW DRUM FILLS FROM HERE TOO. HALF OF WHAT IT HOLDS COMES OUT OF THIS MARSH.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.A.2',
+      from: 'pondSign',
+      q: 'Half of the meadow drum comes from here. How many litres is that?',
+      choices: ['20 litres', '40 litres', '5 litres', '80 litres'],
+      answer: 0,
+      why: 'The card at the meadow intake said the drum holds 40 litres. Half of 40 is 20.'
+    }
+  },
+
+  cavernWall: {
+    text: [
+      'Somebody scratched a line into the rock at shoulder height.',
+      'Above the line: HIGH WATER. Below the line: YOU DROWN.',
+      'Beside it, small and neat: THE LINE IS 5 FEET UP. THE WATER CLIMBS 1 FOOT EVERY 20 MINUTES.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.D.8',
+      q: 'The water is 1 foot deep now. How long until it reaches the line?',
+      choices: ['80 minutes', '100 minutes', '60 minutes', '20 minutes'],
+      answer: 0,
+      why: 'From 1 foot up to 5 feet is 4 feet. 4 times 20 minutes is 80 minutes.'
+    }
+  },
+
+  vaultCache: {
+    text: [
+      'A tin box, dry inside. A spare pencil, a boot lace, a candle, and a note.',
+      '"If you are reading this, you got it awake. That means you read the wall. You will be fine."',
+      'On the back of the note: "I left 3 boxes like this one, packed the same way. Find them all."'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.A.3',
+      q: 'She left 3 boxes packed like this one. How many things is that in all?',
+      choices: ['12 things', '4 things', '7 things', '3 things'],
+      answer: 0,
+      why: 'This box holds 4 things: a pencil, a lace, a candle, a note. 3 boxes of 4 is 12.'
+    }
+  },
+
+  ridgeMarker: {
+    text: [
+      'A trail marker, snapped off at the bottom and wedged back up.',
+      'The arrow points up.',
+      'The paint on the post still reads: SUMMIT 3 MILES. 4 MARKERS TO EVERY MILE. 2 OF THEM ARE DOWN.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.D.8',
+      q: '4 markers a mile for 3 miles, and 2 are down. How many still stand?',
+      choices: ['10 markers', '12 markers', '14 markers', '6 markers'],
+      answer: 0,
+      why: '4 markers times 3 miles is 12. Take away the 2 that are down and 10 still stand.'
+    }
+  },
+
+  terrace: {
+    text: [
+      'Old stone steps go down the west face and hold the slope together.',
+      'There is not one tool mark on any of the stones.',
+      'A note is wedged under a stone: THESE STEPS RISE AS HIGH AS THE HIGH WATER LINE DOWN IN THE CAVES. 3 STEPS TO EVERY FOOT.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.D.8',
+      from: 'cavernWall',
+      q: 'The steps rise as high as the cave line. How many steps is that?',
+      choices: ['15 steps', '5 steps', '3 steps', '9 steps'],
+      answer: 0,
+      why: 'The wall down in the caves said the line is 5 feet up. 5 feet at 3 steps each is 15.'
+    }
+  }
 };
 
 /* ------------------------------------------------------------------ */

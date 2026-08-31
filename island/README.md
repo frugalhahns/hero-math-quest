@@ -16,6 +16,13 @@ words cut into a cave wall — and the writing is the only place the answer exis
 You read it, you answer questions about it, and then you have to work out where
 that means you should go.
 
+Two things ask you questions, and they ask different ones. **Documents** ask what
+a page said. **Signs** ask what the numbers on them mean -- a tide board, a plank
+tally, a water intake, a trail marker. A word problem is not a break from reading
+comprehension; it is the densest form of it, as long as the numbers cannot be
+found without reading. That rule is enforced by the self test, not by good
+intentions: every figure a sign's question needs has to be printed on the sign.
+
 Three loops, all driven by text:
 
 1. **Find out what to do.** A document explains the next problem without pointing
@@ -35,6 +42,27 @@ Krabby, planting is Chikorita, Bulbasaur or Oddish — so missing one animal is
 never a dead end. But the *order* still cannot be short-circuited: the reed walkway needs a digger → the diggers
 are in the grove → the grove is behind a rope crossing → the tablet explaining that
 crossing is the only thing that says it needs a carrier *and* a planter.
+
+## The signs, and the arithmetic on them
+
+Twelve signs, one question each, answered where you stand. They pay out a berry
+the first time you get one right and cost nothing when you do not -- a sign is
+optional, and punishing an optional thing is how you teach a kid to walk past it.
+The Journal counts how many you have worked out.
+
+The standards behind them are Common Core grade 3: `3.OA.D.8`, `3.OA.A.2`,
+`3.OA.A.3`, `3.NBT.A.2`, `3.MD.A.1` and `3.MD.A.2`. Five of the twelve are
+`3.OA.D.8` -- two-step word problems -- which is the one standard in the grade
+that needs a story to exist, and therefore the only one the drill worlds in this
+repo could never cover. The island can, because it has a story.
+
+Two of the twelve are recall questions. The number they need is not on the sign
+in front of you; it is on a sign in a region you have already walked through, and
+remembering it is the point. The marsh asks what the meadow intake said its drum
+holds. The ridge asks how high the high water line was down in the caves. The self
+test checks that the source sign exists, prints a number, and sits earlier in the
+chain than the question does -- so a recall question can never ask about something
+you have not been able to read yet.
 
 ## Reading a little at a time
 
@@ -369,7 +397,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~1,822
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~2,000
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -389,6 +417,13 @@ checks in the browser, including:
   currently averages **2.3**, and the hardest single passage is the Ditto page at
   3.2. It also enforces the page format: 3 pages minimum, 60 words maximum per
   page, 18 words maximum per question stem, 14 per answer choice
+- **every number a sign's question needs is printed on that sign** -- the rule
+  that stops a word problem decaying into arithmetic with scenery around it. The
+  two recall questions are the deliberate exception, and are checked harder: the
+  source sign has to exist, print a number, and sit in an earlier region than the
+  question, so it can never ask about a board you have not reached
+- every sign reads at or under the same grade as everything else, names the
+  standard it answers to, has no duplicate choices, and explains itself
 - every `{braced}` word has a definition and every definition is used
 - every vocabulary question asks about a word that appears in its own passage
 - every animal has a dex number, a sane overworld height, and **both sprite files

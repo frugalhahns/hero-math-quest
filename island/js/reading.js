@@ -7,7 +7,7 @@
    to the back of the queue and comes round again after you have read why. You
    cannot get stuck, and you cannot skip past something you did not follow. */
 
-import { S, save } from './state.js';
+import { S, save, give } from './state.js';
 import { DOCS, SIGNS } from './content/quests.js';
 import * as U from './ui.js';
 import { sfx } from './audio.js';
@@ -15,18 +15,73 @@ import { advance, step } from './quest.js';
 
 let afterDoc = null;
 
+/* A sign is read the same way a document is, and then it asks its one question.
+   Getting it right pays out once; getting it wrong costs nothing but a walk
+   back, because a sign is optional and punishing an optional thing is how you
+   teach a kid to walk past it. */
 export function openSign(signId, label) {
-  const lines = SIGNS[signId];
-  if (!lines) return;
+  const sign = SIGNS[signId];
+  if (!sign) return;
   S.signs[signId] = true;
   save();
+  const ask = !!sign.q;
   U.readPages({
     title: 'You look closer',
     kicker: label || 'Somewhere on Verdant Isle',
-    pages: lines,
-    doneLabel: 'Done',
-    onDone: () => U.closeSheet(true)
+    pages: sign.text,
+    doneLabel: ask ? (S.worked[signId] ? 'Work it out again' : 'Work it out') : 'Done',
+    onDone: () => (ask ? askSign(signId, sign, label) : U.closeSheet(true))
   });
+}
+
+function askSign(signId, sign, label) {
+  const q = sign.q;
+  const body = U.updateSheet(`
+    <h2>Work it out</h2>
+    <p class="kicker">${U.esc(q.from
+      ? 'The number you want is on a sign you have already read'
+      : 'Everything you need is on the sign')}</p>
+    <div class="row" style="margin-bottom:14px">
+      <button class="btn ghost small" type="button" id="reread">Read it again</button>
+    </div>
+    <div id="qhost"></div>`);
+
+  body.querySelector('#reread').addEventListener('click', () => {
+    U.readPages({
+      title: 'You look closer',
+      kicker: label || 'Somewhere on Verdant Isle',
+      pages: sign.text,
+      doneLabel: 'Back to the question',
+      first: false,
+      onDone: () => askSign(signId, sign, label)
+    });
+  });
+
+  const first = !S.worked[signId];
+  U.askOne(body.querySelector('#qhost'), q, ok => {
+    if (!ok) {
+      U.closeSheet(true);
+      U.toast('Have another look at it, then come back.', 3200);
+      return;
+    }
+    if (first) {
+      S.worked[signId] = true;
+      if (sign.gives) give(sign.gives, 1);   // give() saves
+      else save();
+      sfx.item();
+    }
+    U.updateSheet(`
+      <h2>${first ? 'Worked out' : 'Right again'}</h2>
+      ${U.passageHTML([first
+        ? 'Tucked behind the sign, where only somebody who stopped to work it out would think to look:'
+        : 'Same answer as last time, and still the right one.'])}
+      ${first && sign.gives
+        ? `<div class="why">Picked up: <b>a Rowan berry</b>. You have <b>${S.items[sign.gives] || 0}</b>.</div>`
+        : ''}
+      <div class="row end" style="margin-top:16px">
+        <button class="btn" type="button" data-close>Good</button>
+      </div>`);
+  }, { label: 'Work it out', nextLabel: 'Done' });
 }
 
 export function openDoc(docId, opts = {}) {

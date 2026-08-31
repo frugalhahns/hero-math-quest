@@ -353,7 +353,10 @@ for (const sp of SPECIES) {
   sp.passage.text.forEach(t => scan(sp.id, t));
   sp.questions.forEach(q => { scan(sp.id, q.q); q.choices.forEach(c => scan(sp.id, c)); scan(sp.id, q.why); });
 }
-Object.values(SIGNS).forEach((lines, i) => lines.forEach(l => scan('sign ' + i, l)));
+for (const [id, s] of Object.entries(SIGNS)) {
+  s.text.forEach(l => scan('sign ' + id, l));
+  if (s.q) { scan('sign ' + id, s.q.q); s.q.choices.forEach(c => scan('sign ' + id, c)); scan('sign ' + id, s.q.why); }
+}
 ok(missing.size === 0, 'every {braced} word has a definition', [...missing].join(', '));
 const unused = Object.keys(GLOSSARY).filter(w => !used.has(w));
 ok(unused.length === 0, 'no unused glossary entries', unused.join(', '));
@@ -939,6 +942,85 @@ head('the home page');
     ok(!h.includes('undefined') && !h.includes('NaN') && !h.includes('null'),
       'the page never draws a hole where a field was missing');
   }
+}
+
+/* ---------------- the signs and their arithmetic ---------------- */
+/* Signs carry the island's numbers. The rule that keeps them honest is the one
+   below: every number a question needs has to be printed on the sign the reader
+   is standing in front of, so the problem cannot be solved by pattern-matching
+   two digits and guessing an operation -- you have to read the board. The two
+   recall questions are the deliberate exception, and they are checked harder:
+   the number lives on a sign in a region you have already walked through. */
+head('sign arithmetic');
+
+const REGION_ORDER = ['beach', 'meadow', 'grove', 'marsh', 'caverns', 'ridge'];
+const signMap = {};
+for (const e of ENTITIES) if (e.kind === 'sign') signMap[e.sign] = e.map;
+
+const digitsIn = s => (String(s).match(/\d+/g) || []);
+
+const signList = Object.entries(SIGNS);
+const withQ = signList.filter(([, s]) => s.q);
+ok(signList.length === withQ.length, 'every sign asks something', `${withQ.length} of ${signList.length}`);
+
+for (const [id, s] of signList) {
+  ok(Array.isArray(s.text) && s.text.length >= 2, `${id}: has something to read`, String(s.text && s.text.length));
+  const long = s.text.map((x, i) => ({ i, n: grade(x).words })).filter(x => x.n > MAX_PAGE_WORDS);
+  ok(long.length === 0, `${id}: no page over ${MAX_PAGE_WORDS} words`, long.map(x => `page ${x.i + 1} = ${x.n}`).join(', '));
+  const g = grade(s.text.join(' '));
+  ok(g.fk <= TARGET, `${id}: reads at ${g.fk.toFixed(1)}, at or under ${TARGET.toFixed(1)}`, `${g.words} words`);
+
+  const q = s.q;
+  if (!q) continue;
+  ok(/^[34]\.[A-Z]+\.[A-Z]\.\d+$/.test(q.code || ''), `${id}: names the standard it answers to`, String(q.code));
+  ok(typeof q.q === 'string' && q.q.length > 8, `${id}: has a question`);
+  ok(Array.isArray(q.choices) && q.choices.length >= 3, `${id}: at least three choices`, String(q.choices && q.choices.length));
+  ok(new Set(q.choices).size === q.choices.length, `${id}: no two choices are the same`, q.choices.join(' | '));
+  ok(Number.isInteger(q.answer) && q.answer >= 0 && q.answer < q.choices.length,
+    `${id}: the answer is one of the choices`, String(q.answer));
+  ok(typeof q.why === 'string' && q.why.length > 20, `${id}: explains itself afterwards`);
+  ok(grade(q.q).words <= 18, `${id}: the question fits in 18 words`, String(grade(q.q).words));
+  const wide = q.choices.filter(c => grade(c).words > 14);
+  ok(wide.length === 0, `${id}: no choice runs over 14 words`, wide.join(' | '));
+  ok(grade(q.q + ' ' + q.choices.join('. ') + ' ' + q.why).fk <= TARGET,
+    `${id}: the question reads at or under ${TARGET.toFixed(1)}`,
+    grade(q.q + ' ' + q.choices.join('. ') + ' ' + q.why).fk.toFixed(1));
+  ok(!q.gives || ['berries', 'crank'].includes(s.gives), `${id}: pays out something the game knows`, String(s.gives));
+
+  /* the rule */
+  const onSign = digitsIn(s.text.join(' '));
+  const source = q.from ? SIGNS[q.from] : null;
+  const pool = source ? onSign.concat(digitsIn(source.text.join(' '))) : onSign;
+  const missing = digitsIn(q.q).filter(d => !pool.includes(d));
+  ok(missing.length === 0,
+    `${id}: every number the question uses is printed where the reader can find it`,
+    missing.join(', '));
+
+  if (q.from) {
+    ok(!!source, `${id}: the sign it remembers back to exists`, String(q.from));
+    if (source) {
+      const here = REGION_ORDER.indexOf(signMap[id]);
+      const there = REGION_ORDER.indexOf(signMap[q.from]);
+      ok(there >= 0 && here >= 0 && there < here,
+        `${id}: remembers back to ${q.from}, which is a region you have already walked`,
+        `${signMap[q.from]} (${there}) then ${signMap[id]} (${here})`);
+      ok(digitsIn(source.text.join(' ')).length > 0,
+        `${id}: and that sign actually prints a number`, source.text.join(' '));
+      ok(q.why.toLowerCase().includes(signMap[q.from]) || /said|sign|wall|card/i.test(q.why),
+        `${id}: the explanation says where the number came from`, q.why);
+    }
+  }
+}
+
+/* Two-step word problems are the one grade 3 standard that needs a story, which
+   is why the drill worlds in this repo have never covered it. */
+{
+  const codes = withQ.map(([, s]) => s.q.code);
+  const recall = withQ.filter(([, s]) => s.q.from);
+  ok(codes.filter(c => c === '3.OA.D.8').length >= 3, 'the island carries its share of two-step word problems',
+    `${codes.filter(c => c === '3.OA.D.8').length} of ${codes.length}`);
+  ok(recall.length === 2, 'exactly two questions ask you to remember a number', recall.map(r => r[0]).join(', '));
+  note(`standards on the signs: ${[...new Set(codes)].sort().join(', ')}`);
 }
 
 /* ---------------- render smoke test ---------------- */
