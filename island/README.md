@@ -534,6 +534,30 @@ checks in the browser, including:
 The report is flushed to the page after every section rather than only at the end,
 so if something does stall you can see exactly where it stopped.
 
+## Flow test
+
+`selftest.html` proves the content and never presses a button, which turned out to
+be a gap I had been papering over: "the content is right" and "the game works" are
+different claims, and I was making the second on the evidence of the first.
+
+`island/flowtest.html` presses the buttons. The real game shell is underneath the
+report and every check is a genuine click on a genuine handler — 39 of them:
+
+- page through a sign, work out its question, take the berry, and find the save
+  marked afterwards; then do it again and confirm it does not pay twice
+- get one wrong: it explains, marks nothing, costs nothing
+- a recall sign says the number is on a sign you have already read, and does not
+  print the number in the question
+- a document opens, pages, asks 2 of the 3 questions it carries, and logs the step
+- reading the notice, then the chart, then the guide opens the beach 2 → 5 → 9 → 13
+- befriending a beach animal takes two right answers, and then it joins you
+- the home page offers a new player, takes a name, and starts the game with the
+  island named after you
+
+It borrows the same `localStorage` the game on this browser uses, copies every
+`vi.*` key first, puts them back in a `finally`, and the last check proves the
+restore was exact.
+
 The solvability simulation and the reading-level check are the two worth keeping.
 One catches a requirement chain that has quietly become impossible; the other
 catches prose drifting back above the target, which is very easy to do when editing
@@ -544,6 +568,7 @@ content.
 ```
 index.html          the shell: canvas, sprite layer, top bar, touch pad, sheet
 selftest.html       content, reachability, reading-level and save-file assertions
+flowtest.html       the same game, driven by real clicks on real buttons
 manifest.json       so it can be installed, which is how iOS keeps the save
 icons/              the two app icons, and the script that drew them
 css/island.css      one stylesheet, light and dark
