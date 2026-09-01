@@ -8,7 +8,7 @@ import * as W from './world.js';
 import { TS, VIEW_W, VIEW_H } from './world.js';
 import { bake } from './pixels.js';
 import * as U from './ui.js';
-import { advance, refreshBar } from './quest.js';
+import { advance, refreshBar, markers } from './quest.js';
 import { openDoc, openSign } from './reading.js';
 import { meet } from './encounter.js';
 import { openBuildList, openProject } from './build.js';
@@ -218,24 +218,57 @@ function chevron(cx, y, half, color) {
    covered in markers. */
 /* How close you have to be before an unread thing puts a marker up. A whole
    region's worth of them at once is not a map, it is a checklist, and the beach
-   had fifteen. Near enough to see, and no further. */
+   had fifteen. Near enough to see, and no further.
+
+   The step you are actually on is the exception: it is marked from anywhere in
+   the region, and pointed at from the edge of the screen when it is off it.
+   That is not the arrow this game promised never to draw. The arrow it will not
+   draw is the one that tells you what to do -- that is only ever in the writing,
+   and you still have to read the thing when you get there. Finding a post on a
+   35 by 24 grid is not comprehension, it is hunting, and an 8 year old who
+   cannot find the next page just stops playing. */
 const MARKER_RANGE = 5;
 
 function drawMarkers(cam, now) {
   const bounce = Math.sin(now / 260);
   const facingT = facing();
 
-  for (const e of W.visibleEntities(P.map, S)) {
+  /* quest.js decides what is worth marking; this only draws it. The facing
+     tile is added on top, because that one is about what you are pointing at
+     rather than what you have left to do. */
+  const list = markers(P.map, S, P.x, P.y, MARKER_RANGE);
+  const faced = W.visibleEntities(P.map, S)
+    .find(e => e.x === facingT.x && e.y === facingT.y);
+  if (faced && !list.some(m => m.e === faced)) list.push({ e: faced, goal: false });
+
+  for (const { e, goal: wanted } of list) {
     const isFacing = e.x === facingT.x && e.y === facingT.y;
-    const near = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y)) <= MARKER_RANGE;
-    if (!isFacing && (!unexamined(e) || !near)) continue;
 
     const sx = Math.round((e.x - cam.cx) * TS);
     const sy = Math.round((e.y - cam.cy) * TS);
-    if (sx < -TS || sy < -TS || sx > heroCanvas.width || sy > heroCanvas.height) continue;
-    const cx = sx + 8;
+    if (sx < -TS || sy < -TS || sx > heroCanvas.width || sy > heroCanvas.height) {
+      if (wanted && !isFacing) edgeArrow(e, cam, bounce);
+      continue;
+    }
+    /* The camera stops at the edge of the map, so a thing standing in the first
+       column renders at x=0 and a marker centred over it loses half of itself to
+       the frame. The goal marker is the one that has to survive that. */
+    const cx = wanted && !isFacing
+      ? Math.min(Math.max(sx + 8, 8), heroCanvas.width - 8)
+      : sx + 8;
 
-    if (isFacing) {
+    if (wanted && !isFacing) {
+      /* The thing the step is about. Bigger than the rest and always up, however
+         far away it is: this is the one a kid has to be able to pick out of a
+         busy tile without being told twice. */
+      const y = sy - 11 + Math.round(bounce * 2);
+      chevron(cx, y - 1, 6, '#12301f');
+      chevron(cx, y, 5, '#7ee2a8');
+      hctx.fillStyle = '#12301f';
+      hctx.fillRect(cx - 2, y - 8, 4, 5);
+      hctx.fillStyle = '#7ee2a8';
+      hctx.fillRect(cx - 1, y - 7, 2, 4);
+    } else if (isFacing) {
       // a ring on the tile, so it is obvious which square is being talked about
       hctx.strokeStyle = 'rgba(255, 212, 94, 0.95)';
       hctx.lineWidth = 1;
@@ -254,6 +287,39 @@ function drawMarkers(cam, now) {
       hctx.globalAlpha = 1;
     }
   }
+}
+
+/* The next thing to read is off the side of the screen, so say which side. A
+   small triangle pinned inside the edge, on the line from the player to it. */
+function edgeArrow(e, cam, bounce) {
+  const w = heroCanvas.width, h = heroCanvas.height;
+  const pad = 7;
+  const tx = (e.x - cam.cx) * TS + 8;
+  const ty = (e.y - cam.cy) * TS + 8;
+  const px = Math.min(Math.max(tx, pad), w - pad);
+  const py = Math.min(Math.max(ty, pad), h - pad);
+  const dx = tx - px, dy = ty - py;
+  const len = Math.hypot(dx, dy) || 1;
+  const ax = dx / len, ay = dy / len;
+  const wob = Math.round(bounce * 1.5);
+  const cx = px + ax * wob, cy = py + ay * wob;
+
+  hctx.beginPath();
+  hctx.moveTo(cx + ax * 5, cy + ay * 5);
+  hctx.lineTo(cx - ax * 4 - ay * 4, cy - ay * 4 + ax * 4);
+  hctx.lineTo(cx - ax * 4 + ay * 4, cy - ay * 4 - ax * 4);
+  hctx.closePath();
+  hctx.fillStyle = '#2b2410';
+  hctx.fill();
+  hctx.fillStyle = '#7ee2a8';
+  hctx.globalAlpha = 0.92;
+  hctx.beginPath();
+  hctx.moveTo(cx + ax * 3.5, cy + ay * 3.5);
+  hctx.lineTo(cx - ax * 3 - ay * 2.8, cy - ay * 3 + ax * 2.8);
+  hctx.lineTo(cx - ax * 3 + ay * 2.8, cy - ay * 3 - ax * 2.8);
+  hctx.closePath();
+  hctx.fill();
+  hctx.globalAlpha = 1;
 }
 
 function drawPlayer(rx, ry, cam, now) {
@@ -337,17 +403,6 @@ const KIND_VERB = {
   wild: 'Say hello', project: 'Take a look', rocket: 'See what they are up to'
 };
 
-/* Has this thing never been looked at? Used for the faint markers, so the map
-   shows what is left to find and then quietly stops nagging once it is done. */
-function unexamined(e) {
-  if (e.kind === 'doc') return !S.flags[e.doc];
-  if (e.kind === 'sign') return !S.signs[e.sign];
-  if (e.kind === 'dig') return !S.flags['dug:' + e.id];
-  if (e.kind === 'item') return !S.flags['took:' + e.id];
-  if (e.kind === 'project') return !S.projects[e.project];
-  if (e.kind === 'rocket') return !S.flags[e.doc];
-  return false;   // the animals are their own signpost, they do not need one
-}
 
 const actBtn = document.getElementById('btn-act');
 

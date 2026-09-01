@@ -10,11 +10,20 @@ game can be written to a file you keep.
 
 ## The idea
 
-The game never puts an arrow on your map. Every step is written on something — a
+The game never tells you what to do. Every step is written on something — a
 notice nailed to a door, a tide chart in a metal box, a tablet by a stone circle,
 words cut into a cave wall — and the writing is the only place the answer exists.
 You read it, you answer questions about it, and then you have to work out where
 that means you should go.
+
+It *will* show you where the next thing to read is: the step you are on marks its
+own object from anywhere in the region, and points at it from the edge of the
+screen when it is off it. That line used to read "never puts an arrow on your
+map", and it cost more than it was worth. Finding a post on a 35 by 24 grid is
+not comprehension, it is hunting, and an 8 year old who cannot find the next page
+stops playing. Pointing is allowed; answering is not. Where the reading is the
+puzzle the pointing stays vague on purpose — the step that sends you digging
+marks *both* mounds, because working out which one is the whole question.
 
 Two things ask you questions, and they ask different ones. **Documents** ask what
 a page said. **Signs** ask what the numbers on them mean -- a tide board, a plank
@@ -66,7 +75,12 @@ regions are small enough not to need it.
 
 **Everything looked equally urgent.** A marker used to sit over every unread
 thing in the whole region. Now one appears when you are within five tiles, so the
-map shows what is near rather than everything that is left.
+map shows what is near rather than everything that is left — except the thing the
+current step is about, which is marked from anywhere in the region, in a brighter
+colour, with an arrow at the screen edge when it is off screen. Range-limiting
+the markers without that exception was a mistake I shipped for exactly one
+version: you land eleven tiles from the notice, so the first thing a new player
+saw was a beach with nothing marked on it at all.
 
 **Nothing said what was optional.** Signs are the only optional layer on the
 island -- every other kind is a step in the chain -- so the prompt on a sign now
@@ -445,6 +459,12 @@ checks in the browser, including:
 - every region crossing lands on a walkable, reachable tile and has a way back
 - every question's answer index is in range, has no duplicate choices, and has a
   real explanation
+- **you can always tell where to go** -- standing on the tile a new player
+  actually starts on, exactly one thing is marked and it is the notice the top
+  bar just named; every step's target resolves to a real entity in that step's
+  region; and as the solvability simulation walks the chain it checks that the
+  step it is currently on points at something already visible, so the game can
+  never send a kid to a place that has not appeared yet
 - **the opening stays an opening** -- at most 3 things visible when you land and
   under 400 words in front of you (it is 2 and 183), at most 14 questions and
   1,800 words before the first gate (it is 11 and 784), and every wave of the

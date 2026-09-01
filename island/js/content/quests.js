@@ -588,108 +588,135 @@ export const SIGNS = {
 /* ------------------------------------------------------------------ */
 /* The trip. Each entry is one step; `done` reads the save file. */
 
+/* `target` is what the step is pointing at, so the map can show where the next
+   thing to read actually is. It never says what to do -- that is only ever in
+   the writing -- and where the reading is the puzzle it stays vague on purpose:
+   the crank step marks both mounds, because which one to dig is the whole
+   comprehension question. `id` is optional; without it any entity of that kind
+   in the step's region counts, which is what the "find two helpers" steps want. */
 export const QUEST = [
   { id: 'notice', where: 'beach',
+    target: { kind: 'doc', id: 'notice' },
     objective: 'Read the notice nailed to the cabin door.',
     log: 'Ranger Elm has left the island. You look after it now.',
     done: s => !!s.flags.notice },
 
   { id: 'tidechart', where: 'beach',
+    target: { kind: 'doc', id: 'tidechart' },
     objective: 'Elm said the tide chart is in a metal box. Go find it and read it.',
     log: 'The chart is in the box at the far end of the dock.',
     done: s => !!s.flags.tidechart },
 
   { id: 'crank', where: 'beach',
+    target: { kind: 'dig' },
     objective: 'The chart says where the iron handle is buried. Go dig it up.',
     log: 'Dig where the rock finger shadow ends. Not the near end.',
     done: s => (s.items.crank || 0) >= 1 },
 
   { id: 'fieldguide', where: 'beach',
+    target: { kind: 'doc', id: 'fieldguide' },
     objective: 'Read Elm\'s page about who can work the gate.',
     log: 'The gate needs two helpers. Elm described both without naming them.',
     done: s => !!s.flags.fieldguide },
 
   { id: 'helpers1', where: 'beach',
+    target: { kind: 'wild' },
     objective: 'Make friends with the two helpers Elm described.',
     log: 'A path finder from the bushes. A water finder from the shallows.',
     done: s => s.team.includes('pidgey') && s.team.includes('psyduck') },
 
   { id: 'gate', where: 'beach',
+    target: { kind: 'project', id: 'gate' },
     objective: 'Open the Build menu and lift the channel gate.',
     log: 'The gate can be lifted now.',
     done: s => !!s.projects.gate },
 
   { id: 'cairns', where: 'meadow',
+    target: { kind: 'doc', id: 'cairns' },
     objective: 'Meadow Hollow. Find the tablet by the stone circle and read it.',
     log: 'The stone circle is not a shrine. The tablet says what it really is.',
     done: s => !!s.flags.cairns },
 
   { id: 'helpers2', where: 'meadow',
+    target: { kind: 'wild' },
     objective: 'The tablet named two helpers for the gap. Go find them both.',
     log: 'One to carry the weight. One to grow the line.',
     done: s => s.team.includes('machop') && s.team.includes('chikorita') },
 
   { id: 'bridge', where: 'meadow',
+    target: { kind: 'project', id: 'bridge' },
     objective: 'Build the rope crossing over the west gap.',
     log: 'The gap can be crossed with rope grass and muscle.',
     done: s => !!s.projects.bridge },
 
   { id: 'shrine', where: 'grove',
+    target: { kind: 'doc', id: 'shrine' },
     objective: 'Whispering Grove. Read the plaque in the clearing.',
     log: 'The clearing was left unplanted on purpose. The plaque says why.',
     done: s => !!s.flags.shrine },
 
   { id: 'helper3', where: 'grove',
+    target: { kind: 'wild' },
     objective: 'The plaque said where the diggers come up. Go and wait there.',
     log: 'Brook banks, thickest mushrooms. Stand still and do not dig.',
     done: s => s.team.includes('diglett') },
 
   { id: 'boardwalk', where: 'meadow',
+    target: { kind: 'project', id: 'boardwalk' },
     objective: 'Build the reed walkway east of the meadow.',
     log: 'A digger sinks the posts. The bird finds the firm line.',
     done: s => !!s.projects.boardwalk },
 
   { id: 'ledger', where: 'marsh',
+    target: { kind: 'doc', id: 'ledger' },
     objective: 'Reed Marsh. Read the water notebook at the landing.',
     log: 'The notebook explains the marsh, and how to get underneath it.',
     done: s => !!s.flags.ledger },
 
   { id: 'helpers4', where: 'marsh',
+    target: { kind: 'wild' },
     objective: 'The notebook named the pair you need underground. Get them both.',
     log: 'A light carrier from the south channel. A sparker from the meadow.',
     done: s => s.team.includes('chinchou') && s.team.includes('pikachu') },
 
   { id: 'lantern', where: 'marsh',
+    target: { kind: 'project', id: 'lantern' },
     objective: 'Build the light line down the flooded tunnel.',
     log: 'No lanterns in the water. The Chinchou carries the light.',
     done: s => !!s.projects.lantern },
 
   { id: 'vault', where: 'caverns',
+    target: { kind: 'doc', id: 'vault' },
     objective: 'Tidepool Caves. Read the words cut into the wall by the sleeping one.',
     log: 'Something huge is asleep in the west room.',
     done: s => !!s.flags.vault },
 
   { id: 'berries', where: 'grove',
+    target: { kind: 'item', id: 'rowan' },
     objective: 'The wall said what wakes it, and where that grows. Go and get it.',
     log: 'Two Rowan berries. Rowan grows in exactly one place on this island.',
     done: s => (s.items.berries || 0) >= 2 },
 
   { id: 'snorlax', where: 'caverns',
+    target: { kind: 'wild', id: 'snorlax' },
     objective: 'Go back to the west room and wake the sleeping one.',
     log: 'Smell, not noise. A hand\'s width from its nose.',
     done: s => s.team.includes('snorlax') },
 
   { id: 'rockslide', where: 'grove',
+    target: { kind: 'project', id: 'rockslide' },
     objective: 'Clear the rock slide on the ridge trail, north of the grove.',
     log: 'Eight people moved a fifth of it. One Snorlax can finish it.',
     done: s => !!s.projects.rockslide },
 
   { id: 'summit', where: 'ridge',
+    target: { kind: 'doc', id: 'summit' },
     objective: 'Ash Ridge. Climb to the top and read Elm\'s last page.',
     log: 'The last thing Elm wrote is at the top of the ridge.',
     done: s => !!s.flags.summit },
 
   { id: 'ditto', where: 'ridge',
+    target: { kind: 'wild', id: 'ditto' },
     objective: 'One animal is left. Show it that you were paying attention.',
     log: 'It will not care about your team. Only about your reading.',
     done: s => s.team.includes('ditto') },

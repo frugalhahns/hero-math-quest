@@ -15,6 +15,7 @@ import { isKnownTile, isSolidTile } from './tileset.js';
 import * as W from './world.js';
 import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
 import { form, nextForm, canGrow, growableCount } from './evolve.js';
+import { isTarget, markers } from './quest.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 import {
@@ -175,9 +176,28 @@ head('progression is solvable in order');
      behind a dig you cannot see until you read it. So every kind is checked,
      not just the residents. */
   const here = e => reachableRegions.has(e.map) && (!e.when || e.when(sim));
+
+  /* Every step points at something with `target`, and the map marks it from
+     anywhere in the region. A step that points at an entity you cannot see yet
+     is worse than no arrow at all: the game would be telling a kid to go to a
+     place that is not there. So as the simulation walks the chain, the step it
+     is currently on has its target checked against what is actually visible. */
+  const blind = [];
+  const checked = new Set();
+  function checkTarget() {
+    let i = 0;
+    while (i < QUEST.length - 1 && QUEST[i].done(sim)) i++;
+    const q = QUEST[i];
+    if (!q.target || checked.has(q.id)) return;
+    checked.add(q.id);
+    const seen = ENTITIES.some(e => e.map === q.where && here(e) && isTarget(e, q.target) );
+    if (!seen) blind.push(`${q.id} wants ${q.target.kind}${q.target.id ? ' ' + q.target.id : ''} in ${q.where}`);
+  }
+
   let progressed = true, guard = 0;
   while (progressed && guard++ < 40) {
     progressed = false;
+    checkTarget();
     // read every document sitting in a reachable region
     for (const e of ENTITIES) {
       if (!here(e)) continue;
@@ -185,12 +205,14 @@ head('progression is solvable in order');
       if (e.kind === 'dig' && e.gives) sim.items[e.gives] = 1;
       if (e.kind === 'item' && e.gives) sim.items[e.gives] = 2;
     }
+    checkTarget();
     // befriend every resident in a reachable region whose gate items are held
     for (const e of ENTITIES) {
       if (e.kind !== 'wild' || !here(e)) continue;
       if (e.needsItem && (sim.items[e.needsItem.key] || 0) < e.needsItem.count) continue;
       if (!sim.team.includes(e.species)) { sim.team.push(e.species); progressed = true; }
     }
+    checkTarget();
     // build anything whose jobs are covered
     for (const p of PROJECTS) {
       if (sim.projects[p.id]) continue;
@@ -220,6 +242,42 @@ head('progression is solvable in order');
   let stepIdx = 0, spin = 0;
   while (stepIdx < QUEST.length - 1 && QUEST[stepIdx].done(sim) && spin++ < 100) stepIdx++;
   ok(stepIdx === QUEST.length - 1, 'quest chain runs to the last step', `stopped at ${stepIdx} (${QUEST[stepIdx].id})`);
+
+  ok(blind.length === 0, 'no step points at something you cannot see yet', blind.join(' | '));
+  note(`targets checked as the chain was walked: ${[...checked].join(', ')}`);
+}
+
+/* ---------------- what the step points at ---------------- */
+head('where to go next');
+{
+  const targeted = QUEST.filter(q => q.target);
+  ok(targeted.length >= QUEST.length - 1, 'every step but the last says what it is pointing at',
+    `${targeted.length} of ${QUEST.length}`);
+  for (const q of targeted) {
+    const hits = ENTITIES.filter(e => e.map === q.where && isTarget(e, q.target));
+    ok(hits.length > 0, `${q.id}: its target is a real thing standing in ${q.where}`,
+      `${q.target.kind}${q.target.id ? ' ' + q.target.id : ''}`);
+  }
+  /* The complaint this was built for: "it is not clear where he should go". So
+     stand on the tile a new player actually starts on and ask the map. */
+  {
+    const fresh = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0, worked: {} };
+    const lit = markers('beach', fresh, 17, 3, 5);
+    const goals = lit.filter(m => m.goal);
+    ok(goals.length === 1, 'you land and exactly one thing on the beach is marked',
+      lit.map(m => (m.e.doc || m.e.sign || m.e.id) + (m.goal ? ' (goal)' : '')).join(', ') || 'nothing');
+    ok(goals.length === 1 && goals[0].e.doc === 'notice', 'and it is the notice the top bar just told you to read',
+      goals.length ? String(goals[0].e.doc || goals[0].e.sign) : 'nothing');
+    ok(lit.length <= 3, 'and it is not competing with a screenful of others', String(lit.length));
+  }
+
+  /* Pointing is allowed. Answering is not: a target may say which post to walk
+     to, never which of two holes to dig, because that is the question. */
+  const dig = QUEST.find(q => q.id === 'crank');
+  ok(dig && dig.target && !dig.target.id, 'the digging step marks both mounds and picks neither',
+    JSON.stringify(dig && dig.target));
+  ok(ENTITIES.filter(e => e.map === 'beach' && e.kind === 'dig').length === 2,
+    'and there really are two of them to choose between');
 }
 
 /* ---------------- what the first ten minutes look like ---------------- */
