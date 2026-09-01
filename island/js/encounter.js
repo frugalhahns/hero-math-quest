@@ -53,7 +53,10 @@ export function meet(entity, onDone) {
   }
 
   const isFinal = sp.id === 'ditto';
-  const need = isFinal ? 5 : NEED;
+  /* The beach animals carry `need: 2`. The opening region is where a kid decides
+     whether this game is work, and three right answers each, on top of three
+     documents, was too long a first hour. Everywhere else keeps NEED. */
+  const need = isFinal ? 5 : (entity.need || NEED);
   const patience = isFinal ? 3 : PATIENCE;
 
   intro(sp, entity, need, patience, onDone);

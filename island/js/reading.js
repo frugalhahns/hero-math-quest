@@ -104,9 +104,26 @@ function showPassage(doc, alreadyDone) {
   });
 }
 
+/* `ask` is how many of a document's questions get asked. The beach documents set
+   it below the number they carry, because the first region was asking ten
+   questions before the first gate opened. The ones left out are not wasted: the
+   subset is drawn fresh each time, so answering again asks a different pair, and
+   it stays in the order the text made its points. */
+function pickQuestions(doc) {
+  const all = doc.questions;
+  const want = Math.min(doc.ask || all.length, all.length);
+  if (want >= all.length) return all.slice();
+  const idx = all.map((_, i) => i);
+  for (let i = idx.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [idx[i], idx[j]] = [idx[j], idx[i]];
+  }
+  return idx.slice(0, want).sort((a, b) => a - b).map(i => all[i]);
+}
+
 function runQuestions(doc) {
-  const queue = doc.questions.slice();
-  const total = doc.questions.length;
+  const queue = pickQuestions(doc);
+  const total = queue.length;
   queue.forEach(q => { delete q._missed; });
   let firstTry = 0;
   let seen = 0;

@@ -15,30 +15,64 @@
    file ever fails, which is better than an invisible, unfindable animal. */
 
 export const ENTITIES = [
-  /* ------------------------------------------------ Landing Beach */
+  /* ------------------------------------------------ Landing Beach
+
+     The beach is the tutorial, and it used to hand over all fifteen of these at
+     once: about three thousand words and twenty-nine questions standing in a
+     field, each with a marker bouncing over it. An 8 year old does not read that
+     as a place to explore, he reads it as a checklist, and mine said so.
+
+     So the beach arrives in waves along the chain that already existed --
+     notice, chart, dig, guide, helpers, gate -- and every wave is unlocked by
+     the thing you just read. You land with two things in front of you. The
+     chart tells you about the rock finger, and then the rock finger is there.
+     Nothing was cut to do this; it is the same beach, handed over a bit at a
+     time. Later regions are small enough not to need it. */
   { map: 'beach', x: 6,  y: 6,  art: 'post',    kind: 'doc',  doc: 'notice',
     label: 'A notice, nailed to the cabin door at eye height.' },
-  { map: 'beach', x: 10, y: 8,  art: 'post',    kind: 'doc',  doc: 'fieldguide',
-    label: 'A page pinned to a post, held down with a stone.' },
-  { map: 'beach', x: 15, y: 11, art: 'sign',    kind: 'sign', sign: 'beachSign' },
-  { map: 'beach', x: 24, y: 17, art: 'sign',    kind: 'sign', sign: 'dockSign' },
-  { map: 'beach', x: 26, y: 22, art: 'lockbox', kind: 'doc',  doc: 'tidechart',
-    label: 'A metal box bolted to the last board.' },
-  { map: 'beach', x: 3,  y: 16, art: 'sign',    kind: 'sign', sign: 'rockFinger' },
   { map: 'beach', x: 5,  y: 7,  art: null,      kind: 'sign', sign: 'cabinDoor' },
+
+  /* read the notice and the dock is worth walking down */
+  { map: 'beach', x: 26, y: 22, art: 'lockbox', kind: 'doc',  doc: 'tidechart',
+    when: s => !!s.flags.notice,
+    label: 'A metal box bolted to the last board.' },
+  { map: 'beach', x: 24, y: 17, art: 'sign',    kind: 'sign', sign: 'dockSign',
+    when: s => !!s.flags.notice },
+  { map: 'beach', x: 15, y: 11, art: 'sign',    kind: 'sign', sign: 'beachSign',
+    when: s => !!s.flags.notice },
+
+  /* the chart is what tells you the rock finger throws a shadow, so that is
+     when the rock finger and the digging are worth anything */
+  { map: 'beach', x: 3,  y: 16, art: 'sign',    kind: 'sign', sign: 'rockFinger',
+    when: s => !!s.flags.tidechart },
   /* two dug spots. The chart says which one, and it is not the obvious one. */
   { map: 'beach', x: 5,  y: 18, art: 'mound',   kind: 'dig', id: 'moundBase',
+    when: s => !!s.flags.tidechart,
     empty: 'Loose gravel. Somebody already dug here and filled it back in. They found nothing, and they wrote that down.' },
   { map: 'beach', x: 1,  y: 18, art: 'mound',   kind: 'dig', id: 'moundTip',
+    when: s => !!s.flags.tidechart,
     gives: 'crank', giveLabel: 'the iron handle',
     found: 'Down under the gravel, wrapped in oiled cloth: an iron handle. It is heavier than it looks.' },
-  { map: 'beach', x: 11, y: 15, art: 'pidgey',  kind: 'wild', species: 'pidgey' },
-  { map: 'beach', x: 8,  y: 19, art: 'psyduck', kind: 'wild', species: 'psyduck' },
   { map: 'beach', x: 2,  y: 17, art: 'rocket_a', kind: 'rocket', doc: 'rocketBeach',
     when: s => !!s.flags.tidechart,
     label: 'Somebody in a black uniform, digging.' },
-  { map: 'beach', x: 20, y: 18, art: null,      kind: 'wild', species: 'krabby' },
-  { map: 'beach', x: 17, y: 1,  art: null,      kind: 'project', project: 'gate' },
+
+  /* the field guide is the page that explains how to make a friend, so the
+     animals turn up once you have read it, and not before */
+  { map: 'beach', x: 10, y: 8,  art: 'post',    kind: 'doc',  doc: 'fieldguide',
+    when: s => (s.items.crank || 0) >= 1,
+    label: 'A page pinned to a post, held down with a stone.' },
+  { map: 'beach', x: 11, y: 15, art: 'pidgey',  kind: 'wild', species: 'pidgey',
+    when: s => !!s.flags.fieldguide, need: 2 },
+  { map: 'beach', x: 8,  y: 19, art: 'psyduck', kind: 'wild', species: 'psyduck',
+    when: s => !!s.flags.fieldguide, need: 2 },
+  { map: 'beach', x: 17, y: 1,  art: null,      kind: 'project', project: 'gate',
+    when: s => !!s.flags.fieldguide },
+
+  /* the crab is not part of the opening. It turns up once the gate is open, so
+     coming back to the beach is worth something. */
+  { map: 'beach', x: 20, y: 18, art: null,      kind: 'wild', species: 'krabby',
+    when: s => !!s.projects.gate, need: 2 },
 
   /* ------------------------------------------------ Meadow Hollow */
   { map: 'meadow', x: 27, y: 15, art: 'sign', kind: 'doc', doc: 'cairns',

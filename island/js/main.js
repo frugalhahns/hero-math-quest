@@ -216,13 +216,19 @@ function chevron(cx, y, half, color) {
    on screen you have never looked at gets a small faint one so it can be found
    at all. The faint ones disappear once examined, so the map does not stay
    covered in markers. */
+/* How close you have to be before an unread thing puts a marker up. A whole
+   region's worth of them at once is not a map, it is a checklist, and the beach
+   had fifteen. Near enough to see, and no further. */
+const MARKER_RANGE = 5;
+
 function drawMarkers(cam, now) {
   const bounce = Math.sin(now / 260);
   const facingT = facing();
 
   for (const e of W.visibleEntities(P.map, S)) {
     const isFacing = e.x === facingT.x && e.y === facingT.y;
-    if (!isFacing && !unexamined(e)) continue;
+    const near = Math.max(Math.abs(e.x - P.x), Math.abs(e.y - P.y)) <= MARKER_RANGE;
+    if (!isFacing && (!unexamined(e) || !near)) continue;
 
     const sx = Math.round((e.x - cam.cx) * TS);
     const sy = Math.round((e.y - cam.cy) * TS);
@@ -356,7 +362,11 @@ function updatePrompt() {
     return;
   }
   const verb = KIND_VERB[e.kind] || 'Look';
-  el.innerHTML = `<b>${verb}</b><span>press Space</span>`;
+  /* Signs are the only optional layer on the island: every other kind is a step
+     in the chain. Saying so is what lets a kid walk past one without feeling he
+     has skipped his homework, which is most of what "too much reading" meant. */
+  const note = e.kind === 'sign' ? 'extra &middot; press Space' : 'press Space';
+  el.innerHTML = `<b>${verb}</b><span>${note}</span>`;
   el.classList.remove('hidden');
   actBtn.classList.add('ready');
   actBtn.textContent = verb;

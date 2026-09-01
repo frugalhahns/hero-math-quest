@@ -168,25 +168,34 @@ head('progression is solvable in order');
 {
   const sim = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
   const reachableRegions = new Set(['beach']);
+  /* `when` hides an entity until the save says otherwise, and the beach now uses
+     it to hand itself over a wave at a time. A simulation that ignored those
+     predicates would happily read a page that is not there yet, and would sail
+     straight past a circular gate -- a document you cannot see until you dig,
+     behind a dig you cannot see until you read it. So every kind is checked,
+     not just the residents. */
+  const here = e => reachableRegions.has(e.map) && (!e.when || e.when(sim));
   let progressed = true, guard = 0;
   while (progressed && guard++ < 40) {
     progressed = false;
     // read every document sitting in a reachable region
     for (const e of ENTITIES) {
-      if (e.kind === 'doc' && reachableRegions.has(e.map) && !sim.flags[e.doc]) { sim.flags[e.doc] = true; progressed = true; }
-      if (e.kind === 'dig' && e.gives && reachableRegions.has(e.map)) sim.items[e.gives] = 1;
-      if (e.kind === 'item' && e.gives && reachableRegions.has(e.map)) sim.items[e.gives] = 2;
+      if (!here(e)) continue;
+      if (e.kind === 'doc' && !sim.flags[e.doc]) { sim.flags[e.doc] = true; progressed = true; }
+      if (e.kind === 'dig' && e.gives) sim.items[e.gives] = 1;
+      if (e.kind === 'item' && e.gives) sim.items[e.gives] = 2;
     }
     // befriend every resident in a reachable region whose gate items are held
     for (const e of ENTITIES) {
-      if (e.kind !== 'wild' || !reachableRegions.has(e.map)) continue;
-      if (e.when && !e.when(sim)) continue;
+      if (e.kind !== 'wild' || !here(e)) continue;
       if (e.needsItem && (sim.items[e.needsItem.key] || 0) < e.needsItem.count) continue;
       if (!sim.team.includes(e.species)) { sim.team.push(e.species); progressed = true; }
     }
     // build anything whose jobs are covered
     for (const p of PROJECTS) {
       if (sim.projects[p.id]) continue;
+      const site = ENTITIES.find(e => e.kind === 'project' && e.project === p.id);
+      if (!site || !here(site)) continue;      // the build site has its own `when`
       if (p.learn && !sim.flags[p.learn]) continue;
       if (p.needsItem && (sim.items[p.needsItem.key] || 0) < p.needsItem.count) continue;
       const jobs = sim.team.map(id => BY_ID[id].job);
@@ -211,6 +220,71 @@ head('progression is solvable in order');
   let stepIdx = 0, spin = 0;
   while (stepIdx < QUEST.length - 1 && QUEST[stepIdx].done(sim) && spin++ < 100) stepIdx++;
   ok(stepIdx === QUEST.length - 1, 'quest chain runs to the last step', `stopped at ${stepIdx} (${QUEST[stepIdx].id})`);
+}
+
+/* ---------------- what the first ten minutes look like ---------------- */
+/* The beach is the tutorial and it is where a kid decides whether this game is
+   work. It used to hand over fifteen things at once, about three thousand words
+   and twenty-nine questions, every one of them with a marker bouncing over it.
+   Mine took one look and said there was too much to read, and he was right.
+
+   These are budgets, not descriptions. They fail if the opening grows back. */
+head('the opening');
+{
+  const fresh = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0, worked: {} };
+  const wordsOf = s => grade(s).words;
+
+  const atLanding = W.visibleEntities('beach', fresh);
+  ok(atLanding.length <= 3, 'you land in front of three things at most, not fifteen',
+    `${atLanding.length}: ${atLanding.map(e => e.doc || e.sign || e.species || e.project || e.id).join(', ')}`);
+
+  const landingWords = atLanding.reduce((n, e) => {
+    if (e.kind === 'doc') return n + DOCS[e.doc].text.reduce((m, x) => m + wordsOf(x), 0);
+    if (e.kind === 'sign') return n + SIGNS[e.sign].text.reduce((m, x) => m + wordsOf(x), 0);
+    return n;
+  }, 0);
+  ok(landingWords <= 400, 'and under 400 words of reading in front of you', `${landingWords} words`);
+
+  /* Everything the chain actually requires before the first gate opens. Signs
+     are not counted: they are the optional layer, and the prompt now says so. */
+  const beachDocs = ENTITIES.filter(e => e.kind === 'doc' && e.map === 'beach').map(e => DOCS[e.doc]);
+  const askedByDocs = beachDocs.reduce((n, d) => n + Math.min(d.ask || d.questions.length, d.questions.length), 0);
+  /* The residents standing on the beach at the moment the gate becomes
+     buildable: everything read, the handle dug, nothing built yet. A `when`
+     predicate reads a whole save, so it gets a whole save. */
+  const beforeGate = {
+    projects: {}, team: [], items: { crank: 1 }, read: {}, signs: {}, crew: {}, step: 0,
+    flags: { notice: true, tidechart: true, fieldguide: true }
+  };
+  const beachWilds = W.visibleEntities('beach', beforeGate).filter(e => e.kind === 'wild');
+  const askedByAnimals = beachWilds.reduce((n, e) => n + (e.need || 3), 0);
+  const mustAsk = askedByDocs + askedByAnimals;
+  ok(mustAsk <= 14, 'the opening asks at most 14 questions before the first gate',
+    `${askedByDocs} from documents, ${askedByAnimals} from animals`);
+
+  const beachWords = beachDocs.reduce((n, d) => n + d.text.reduce((m, x) => m + wordsOf(x), 0), 0)
+    + beachWilds.reduce((n, e) => n + BY_ID[e.species].passage.text.reduce((m, x) => m + wordsOf(x), 0), 0);
+  ok(beachWords <= 1800, 'and under 1,800 words of it', `${beachWords} words`);
+
+  /* Every wave has to be openable by the wave before it, or the beach is a
+     locked room. The solvability simulation proves the whole island, this
+     proves the beach in particular, from nothing. */
+  const seen = new Set(atLanding.map(e => e.x + ',' + e.y));
+  const sim = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
+  for (let pass = 0; pass < 8; pass++) {
+    for (const e of W.visibleEntities('beach', sim)) {
+      seen.add(e.x + ',' + e.y);
+      if (e.kind === 'doc') sim.flags[e.doc] = true;
+      if (e.kind === 'dig' && e.gives) sim.items[e.gives] = 1;
+      if (e.kind === 'wild') { if (!sim.team.includes(e.species)) sim.team.push(e.species); }
+      if (e.kind === 'project') sim.projects[e.project] = true;
+    }
+  }
+  const all = ENTITIES.filter(e => e.map === 'beach');
+  const stuck = all.filter(e => !seen.has(e.x + ',' + e.y));
+  ok(stuck.length === 0, 'and every wave of the beach opens from the one before it',
+    stuck.map(e => e.doc || e.sign || e.species || e.project || e.id).join(', '));
+  note(`landing: ${atLanding.length} things, ${landingWords} words. Whole beach before the gate: ${mustAsk} questions, ${beachWords} words.`);
 }
 
 /* ---------------- questions ---------------- */

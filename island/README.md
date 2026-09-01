@@ -43,6 +43,44 @@ never a dead end. But the *order* still cannot be short-circuited: the reed walk
 are in the grove → the grove is behind a rope crossing → the tablet explaining that
 crossing is the only thing that says it needs a carrier *and* a planter.
 
+## The first ten minutes
+
+The beach is the tutorial, and it used to hand over everything it had at once:
+fifteen things to interact with, about three thousand words, twenty-nine
+questions, and a marker bouncing over every one of them until it was dealt with.
+An 8 year old does not read that as a place to explore. He reads it as a
+checklist, and mine said so out loud -- "there are too many signs".
+
+The signs were not the problem. They are under 10% of the words. Three things
+were:
+
+**Everything arrived at once.** So the beach now comes in waves, along the chain
+that already existed -- notice, chart, dig, guide, helpers, gate -- and each wave
+is unlocked by the thing you just read. You land in front of two things. The tide
+chart is what tells you the rock finger throws a shadow, so the rock finger and
+the digging appear once you have read the chart. The field guide is the page that
+explains how to make a friend, so the animals turn up after it and not before.
+The crab waits until the gate is open, so there is a reason to come back. Nothing
+was cut to do this: it is the same beach, handed over a bit at a time. The later
+regions are small enough not to need it.
+
+**Everything looked equally urgent.** A marker used to sit over every unread
+thing in the whole region. Now one appears when you are within five tiles, so the
+map shows what is near rather than everything that is left.
+
+**Nothing said what was optional.** Signs are the only optional layer on the
+island -- every other kind is a step in the chain -- so the prompt on a sign now
+says *extra*. That is what lets a kid walk past one without feeling he skipped
+his homework.
+
+And the opening asks less: the beach documents ask two or three of the questions
+they carry rather than all of them, drawn fresh each time so answering again asks
+a different pair, and the beach animals need two right answers instead of three.
+Eleven questions before the first gate, where there were twenty.
+
+Those are budgets in the self test now, not descriptions. They fail if the
+opening grows back.
+
 ## The signs, and the arithmetic on them
 
 Twelve signs, one question each, answered where you stand. They pay out a berry
@@ -397,7 +435,7 @@ modules need a real origin.
 ## Self test
 
 There is no build step and no type checker, so the invariants that would otherwise
-be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~2,000
+be silent bugs are asserted instead. Open `island/selftest.html` and it runs ~2,005
 checks in the browser, including:
 
 - every tile map row is exactly the declared width, and every tile character is one
@@ -407,10 +445,17 @@ checks in the browser, including:
 - every region crossing lands on a walkable, reachable tile and has a way back
 - every question's answer index is in range, has no duplicate choices, and has a
   real explanation
+- **the opening stays an opening** -- at most 3 things visible when you land and
+  under 400 words in front of you (it is 2 and 183), at most 14 questions and
+  1,800 words before the first gate (it is 11 and 784), and every wave of the
+  beach has to be openable by the wave before it, walked from an empty save
 - **the whole game is solvable in order** — a simulation reads what is reachable,
   befriends who is reachable, builds what it can staff, and repeats, then asserts
-  that all 6 regions open, all 11 animals can be earned, all 6 projects can be
-  finished, and the 22-step chain runs to its last step
+  that all 6 regions open, all 17 animals can be earned, all 6 projects can be
+  finished, and the 22-step chain runs to its last step. It honours the `when`
+  predicate on every kind of entity, not just the residents -- a simulation that
+  ignored those would sail straight through a circular gate, a page you cannot
+  see until you dig behind a dig you cannot see until you read it
 - **the reading level is measured, not assumed** — a Flesch-Kincaid score is
   computed for every passage and for the questions and choices as a group, and each
   one has to come in at or under 5.0 with the corpus averaging 4.0 or easier. It

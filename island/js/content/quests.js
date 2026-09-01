@@ -12,6 +12,7 @@
 export const DOCS = {
 
   notice: {
+    ask: 2,          // the beach asks less; see pickQuestions in reading.js
     id: 'notice', title: 'Notice on the Cabin Door', source: 'Ranger Elm',
     text: [
       'If you are reading this, the boat has already gone. The island is yours to look after now. I am sorry it happened this way. I broke my leg in two places.',
@@ -40,6 +41,7 @@ export const DOCS = {
   },
 
   tidechart: {
+    ask: 3,          // the beach asks less; see pickQuestions in reading.js
     id: 'tidechart', title: 'The Tide Chart', source: 'From the metal box at the end of the dock',
     text: [
       'LOW WATER comes just after sunrise this season. The sea drops down about as far as you are tall.',
@@ -75,6 +77,7 @@ export const DOCS = {
   },
 
   fieldguide: {
+    ask: 2,          // the beach asks less; see pickQuestions in reading.js
     id: 'fieldguide', title: 'Who Can Do What', source: 'Ranger Elm, on a post outside the cabin',
     text: [
       'The gate needs two jobs done at the same time. You cannot do either one yourself.',
