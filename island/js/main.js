@@ -221,12 +221,18 @@ function chevron(cx, y, half, color) {
    had fifteen. Near enough to see, and no further.
 
    The step you are actually on is the exception: it is marked from anywhere in
-   the region, and pointed at from the edge of the screen when it is off it.
+   the region, and pointed at from the edge of the screen when it is off it. And
+   when the step is in a region you are not standing in, the crossing that takes
+   you one hop closer gets the same marker, because "Reed Marsh" means nothing to
+   a kid who has never been there and cannot see a way out of the grove.
+
    That is not the arrow this game promised never to draw. The arrow it will not
    draw is the one that tells you what to do -- that is only ever in the writing,
    and you still have to read the thing when you get there. Finding a post on a
    35 by 24 grid is not comprehension, it is hunting, and an 8 year old who
-   cannot find the next page just stops playing. */
+   cannot find the next page just stops playing. Which is also why quest.js will
+   point at a document, a build site, a berry bush and a way out, and never at an
+   animal: working out which animal the page described is the question. */
 const MARKER_RANGE = 5;
 
 function drawMarkers(cam, now) {
@@ -241,8 +247,11 @@ function drawMarkers(cam, now) {
     .find(e => e.x === facingT.x && e.y === facingT.y);
   if (faced && !list.some(m => m.e === faced)) list.push({ e: faced, goal: false });
 
-  for (const { e, goal: wanted } of list) {
-    const isFacing = e.x === facingT.x && e.y === facingT.y;
+  for (const { e, goal: wanted, route } of list) {
+    /* A crossing is a tile you walk onto, not a thing you press Space on, so it
+       never takes the "you are facing this" treatment -- it stays the green
+       chevron the whole way there, including the step you take onto it. */
+    const isFacing = !route && e.x === facingT.x && e.y === facingT.y;
 
     const sx = Math.round((e.x - cam.cx) * TS);
     const sy = Math.round((e.y - cam.cy) * TS);
@@ -260,8 +269,12 @@ function drawMarkers(cam, now) {
     if (wanted && !isFacing) {
       /* The thing the step is about. Bigger than the rest and always up, however
          far away it is: this is the one a kid has to be able to pick out of a
-         busy tile without being told twice. */
-      const y = sy - 11 + Math.round(bounce * 2);
+         busy tile without being told twice.
+
+         Clamped downwards for the same reason cx is clamped sideways: three of
+         the ten crossings are on row 0, and a marker drawn eleven pixels above
+         row 0 is a marker nobody ever sees. */
+      const y = Math.max(sy - 11 + Math.round(bounce * 2), 9);
       chevron(cx, y - 1, 6, '#12301f');
       chevron(cx, y, 5, '#7ee2a8');
       hctx.fillStyle = '#12301f';
@@ -446,9 +459,14 @@ function act() {
       break;
 
     case 'dig': {
+      /* An empty hole is still a hole you have dug, and it has to be recorded or
+         the marker over it never goes out. The chart names one of the two
+         mounds; once you have been down the wrong one you do not need reminding
+         that it is there. */
       const key = 'dug:' + e.id;
-      if (e.gives && !S.flags[key]) {
-        S.flags[key] = true;
+      const first = !S.flags[key];
+      S.flags[key] = true;
+      if (e.gives && first) {
         give(e.gives, 1);
         sfx.item();
         U.openSheet(`
@@ -461,12 +479,12 @@ function act() {
       } else {
         U.openSheet(`
           <h2>You dig</h2>
-          ${U.passageHTML([S.flags[key]
-            ? 'Just the hole you dug here last time.'
-            : (e.empty || 'Gravel, and more gravel. Nothing here.')])}
+          ${U.passageHTML([first
+            ? (e.empty || 'Gravel, and more gravel. Nothing here.')
+            : 'Just the hole you dug here last time.'])}
           <div class="row end" style="margin-top:16px">
             <button class="btn" type="button" data-close>Fill it back in</button>
-          </div>`);
+          </div>`, { onClose: refresh });
       }
       break;
     }

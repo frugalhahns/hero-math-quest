@@ -15,7 +15,7 @@ import { isKnownTile, isSolidTile } from './tileset.js';
 import * as W from './world.js';
 import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
 import { form, nextForm, canGrow, growableCount } from './evolve.js';
-import { isTarget, markers } from './quest.js';
+import { isTarget, markers, nextHop, regionsFor } from './quest.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 import {
@@ -278,6 +278,77 @@ head('where to go next');
     JSON.stringify(dig && dig.target));
   ok(ENTITIES.filter(e => e.map === 'beach' && e.kind === 'dig').length === 2,
     'and there really are two of them to choose between');
+
+  /* The beach never leaves its region, so for the first six steps "marked from
+     anywhere in the region" is the whole job. Every step after it sends you
+     somewhere else, and until the crossings were marked too the map simply went
+     blank the moment the journal named a place -- which is the exact moment a
+     kid has the least idea what to do. Six regions, ten crossings, and from the
+     grove the caves are three of them away.
+
+     So: from every region you could be standing in, every step has to point at
+     something. Either its own object, or the way out. */
+  const blank = [];
+  for (const q of targeted) {
+    for (const map of Object.keys(REGIONS)) {
+      if (regionsFor(q).includes(map)) continue;
+      const hop = nextHop(map, regionsFor(q));
+      if (!hop) { blank.push(`${q.id}: no way out of ${map}`); continue; }
+      if (hop.map !== map) blank.push(`${q.id}: the hop out of ${map} is not in ${map}`);
+      if (!EXITS.includes(hop)) blank.push(`${q.id}: the hop out of ${map} is not a real crossing`);
+    }
+  }
+  ok(blank.length === 0, 'from any region, a step somewhere else points at the way out',
+    blank.join(' | '));
+
+  for (const q of targeted) {
+    for (const r of regionsFor(q)) ok(!!REGIONS[r], `${q.id}: "${r}" is a real region`);
+  }
+
+  /* Pointing at a place is allowed; pointing at an animal is not, because
+     working out which animal the page described is the question. Every resident
+     step is expected to have nothing marked once you are standing in the right
+     region -- that is the design, and it is asserted rather than assumed so that
+     "the map is blank here" can never quietly spread to a step that needs one. */
+  const wildSteps = targeted.filter(q => q.target.kind === 'wild').map(q => q.id);
+  ok(wildSteps.length === 6, 'six steps point at a region and leave the animal to the reader',
+    wildSteps.join(', '));
+  for (const q of targeted) {
+    if (q.target.kind === 'wild') continue;
+    const hits = regionsFor(q).flatMap(r => ENTITIES.filter(e => e.map === r && isTarget(e, q.target)));
+    ok(hits.length > 0 && hits.every(e => e.kind !== 'wild'),
+      `${q.id}: what it marks is a place, not a resident`);
+  }
+
+  /* Two things that used to go dark mid-step. markers() reads the live step, so
+     these drive it and put it back. */
+  const wasStep = S.step;
+  const at = id => QUEST.findIndex(q => q.id === id);
+  try {
+    /* The berry step wants two berries off a bush that records itself as picked
+       after the first one. It used to lose its marker halfway through the step
+       it belongs to. */
+    S.step = at('berries');
+    const picked = { projects: {}, team: [], flags: { 'took:rowan': true }, items: { berries: 1 },
+                     read: {}, signs: {}, crew: {}, step: S.step };
+    const stillLit = markers('grove', picked, 19, 11, 5).filter(m => m.goal && m.e.id === 'rowan');
+    ok(stillLit.length === 1, 'the berry step keeps its marker after the first berry',
+      `${stillLit.length} marked`);
+
+    /* And standing in the wrong region gets you a crossing rather than nothing. */
+    S.step = at('vault');
+    const lost = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: S.step };
+    const way = markers('grove', lost, 17, 12, 5).filter(m => m.route);
+    ok(way.length === 1 && way[0].goal, 'told to go to the caves from the grove, the way out is marked',
+      way.length ? `${way[0].e.x},${way[0].e.y} -> ${way[0].e.to}` : 'nothing marked');
+
+    /* ...and standing in the right one does not point you back out of it. */
+    S.step = at('cairns');
+    const home = markers('meadow', lost, 17, 12, 5);
+    ok(home.filter(m => m.route).length === 0, 'and once you are there it stops pointing at the door');
+  } finally {
+    S.step = wasStep;
+  }
 }
 
 /* ---------------- what the first ten minutes look like ---------------- */

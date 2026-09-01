@@ -673,7 +673,11 @@ export const QUEST = [
     log: 'The notebook explains the marsh, and how to get underneath it.',
     done: s => !!s.flags.ledger },
 
-  { id: 'helpers4', where: 'marsh',
+  /* The only step that spans two regions: the light carrier is in the marsh and
+     the sparker is back in the meadow, which the journal line says out loud. It
+     is listed here as well so the map does not point you back to the marsh the
+     moment you go and get the second half of it. */
+  { id: 'helpers4', where: 'marsh', regions: ['marsh', 'meadow'],
     target: { kind: 'wild' },
     objective: 'The notebook named the pair you need underground. Get them both.',
     log: 'A light carrier from the south channel. A sparker from the meadow.',

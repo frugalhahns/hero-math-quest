@@ -23,7 +23,18 @@ map", and it cost more than it was worth. Finding a post on a 35 by 24 grid is
 not comprehension, it is hunting, and an 8 year old who cannot find the next page
 stops playing. Pointing is allowed; answering is not. Where the reading is the
 puzzle the pointing stays vague on purpose — the step that sends you digging
-marks *both* mounds, because working out which one is the whole question.
+marks *both* mounds, because working out which one is the whole question, and no
+step ever marks an animal, because which animal the page described is the
+question.
+
+The same marker goes on the **way out** when the step is somewhere else. The
+beach never leaves its own region, so for the first six steps "marked from
+anywhere in the region" was the whole job — and then the journal says *Reed
+Marsh* and the map goes blank, which is the exact moment a kid has the least idea
+what to do. Six regions, ten crossings, and from the grove the caves are three of
+them away. So the crossing that takes you one hop closer gets the green chevron,
+and the edge arrow when it is off screen. It says which way. It still says
+nothing about what to do when you arrive.
 
 Two things ask you questions, and they ask different ones. **Documents** ask what
 a page said. **Signs** ask what the numbers on them mean -- a tide board, a plank
@@ -199,6 +210,11 @@ Some deliberate choices:
   you have read it, so the map shows what is left to find without staying
   covered in markers. This was not the original design and it should have been:
   a real 8 year old walked straight past a thin grey "press Space" pill.
+- **You can always see where to go.** Every step points at something from every
+  region on the island: its own object if you are standing in the right place,
+  otherwise the crossing that gets you one hop closer. The self test walks the
+  chain and checks it — there is no step, and no region you could be standing in,
+  where the map has nothing on it.
 
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the
