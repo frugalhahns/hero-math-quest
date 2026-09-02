@@ -266,6 +266,13 @@ function drawMarkers(cam, now) {
       ? Math.min(Math.max(sx + 8, 8), heroCanvas.width - 8)
       : sx + 8;
 
+    /* Residents are bottom-anchored <img> in the actor layer and some of them
+       are nearly three tiles tall, so a marker six pixels above the tile lands
+       somewhere in a Snorlax's stomach. Lift it clear of the sprite. */
+    const lift = e.kind === 'wild'
+      ? Math.round(((TILES_TALL[e.species] || 1.5) - 1) * TS)
+      : 0;
+
     if (wanted && !isFacing) {
       /* The thing the step is about. Bigger than the rest and always up, however
          far away it is: this is the one a kid has to be able to pick out of a
@@ -274,7 +281,7 @@ function drawMarkers(cam, now) {
          Clamped downwards for the same reason cx is clamped sideways: three of
          the ten crossings are on row 0, and a marker drawn eleven pixels above
          row 0 is a marker nobody ever sees. */
-      const y = Math.max(sy - 11 + Math.round(bounce * 2), 9);
+      const y = Math.max(sy - 11 - lift + Math.round(bounce * 2), 9);
       chevron(cx, y - 1, 6, '#12301f');
       chevron(cx, y, 5, '#7ee2a8');
       hctx.fillStyle = '#12301f';
@@ -286,7 +293,7 @@ function drawMarkers(cam, now) {
       hctx.strokeStyle = 'rgba(255, 212, 94, 0.95)';
       hctx.lineWidth = 1;
       hctx.strokeRect(sx + 0.5, sy + 0.5, TS - 1, TS - 1);
-      const y = sy - 9 + Math.round(bounce * 2);
+      const y = Math.max(sy - 9 - lift + Math.round(bounce * 2), 6);
       chevron(cx, y - 1, 4, '#2b2410');        // outline, so it reads on any tile
       chevron(cx, y, 3, '#ffd45e');
       hctx.fillStyle = '#2b2410';
@@ -295,7 +302,7 @@ function drawMarkers(cam, now) {
       hctx.fillRect(cx - 1, y - 4, 2, 2);
     } else {
       hctx.globalAlpha = 0.72;
-      const y = sy - 6 + Math.round(bounce * 1.5);
+      const y = Math.max(sy - 6 - lift + Math.round(bounce * 1.5), 1);
       chevron(cx, y, 2, '#f4efe2');
       hctx.globalAlpha = 1;
     }

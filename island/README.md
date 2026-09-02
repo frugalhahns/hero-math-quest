@@ -215,6 +215,11 @@ Some deliberate choices:
   otherwise the crossing that gets you one hop closer. The self test walks the
   chain and checks it — there is no step, and no region you could be standing in,
   where the map has nothing on it.
+- **Residents get the faint marker, never the bright one.** A resident you have
+  not met yet is marked the same way an unread sign is, so the six "go and find
+  the helpers" steps show that there is somebody here and how many of them. Which
+  ones the page described is still yours to work out: no step ever puts the green
+  chevron on an animal.
 
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the

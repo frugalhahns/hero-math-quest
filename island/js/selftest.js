@@ -346,6 +346,27 @@ head('where to go next');
     S.step = at('cairns');
     const home = markers('meadow', lost, 17, 12, 5);
     ok(home.filter(m => m.route).length === 0, 'and once you are there it stops pointing at the door');
+
+    /* The step that sends you to find two of the four animals in the meadow used
+       to leave the map with nothing on it at all. The residents get the faint
+       marker now -- there is somebody here, and here is how many -- while the
+       green one still refuses to say which. */
+    S.step = at('helpers2');
+    const hunting = { projects: { gate: true }, team: ['pidgey', 'psyduck'],
+                      flags: { notice: true, tidechart: true, fieldguide: true, cairns: true },
+                      items: { crank: 1 }, read: {}, signs: {}, crew: {}, step: S.step };
+    const near = markers('meadow', hunting, 22, 17, 5);
+    const faintWild = near.filter(m => !m.goal && m.e.kind === 'wild');
+    ok(faintWild.length >= 2, 'looking for the two helpers, the meadow animals are marked faintly',
+      faintWild.map(m => m.e.species).join(', ') || 'nothing');
+    ok(near.every(m => !(m.goal && m.e.kind === 'wild')), 'and not one of them is marked as the answer',
+      near.filter(m => m.goal).map(m => m.e.species || m.e.id).join(', ') || 'none');
+
+    /* An animal already on your team is not somebody left to meet. */
+    const met = { ...hunting, team: ['pidgey', 'psyduck', 'machop', 'chikorita'] };
+    const after = markers('meadow', met, 22, 17, 5).filter(m => m.e.kind === 'wild');
+    ok(after.every(m => !['machop', 'chikorita'].includes(m.e.species)),
+      'a resident you have befriended stops being marked', after.map(m => m.e.species).join(', ') || 'none');
   } finally {
     S.step = wasStep;
   }

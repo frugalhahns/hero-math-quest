@@ -65,7 +65,14 @@ export function unexamined(e, save) {
   if (e.kind === 'item') return !save.flags['took:' + e.id];
   if (e.kind === 'project') return !save.projects[e.project];
   if (e.kind === 'rocket') return !save.flags[e.doc];
-  return false;   // the animals are their own signpost, they do not need one
+  /* A resident you have not met yet. This used to return false -- "the animals
+     are their own signpost" -- and on the six steps that send you to find one,
+     that left the map completely blank in a region with four animals standing
+     in it. A faint marker says there is somebody here to talk to, and how many
+     of them, which is what the map is for. Which two the page described is
+     still the question, and no resident ever gets the green one. */
+  if (e.kind === 'wild') return !save.team.includes(e.species);
+  return false;
 }
 
 /* Is this the thing the current step is about, and is pointing at it allowed?
