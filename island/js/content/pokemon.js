@@ -946,6 +946,246 @@ export const SPECIES = [
       catch: 'For half a second it wears your face, then grins and stops.',
       flee: 'It flattens into the shape of a stone and will not be found.'
     }
+  },
+  /* ------------------------------------------------ the kelp shallows
+
+     The five under the water. Four of them do a job somebody else on the island
+     already does -- the bed is optional, so nothing may depend on getting down
+     here -- and the fifth cannot do anything at all yet, which is the whole
+     point of its page. */
+  {
+    id: 'staryu', name: 'Staryu', kind: 'Star Shape', region: 'shallows',
+    job: 'light', jobName: 'Lighting', jobDesc: 'Holds a steady light in the dark.',
+    found: 'halfway up the kelp, out past the west point',
+    line: [
+      { name: 'Staryu', dex: 120 },
+      { name: 'Starmie', dex: 121,
+        blurb: 'Starmie has a second ring of arms and the stone in the middle has gone hard and clear. It hums. Elm wrote that a Starmie moving in the dark looks like something falling a long way off.' }
+    ],
+    passage: {
+      title: 'Field Notes: Staryu',
+      source: 'Ranger Elm, note 62',
+      text: [
+        'A Staryu is five arms and a stone. The stone in the middle is the part that matters. Every other part of it can be replaced.',
+        'I mean that word. I found one in my fourth year with two arms gone. I marked the stone so I would know it again. Eleven weeks later it had five arms.',
+        'The stone gives off a {glow}. It gets brighter at night, and brighter again when another Staryu is near. That is how they find each other in water you cannot see through.',
+        'It does not do that to be looked at. Shine a lamp at one and the stone goes out, and it stays out for a long time. Turn your lamp off and wait.',
+        'Wait long enough and one will come and look at you. That is all there is to it. You do not catch a Staryu. You get looked at, and then it decides.'
+      ]
+    },
+    questions: [
+      { tag: 'Detail',
+        q: 'What happened to the Staryu with two arms gone?',
+        choices: ['It grew them back in eleven weeks', 'It stopped glowing for good', 'It never moved again', 'Elm carried it home'],
+        answer: 0,
+        why: 'Elm marked the stone so he would know the same animal again, and eleven weeks later it had all five arms back.' },
+      { tag: 'Cause and effect',
+        q: 'What happens if you shine a lamp at a Staryu?',
+        choices: ['Its stone goes out for a long time', 'It glows brighter to match', 'It swims straight at the light', 'It grows a new arm'],
+        answer: 0,
+        why: 'The light is not for you. A lamp shuts the stone down, and Elm says the only fix is to turn the lamp off and wait.' },
+      { tag: 'Main idea',
+        q: 'Which part of a Staryu matters most?',
+        choices: ['The stone in the middle', 'The five arms', 'The one longest arm', 'None of it'],
+        answer: 0,
+        why: 'The first page says it and the rest of the page proves it: arms grow back, and the stone is the part that cannot be replaced.' },
+      { tag: 'Inference',
+        q: 'Why does the stone glow brighter near another Staryu?',
+        choices: ['It is how they find each other', 'It is afraid of them', 'It is copying the other one', 'The water is warmer there'],
+        answer: 0,
+        why: 'In water you cannot see through, a light that answers another light is a way of saying where you are.' }
+    ],
+    lines: {
+      rapport: 'The stone in the middle brightens once, and then again, slower.',
+      catch: 'It rights itself, points one arm at you, and holds there.',
+      flee: 'The light goes out and the kelp is empty where it was.'
+    }
+  },
+  {
+    id: 'corsola', name: 'Corsola', kind: 'Coral', region: 'shallows',
+    job: 'plant', jobName: 'Planting', jobDesc: 'Makes roots, vines and rope grass grow.',
+    found: 'the stony floor at the bottom of the kelp',
+    line: [
+      { name: 'Corsola', dex: 222 }
+    ],
+    passage: {
+      title: 'Field Notes: Corsola',
+      source: 'Ranger Elm, note 64',
+      text: [
+        'Corsola is an animal that grows a rock. The pink branches on its back are not a shell it was born in. It makes them itself, a little at a time, for its whole life.',
+        'How little? I measured the same one for three summers. In three years it grew less new branch than the length of your thumb.',
+        'So the stony floor under this {kelp} is older than anything on the island with a name. Snap a branch off in one second and you have taken years off something.',
+        'They snap easily. That is the only reason I am writing any of this down.',
+        'A Corsola will help you plant. It knows what will hold and what will wash away, because everything it has ever built had to hold. Ask it where a thing should go before you put the thing there.'
+      ]
+    },
+    questions: [
+      { tag: 'Detail',
+        q: 'How much does a Corsola grow in three years?',
+        choices: ['Less than the length of your thumb', 'About the length of your arm', 'Nothing at all', 'Twice its own size'],
+        answer: 0,
+        why: 'Elm measured the same animal for three summers to find that out, which is why he can put a number on it.' },
+      { tag: 'Inference',
+        q: 'Why does Elm warn you about the branches?',
+        choices: ['They take years to grow and snap in a second', 'They are sharp enough to cut you', 'They are worth money', 'They are the animal\'s food'],
+        answer: 0,
+        why: 'Both halves of the page together: three years for a thumb of branch, and one second to snap it off.' },
+      { tag: 'Main idea',
+        q: 'Why is a Corsola good at planting?',
+        choices: ['It knows what will hold and what will wash away', 'It works faster than anything else', 'It can dig deep holes', 'It does not need light'],
+        answer: 0,
+        why: 'Everything it has ever built had to stay put in moving water, so it has a lot of practice at telling good ground from bad.' }
+    ],
+    lines: {
+      rapport: 'It shifts on the stone and turns its branches toward you.',
+      catch: 'It comes off the rock with a small tick and settles beside you.',
+      flee: 'It folds down against the floor and turns the colour of the floor.'
+    }
+  },
+  {
+    id: 'horsea', name: 'Horsea', kind: 'Dragon', region: 'shallows',
+    job: 'water', jobName: 'Finding Water', jobDesc: 'Sniffs out fresh water and carries it.',
+    found: 'wrapped round a kelp stalk, halfway up',
+    line: [
+      { name: 'Horsea', dex: 116 },
+      { name: 'Seadra', dex: 117,
+        blurb: 'Seadra can swim now, and it is quick. The spines on its back are sharp. It has stopped hiding in the kelp. That is a change in how it feels, not in what it can do.' },
+      { name: 'Kingdra', dex: 230,
+        blurb: 'Kingdra lives far below this bed, where the light gives out. It sleeps most of the year. Elm only ever saw one, and wrote that the water moved before it did.' }
+    ],
+    passage: {
+      title: 'Field Notes: Horsea',
+      source: 'Ranger Elm, note 66',
+      text: [
+        'A Horsea is a fish that gave up swimming. Look at one from the side. It swims standing up, and slowly, and badly.',
+        'So it holds on instead. The tail wraps round a kelp {stalk} and stays wrapped while the water pulls at it all day long.',
+        'What it does have is a jet. A Horsea can spit a line of water hard enough to knock packed sand off a buried post from a foot away.',
+        'I used one on the dock posts every spring. It did in an hour what took me a whole morning with a brush, and it seemed to enjoy it.',
+        'Frighten one and you get ink, not water, and you will not see where it went. Come at it slowly, and from the front, where it can watch you coming.'
+      ]
+    },
+    questions: [
+      { tag: 'Cause and effect',
+        q: 'Why does a Horsea hold on to a kelp stalk?',
+        choices: ['It is a poor swimmer', 'It is hiding from the light', 'It is eating the kelp', 'It is asleep'],
+        answer: 0,
+        why: 'The first page says it swims "slowly, and badly", so holding on is how it stays where it means to be.' },
+      { tag: 'What to do',
+        q: 'How should you come up to a Horsea?',
+        choices: ['Slowly, from the front', 'Quickly, from behind', 'From above, with a lamp', 'Not at all'],
+        answer: 0,
+        why: 'From the front is where it can watch you coming, and slowly is what stops it deciding you are a problem.' },
+      { tag: 'Detail',
+        q: 'What did Elm use a Horsea for?',
+        choices: ['Cleaning the dock posts', 'Carrying fresh water', 'Finding the way through the kelp', 'Digging in the sand'],
+        answer: 0,
+        why: 'Every spring, and it did in an hour what took him a whole morning with a brush.' },
+      { tag: 'Inference',
+        q: 'What does a frightened Horsea do?',
+        choices: ['Squirts ink and disappears', 'Squirts water at you', 'Wraps its tail tighter', 'Swims away fast'],
+        answer: 0,
+        why: 'Ink instead of water, and Elm adds that you will not see where it went, which is rather the point of ink.' }
+    ],
+    lines: {
+      rapport: 'It lets go of the stalk with its tail, then takes hold again.',
+      catch: 'It unwraps, drifts over, and hooks its tail gently round your arm.',
+      flee: 'A dark cloud, and nothing in it.'
+    }
+  },
+  {
+    id: 'lapras', name: 'Lapras', kind: 'Transport', region: 'shallows',
+    job: 'haul', jobName: 'Carrying', jobDesc: 'Lifts what people cannot lift.',
+    found: 'the open water past the kelp, when it feels like coming',
+    line: [
+      { name: 'Lapras', dex: 131 }
+    ],
+    passage: {
+      title: 'Field Notes: Lapras',
+      source: 'Ranger Elm, note 70',
+      text: [
+        'A Lapras does not live here. It comes through. Twice a year, and never on the same day twice, so do not go out looking for one.',
+        'It is the biggest thing on this island that will ever look you in the eye. It is {gentle}. Those two facts together are the reason there are so few of them.',
+        'People hunted them, because a gentle animal is an easy animal. I am not going to write the numbers down. There were a great many more.',
+        'A Lapras will carry you, or your load, across open water if it decides to. It is not a boat and it is not for standing on. Sit down and hold on.',
+        'It sings. Two notes, low, a long way apart. If you hear it, stop where you are and wait. Going to look is how people miss it.'
+      ]
+    },
+    questions: [
+      { tag: 'Cause and effect',
+        q: 'Why are there so few Lapras left?',
+        choices: ['They are gentle, so they were easy to hunt', 'The water got too cold for them', 'They stopped having young', 'They swam away for good'],
+        answer: 0,
+        why: 'Elm puts the two facts side by side on purpose: it is gentle, and a gentle animal is an easy animal.' },
+      { tag: 'What to do',
+        q: 'What should you do if you hear one singing?',
+        choices: ['Stop where you are and wait', 'Swim toward the sound', 'Sing back to it', 'Come back the next day'],
+        answer: 0,
+        why: '"Going to look is how people miss it." Waiting is the thing that works, and it is the hardest thing to do.' },
+      { tag: 'Detail',
+        q: 'How should you ride on a Lapras?',
+        choices: ['Sit down and hold on', 'Stand up near the front', 'Hold the shell and swim behind', 'Ride two at a time'],
+        answer: 0,
+        why: 'It is an animal, not a boat. Elm says it is not for standing on, and then says exactly what to do instead.' },
+      { tag: 'Inference',
+        q: 'Why does Elm say not to go out looking for one?',
+        choices: ['It never comes on the same day twice', 'It only comes at night', 'It hides from people now', 'It lives too far down'],
+        answer: 0,
+        why: 'Twice a year and never on the same day means there is no day you could pick. Waiting is the only thing that works.' }
+    ],
+    lines: {
+      rapport: 'It comes up alongside, close enough that you stop moving.',
+      catch: 'It sings the two low notes, and waits, which is how you know.',
+      flee: 'It turns without hurrying and the water closes over it.'
+    }
+  },
+  {
+    id: 'magikarp', name: 'Magikarp', kind: 'Fish', region: 'shallows',
+    job: 'shove', jobName: 'Pushing', jobDesc: 'Moves what nothing else can move.',
+    found: 'everywhere in the shallows, in their hundreds',
+    line: [
+      { name: 'Magikarp', dex: 129 },
+      { name: 'Gyarados', dex: 130,
+        blurb: 'This is what a Magikarp is for. A Gyarados is longer than the dock and it is not gentle. Elm wrote that it appears to remember every year of being ignored.' }
+    ],
+    passage: {
+      title: 'Field Notes: Magikarp',
+      source: 'Ranger Elm, note 72',
+      text: [
+        'There are more Magikarp in this water than everything else put together. You will be tired of them by your second day down here.',
+        'Here is the full list of what one can do. It can splash. That is the list.',
+        'So why is this page as long as all the others? Because a Magikarp that lives long enough stops being a Magikarp.',
+        'And the one that gets there is not the strongest one. It is the one that was still there. Most are eaten in their first year. The rest keep going, badly, in water nothing else will live in.',
+        'I have seen what it turns into twice. Both times from a long way off, and both times I was glad about the distance.',
+        'So do not put a Magikarp on a job today. Put it on a job next {season}.'
+      ]
+    },
+    questions: [
+      { tag: 'Main idea',
+        q: 'Why is this page as long as the others?',
+        choices: ['A Magikarp that lives long enough changes', 'Magikarp are the most useful animal here', 'There are so many of them', 'Elm could not think of an ending'],
+        answer: 0,
+        why: 'The whole page is built on that one sentence. Everything before it is about how little a Magikarp can do today.' },
+      { tag: 'Inference',
+        q: 'Which Magikarp is the one that grows?',
+        choices: ['The one that was still there', 'The biggest one', 'The one that splashes hardest', 'The one people fed'],
+        answer: 0,
+        why: 'Elm says it straight out and then explains it: most are eaten in the first year, and lasting is the whole skill.' },
+      { tag: 'Detail',
+        q: 'What can a Magikarp do?',
+        choices: ['Splash', 'Push rocks', 'Carry a light', 'Find fresh water'],
+        answer: 0,
+        why: 'Elm calls it the full list, and then the list is one word long.' },
+      { tag: 'What to do',
+        q: 'What does Elm say to do with a Magikarp?',
+        choices: ['Give it a job next season, not today', 'Leave it in the water', 'Feed it every day', 'Take two of them'],
+        answer: 0,
+        why: 'The last line of the page. It is not much use now, and that is not the same thing as never.' }
+    ],
+    lines: {
+      rapport: 'It stops splashing for a moment and looks at you sideways.',
+      catch: 'It splashes once, hard, and comes along.',
+      flee: 'It splashes off through the kelp and hits two stalks on the way.'
+    }
   }
 ];
 

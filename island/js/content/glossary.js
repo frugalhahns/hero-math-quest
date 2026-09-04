@@ -66,7 +66,14 @@ export const GLOSSARY = {
   buried:    'Covered over, under the ground or under a pile.',
   scratched: 'Cut a thin line into something with something sharp.',
   northwest: 'The direction halfway between north and west.',
-  southeast: 'The direction halfway between south and east.'
+  southeast: 'The direction halfway between south and east.',
+  bed:       'A place where one kind of plant grows thickly.',
+  kelp:      'A very tall seaweed. It grows up from the sea floor toward the light.',
+  frond:     'One long leaf of a seaweed or a fern.',
+  timbers:   'The big pieces of wood a boat is built out of.',
+  stalk:     'The long stem a plant grows up on.',
+  gentle:    'Careful and soft, and never rough.',
+  season:    'One of the four parts of a year, like summer or winter.'
 };
 
 export function define(word) {

@@ -35,7 +35,12 @@ export const BASE_DEX = {
   krabby: 98,
   hoothoot: 163,
   mareep: 179,
-  marill: 183
+  marill: 183,
+  staryu: 120,
+  corsola: 222,
+  horsea: 116,
+  lapras: 131,
+  magikarp: 129
 };
 
 /* On-screen height in map tiles, out on the island. Set by eye rather than
@@ -60,7 +65,12 @@ export const TILES_TALL = {
   oddish: 1.3,
   marill: 1.3,
   mareep: 1.5,
-  hoothoot: 1.5
+  hoothoot: 1.5,
+  staryu: 1.3,
+  corsola: 1.2,
+  horsea: 1.4,
+  lapras: 2.4,
+  magikarp: 1.5
 };
 
 /* These take a dex number, not a species id, because a species has more than

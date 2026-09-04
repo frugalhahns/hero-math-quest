@@ -97,7 +97,10 @@ const SURFACE = {
   dirt:  f => { noise(0.045, 230 + f * 60, 0.032, 'lowpass'); },
   wood:  f => { tone(f ? 128 : 112, 0, 0.055, 'sine', 0.030); noise(0.028, 1000, 0.014, 'bandpass'); },
   stone: f => { noise(0.03, 1050 + f * 220, 0.026, 'bandpass'); noise(0.14, 760, 0.008, 'bandpass', 0.085); },
-  water: f => { noise(0.09, 620 + f * 120, 0.030, 'lowpass'); noise(0.05, 2400, 0.010, 'bandpass', 0.02); }
+  water: f => { noise(0.09, 620 + f * 120, 0.030, 'lowpass'); noise(0.05, 2400, 0.010, 'bandpass', 0.02); },
+  /* Not a footstep at all: the submarine's motor, and a bubble behind it. The
+     only "surface" you never actually touch. */
+  deep:  f => { tone(f ? 62 : 58, 0, 0.14, 'sine', 0.026); noise(0.06, 900, 0.008, 'bandpass', 0.05); }
 };
 
 export const SURFACES = Object.keys(SURFACE);

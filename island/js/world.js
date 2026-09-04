@@ -82,10 +82,20 @@ export function entityAt(map, x, y, S) {
   return ENTITIES.find(e => e.map === map && e.x === x && e.y === y && !hidden(e, S)) || null;
 }
 
+/* A crossing you have not earned yet is a wall. There is one: the submarine
+   moored under the last board of the dock, which is a boat before it is yours
+   and a door afterwards. The rule lives on the EXITS entry rather than here, so
+   there is only ever one copy of it. */
+function shutExit(map, x, y, S) {
+  const e = EXITS.find(o => o.needs && o.map === map && o.x === x && o.y === y);
+  return !!e && !e.needs(S);
+}
+
 export function blocked(map, x, y, S) {
   const t = tileAt(map, x, y);
   if (t === null) return true;
   if (isSolidTile(t)) return true;
+  if (shutExit(map, x, y, S)) return true;
   return !!entityAt(map, x, y, S);
 }
 
@@ -94,7 +104,9 @@ export function blocked(map, x, y, S) {
    going silent -- a missing sound is harder to notice than a wrong one. */
 export const TILE_SURFACE = {
   '.': 'grass', ',': 'grass', f: 'grass', m: 'grass',
-  S: 'sand', '=': 'dirt', _: 'wood', ':': 'stone', o: 'water'
+  S: 'sand', '=': 'dirt', _: 'wood', ':': 'stone', o: 'water',
+  // under the water there are no feet, so both of these are the motor
+  W: 'deep', F: 'deep', d: 'deep'
 };
 
 export function surfaceAt(map, x, y) {
@@ -172,11 +184,39 @@ export function drawMap(ctx, map, cam, frame, S) {
 
 /* What to show past the edge of a map, so the border never flashes black. */
 function edgeTile(map) {
+  if (map === 'shallows') return 'B';
   if (map === 'caverns') return '#';
   if (map === 'marsh') return 'e';
   if (map === 'ridge') return 'C';
   if (map === 'beach') return '~';
   return 'T';
+}
+
+/* Under the water. Not the cave's vignette with a different colour: this is a
+   flat wash over the whole frame, heavier toward the bottom of the screen, plus
+   two bands of light coming down from the surface. Without something laid over
+   the top the kelp bed reads as a green field seen at night. */
+export function drawDeep(ctx, w, h, t) {
+  const g = ctx.createLinearGradient(0, 0, 0, h);
+  g.addColorStop(0, 'rgba(30, 120, 170, 0.18)');
+  g.addColorStop(1, 'rgba(8, 44, 84, 0.52)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, w, h);
+
+  ctx.save();
+  ctx.globalAlpha = 0.10;
+  ctx.fillStyle = '#dff2ff';
+  for (let i = 0; i < 3; i++) {
+    const x = ((i * 137 + t * 0.006) % (w + 120)) - 60;
+    ctx.beginPath();
+    ctx.moveTo(x, 0);
+    ctx.lineTo(x + 26, 0);
+    ctx.lineTo(x + 64, h);
+    ctx.lineTo(x + 20, h);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.restore();
 }
 
 /* A soft vignette for the cave, drawn over everything but the UI. */

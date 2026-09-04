@@ -51,6 +51,14 @@ const C = {
   floor: '#4a545d', floorD: '#39424a', floorL: '#5c6871',
   pool: '#1f5f66', poolL: '#2f8189',
   reed: '#6b8a3f', reedD: '#4c6329',
+  /* under the water. Everything down here is a stop or two darker than the same
+     thing in the air, because that is what water does to light, and the sand is
+     greyer for the same reason. */
+  deep: '#2b6f96', deepD: '#1f5878', deepL: '#4890b6',
+  silt: '#a9b39a', siltD: '#8d9880', siltL: '#c6cfb6', caustic: '#dff0e8',
+  kelp: '#4a6b2a', kelpD: '#32491b', kelpL: '#6b8f3d',
+  coral: '#e08aa8', coralD: '#b05f80', coralL: '#f2b3c8',
+  hull: '#f2c637', hullD: '#b8912a',
   scree: '#8d8a7d', screeD: '#6b6960', screeL: '#a8a496',
   glow: '#9fe0ff'
 };
@@ -293,6 +301,112 @@ const PAINT = {
     px(g, 7, 6, 1, 4, '#ffffff');
   },
 
+  /* ---- the kelp shallows, under the water ---- */
+
+  /* Open water over a deep bottom. The motes drift the same way the surface
+     ripples do, one pixel per frame, which is all it takes to stop a still
+     picture reading as a wall. */
+  W: (g, r, f) => {
+    px(g, 0, 0, TS, TS, C.deep);
+    speckle(g, r, C.deepD, 12);
+    g.fillStyle = C.deepL;
+    for (let i = 0; i < 5; i++) {
+      const x = Math.floor(r() * TS), y = Math.floor(r() * TS);
+      g.fillRect(x, (y + (f ? 1 : 0)) % TS, 1, 1);
+    }
+  },
+
+  /* Rippled sand, seen through water: the same shapes as the beach, greyer. */
+  F: (g, r) => {
+    px(g, 0, 0, TS, TS, C.silt);
+    speckle(g, r, C.siltD, 12);
+    speckle(g, r, C.siltL, 8);
+    g.fillStyle = C.siltD;
+    for (const y of [3, 8, 13]) {
+      const x0 = Math.floor(r() * 6);
+      g.fillRect(x0, y, 5, 1);
+      g.fillRect(x0 + 8, y + 1, 4, 1);
+    }
+    /* Caustics: the net of light the surface throws on to the bottom in shallow
+       water. Two short bright strokes per tile is enough for the eye to join
+       them up into a net across the whole floor. */
+    g.globalAlpha = 0.35;
+    g.fillStyle = C.caustic;
+    const cx = Math.floor(r() * 10), cy = Math.floor(r() * 10);
+    g.fillRect(cx, cy, 4, 1);
+    g.fillRect(cx + 3, cy + 1, 1, 3);
+    g.fillRect((cx + 8) % 14, (cy + 7) % 14, 3, 1);
+    g.globalAlpha = 1;
+  },
+
+  /* A kelp stand from above: stalks, and the blades lying over them. Two frames
+     that lean opposite ways, so the whole bed sways together. */
+  K: (g, r, f) => {
+    PAINT.W(g, rng(11), f);
+    const lean = f ? 1 : -1;
+    g.fillStyle = C.kelpD;
+    for (let i = 0; i < 5; i++) {
+      const x = 1 + Math.floor(r() * 13), h = 9 + Math.floor(r() * 6);
+      g.fillRect(x, TS - h, 2, h);
+      g.fillRect(x + lean, TS - h - 1, 2, 2);
+    }
+    g.fillStyle = C.kelp;
+    for (let i = 0; i < 4; i++) {
+      const x = 1 + Math.floor(r() * 13), h = 7 + Math.floor(r() * 7);
+      g.fillRect(x, TS - h, 1, h);
+    }
+    speckle(g, r, C.kelpL, 6);
+  },
+
+  /* Coral. The one thing down here it takes three years to grow a thumb of. */
+  O: (g, r) => {
+    PAINT.F(g, rng(13));
+    g.fillStyle = C.coralD;
+    g.beginPath(); g.arc(8, 9, 5.6, 0, 7); g.fill();
+    g.fillStyle = C.coral;
+    g.beginPath(); g.arc(8, 8, 4.4, 0, 7); g.fill();
+    g.fillStyle = C.coralL;
+    for (let i = 0; i < 5; i++) px(g, 4 + Math.floor(r() * 8), 4 + Math.floor(r() * 7), 1, 1, C.coralL);
+    px(g, 7, 3, 2, 3, C.coral);
+    px(g, 3, 6, 2, 3, C.coral);
+    px(g, 11, 6, 2, 3, C.coral);
+  },
+
+  /* Rock, with weed on the top of it. Also the wall all the way round. */
+  B: (g, r) => {
+    px(g, 0, 0, TS, TS, C.rockD);
+    speckle(g, r, C.rock, 16);
+    speckle(g, r, C.deepD, 10);
+    g.fillStyle = C.kelpD;
+    for (let i = 0; i < 4; i++) g.fillRect(Math.floor(r() * TS), Math.floor(r() * 5), 1, 3 + Math.floor(r() * 3));
+  },
+
+  /* The Rosa, on her side in the sand. */
+  V: (g, r) => {
+    PAINT.F(g, rng(17));
+    px(g, 0, 2, TS, 12, C.woodD);
+    px(g, 0, 3, TS, 1, C.wood);
+    px(g, 0, 8, TS, 1, C.wood);
+    speckle(g, r, '#2c2016', 14, 0, 2, TS, 12);
+    g.fillStyle = C.kelpD;
+    for (let i = 0; i < 3; i++) g.fillRect(Math.floor(r() * TS), 1, 1, 3);
+  },
+
+  /* The submarine, tied up under the last board of the dock. A tile rather than
+     an entity because it is a door: walk on to it and you go down. It is solid
+     until the card in the hatch has been read -- see EXITS in entities.js. */
+  d: (g, r, f) => {
+    PAINT['~'](g, rng(19), f);
+    px(g, 2, 6, 12, 6, C.hullD);
+    px(g, 3, 6, 10, 4, C.hull);
+    px(g, 6, 3, 3, 3, C.hullD);
+    px(g, 7, 4, 1, 2, C.hull);
+    px(g, 10, 7, 2, 2, '#cfe8ff');
+    px(g, 1, 8, 1, 2, C.hullD);
+    g.fillStyle = 'rgba(255,255,255,0.35)';
+    g.fillRect(f ? 3 : 5, 13, 3, 1);
+  },
+
   /* ---- barriers, cleared by projects ---- */
 
   1: (g, r) => {                                   // the channel gate
@@ -334,8 +448,9 @@ const PAINT = {
 
 /* ---------------- baking ---------------- */
 
-const SOLID = new Set(['T', 'b', 'R', 'C', 'A', '~', 's', 'e', 'w', 'r', 'D', '|', '#', 'p', 'x', 'G', '1', '2', '3', '4', '5']);
-const ANIMATED = new Set(['~', 's', 'p', 'o', 'e', '3', '4']);
+const SOLID = new Set(['T', 'b', 'R', 'C', 'A', '~', 's', 'e', 'w', 'r', 'D', '|', '#', 'p', 'x', 'G',
+                       'K', 'O', 'B', 'V', '1', '2', '3', '4', '5']);
+const ANIMATED = new Set(['~', 's', 'p', 'o', 'e', 'W', 'K', 'd', '3', '4']);
 
 export function isSolidTile(ch) { return SOLID.has(ch); }
 export function isKnownTile(ch) { return !!PAINT[ch]; }

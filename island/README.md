@@ -306,6 +306,47 @@ line what you just got, and no step may point at it. And flowtest clicks all the
 way through the card -- open, page, answer every question -- then checks the save
 came out of it owning a bicycle and already on it.
 
+## The Kelp Shallows
+
+The seventh region is not on the island. It is the kelp bed under the water off
+the end of the dock, and getting to it is the second reward: a card in the hatch
+of a little yellow submarine, which turns up once the water notebook in the marsh
+has been read. By then a kid knows what a tide is and what the channel is, which
+is most of what the card assumes.
+
+The submarine is moored on the last row of the beach map as a tile rather than an
+entity, because it is a door. It is solid until you have read the card and a
+crossing afterwards, and the rule lives on the `EXITS` entry as `needs` so the
+world and both simulations read the same copy of it. It is the only crossing on
+the island not opened by a project clearing a barrier.
+
+Down there you are the visitor. Five residents, and four of them do a job
+somebody up top already does, on purpose: **nothing in the chain may reach into
+the bed**. No step goes there, there is nothing to build there, and no project
+depends on a job only the bed can do. All three are checked, because "optional"
+turns quietly into "a place you had to find" the first time something up there
+needs something down here.
+
+- **Staryu** grows its arms back and puts its light out if you shine a lamp at it.
+- **Corsola** grows less than a thumb of stone branch in three years.
+- **Horsea** is a fish that gave up swimming and holds on to a stalk instead.
+- **Lapras** does not live there. It comes through, and it only comes once the
+  three who do live there have said yes.
+- **Magikarp** is at the door, in hundreds, and can do exactly one thing. Its page
+  is as long as the others, and it is about why that is not the same as never.
+
+The bed arrives in the same three waves as everywhere else: the slate and the
+depth post and a Magikarp at the door, the three residents when the slate has been
+read, and the wreck of the Rosa alongside them.
+
+New tiles for it -- open water, rippled silt with caustics on it, kelp that leans
+one way and then the other, coral heads, rock, ship timbers -- and a blue wash
+with light shafts laid over the whole frame, which is the underwater equivalent of
+the vignette in the caves. Your sprite becomes the submarine while you are down
+there and casts no shadow, because nothing swimming does. The footstep becomes the
+motor, and the soundtrack gets the slowest theme in the game: major key, but
+muffled between the marsh and the caves, because that is what water does to sound.
+
 ## Looking a bit more like the games it borrows from
 
 The residents have been real Generation V sprites since the second week. The

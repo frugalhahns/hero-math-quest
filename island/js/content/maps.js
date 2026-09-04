@@ -1,6 +1,9 @@
-/* Tile maps for the six regions of Verdant Isle.
+/* Tile maps for the seven regions of Verdant Isle. Six are on it; the seventh
+   is the kelp bed under the water off the end of the dock, which is why the
+   beach's last row has a `d` in it -- that is the submarine, moored, and it is
+   solid until the card in its hatch has been read.
    Every row is exactly 34 characters and every map is 24 rows.
-   Tile legend lives in world.js. Barrier tiles 1-5 are cleared by projects. */
+   Tile legend lives in js/tileset.js. Barrier tiles 1-5 are cleared by projects. */
 
 export const MAP_W = 34;
 export const MAP_H = 24;
@@ -30,7 +33,7 @@ export const GRIDS = {
     '~CCCCCsssssssssssssssssss__ssssss~',
     '~~~~C~~~~~~~~~~~~~~~~~~~~__~~~~~~~',
     '~~~~~~~~~~~~~~~~~~~~~~~~~__~~~~~~~',
-    '~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~'
+    '~~~~~~~~~~~~~~~~~~~~~~~~~d~~~~~~~~'
   ],
   meadow: [
     'TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT',
@@ -161,5 +164,31 @@ export const GRIDS = {
     'CCACAAAAAA===============AAAAAAACC',
     'CCCCCCCCCCCCCCCC===CCCCCCCCCCCCCCC',
     'CCCCCCCCCCCCCCCCC=CCCCCCCCCCCCCCCC'
+  ],
+  shallows: [
+    'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB',
+    'BBBBBBBBBBBBBBBBBWBBBBBBBBBBBBBBBB',
+    'BBWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWBB',
+    'BWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWB',
+    'BWWWKKWWWWWWWWWWWWWWWWWWWWKKWWWWWB',
+    'BWWKKKKWWWWWKKKWWWKKKWWWWWKKKWWWWB',
+    'BWWKKKWWWWWKKKKWWWKKKKWWWWKKKWWWWB',
+    'BFFFKFFFFFFKKKFFFFFKKKFFFFFKFFFFFB',
+    'BFFFFFFFFFFFKKFFFFFFKKFFFFFFFFFFFB',
+    'BFFOFFFFFFFFFKFFFFFFFKFFFFFFFFKFFB',
+    'BFOOOFFFFFFFFFFFFFFFFFFFFFFFFFKKFB',
+    'BFOOFFFFFFFFFFFFFFFFFFFFFFFFFFKKFB',
+    'BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB',
+    'BFFFFFFFFKKFFFFFFFFFFFFFFVVVVFFFFB',
+    'BFFFFFFFKKKFFFFFFFFFFFFFVVVVVVFFFB',
+    'BFFFFFFFKKFFFFFFFFFFFFFFVVVVVVFFFB',
+    'BFFFFFFFFFFFFFFFFFFFFFFFFVVVVFFFFB',
+    'BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB',
+    'BFFBFFFFFFFFFFOOFFFFFFFFFFFFFBFFFB',
+    'BFBBFFFFFFFFFOOOOFFFFFFFFFFFFBBFFB',
+    'BFFBFFFFFFFFFFOOFFFFFFFFFFFFFBFFFB',
+    'BFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFB',
+    'BBFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFBB',
+    'BBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB'
   ]
 };

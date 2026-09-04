@@ -83,6 +83,14 @@ export const ENTITIES = [
     when: s => !!s.projects.gate,
     label: 'A bicycle leaning on the cabin wall, with a card tied to the bars.' },
 
+  /* The card in the submarine's hatch. Like the bicycle: nothing needs it, no
+     step points at it, and it waits for the water notebook in the marsh -- by
+     then a kid knows what a tide is and what the channel is, which is most of
+     what the card assumes. */
+  { map: 'beach', x: 24, y: 22, art: 'lockbox', kind: 'doc', doc: 'submarine',
+    when: s => !!s.flags.ledger,
+    label: 'A hatch in the top of something yellow, tied under the last board.' },
+
   /* ------------------------------------------------ Meadow Hollow
 
      Every region after the beach used to hand over everything it had the
@@ -224,7 +232,37 @@ export const ENTITIES = [
   { map: 'ridge', x: 14, y: 3,  art: null, kind: 'doc', doc: 'summit',
     label: 'The stone pile at the top. A flat slate is wedged in near the top.' },
   { map: 'ridge', x: 16, y: 4,  art: 'ditto', kind: 'wild', species: 'ditto',
-    when: s => !!s.flags.summit }
+    when: s => !!s.flags.summit },
+
+  /* ------------------------------------------------ The Kelp Shallows
+
+     The one region that is not on the island, and the only one that is entirely
+     optional: no step in the chain comes down here and nothing up there needs
+     anything found down here. Same three waves as everywhere else.
+
+     Magikarp is at the door on purpose. There are hundreds of them, the slate
+     says so, and a kid who writes them off on sight is exactly the kid the
+     Magikarp page is written for. */
+  { map: 'shallows', x: 17, y: 4,  art: 'lockbox', kind: 'doc', doc: 'kelp',
+    label: 'A slate in a glass case, wired to a post in the sand.' },
+  { map: 'shallows', x: 14, y: 7,  art: 'sign', kind: 'sign', sign: 'kelpPost' },
+  { map: 'shallows', x: 20, y: 9,  art: null, kind: 'wild', species: 'magikarp' },
+
+  /* the slate's wave: the three that live in the bed, and the boat it does not
+     mention because Elm never wrote about her */
+  { map: 'shallows', x: 13, y: 18, art: null, kind: 'wild', species: 'corsola',
+    when: s => !!s.flags.kelp },
+  { map: 'shallows', x: 8,  y: 13, art: null, kind: 'wild', species: 'staryu',
+    when: s => !!s.flags.kelp },
+  { map: 'shallows', x: 10, y: 6,  art: null, kind: 'wild', species: 'horsea',
+    when: s => !!s.flags.kelp },
+  { map: 'shallows', x: 23, y: 14, art: 'sign', kind: 'sign', sign: 'wreckSign',
+    when: s => !!s.flags.kelp },
+
+  /* The big one comes through when it feels like it, which in a game has to
+     mean something. It means the three who live here have all said yes. */
+  { map: 'shallows', x: 24, y: 3,  art: null, kind: 'wild', species: 'lapras',
+    when: s => ['corsola', 'staryu', 'horsea'].every(id => s.team.includes(id)) }
 ];
 
 /* Region display names and the tile you arrive on. */
@@ -234,10 +272,19 @@ export const REGIONS = {
   grove:   { name: 'Whispering Grove', dark: false },
   marsh:   { name: 'Reed Marsh',       dark: false },
   caverns: { name: 'Tidepool Caves',   dark: true },
-  ridge:   { name: 'Ash Ridge',        dark: false }
+  ridge:   { name: 'Ash Ridge',        dark: false },
+  /* `deep` gets the blue laid over everything, the way `dark` gets the black in
+     the caves. It is not gloom: it is the colour of being under. */
+  shallows: { name: 'The Kelp Shallows', dark: false, deep: true }
 };
 
-/* Edge crossings. Each is a single tile you walk onto. */
+/* Edge crossings. Each is a single tile you walk onto.
+
+   `needs` is a crossing you cannot use yet, and there is exactly one: every
+   other border on the island is closed by a barrier tile that a project clears.
+   The dive is closed by not owning a submarine, so the tile itself stays solid
+   until you do -- see blocked() in world.js, which reads this list rather than
+   keeping a second copy of the rule. */
 export const EXITS = [
   { map: 'beach',   x: 17, y: 0,  to: 'meadow',  tx: 17, ty: 22, dir: 'up' },
   { map: 'meadow',  x: 17, y: 23, to: 'beach',   tx: 17, ty: 2,  dir: 'down' },
@@ -248,5 +295,8 @@ export const EXITS = [
   { map: 'marsh',   x: 17, y: 23, to: 'caverns', tx: 17, ty: 1,  dir: 'down' },
   { map: 'caverns', x: 17, y: 0,  to: 'marsh',   tx: 17, ty: 21, dir: 'up' },
   { map: 'grove',   x: 17, y: 0,  to: 'ridge',   tx: 17, ty: 22, dir: 'up' },
-  { map: 'ridge',   x: 17, y: 23, to: 'grove',   tx: 17, ty: 3,  dir: 'down' }
+  { map: 'ridge',   x: 17, y: 23, to: 'grove',   tx: 17, ty: 3,  dir: 'down' },
+  { map: 'beach',    x: 25, y: 23, to: 'shallows', tx: 17, ty: 2,  dir: 'down',
+    needs: s => !!s.flags.submarine },
+  { map: 'shallows', x: 17, y: 1,  to: 'beach',    tx: 25, ty: 22, dir: 'up' }
 ];

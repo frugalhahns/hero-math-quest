@@ -50,6 +50,15 @@ export const THEMES = {
   ridge: {
     root: 65, scale: MAJOR_PENT, bpm: 78, bright: 1.3, arp: true,
     chords: [[0, 4, 7], [5, 9, 12], [9, 12, 16], [7, 11, 14]]
+  },
+  /* Under the water: the slowest thing here and the only major key that is
+     muffled rather than open. Water takes the top off everything, so `bright`
+     sits between the marsh and the caves, but the chords stay warm because this
+     is a nice place to be and not a frightening one. No arpeggio: nothing down
+     there is in a hurry. */
+  shallows: {
+    root: 58, scale: MAJOR_PENT, bpm: 58, bright: 0.62, arp: false,
+    chords: [[0, 4, 7], [9, 12, 16], [5, 9, 12], [2, 5, 9]]
   }
 };
 

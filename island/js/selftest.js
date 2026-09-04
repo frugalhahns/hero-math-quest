@@ -90,7 +90,8 @@ W.buildWorld(FULL);
 
 const ENTRY = {
   beach: [17, 3], meadow: [17, 22], grove: [32, 12],
-  marsh: [1, 6], caverns: [17, 1], ridge: [17, 22]
+  marsh: [1, 6], caverns: [17, 1], ridge: [17, 22],
+  shallows: [17, 2]
 };
 
 head('region entry tiles');
@@ -251,6 +252,17 @@ head('progression is solvable in order');
         const region = Object.keys(REGIONS).find(k => REGIONS[k].name === p.opens);
         if (region) reachableRegions.add(region);
       }
+    }
+    /* A region is opened by a project clearing a barrier, or by a crossing you
+       have earned the right to use. There is one of the second kind and it is
+       the dive, so this loop is the only thing that ever puts the kelp bed in
+       reach -- and it has to run inside the walk rather than before it, because
+       what earns it is a page you read in the marsh. */
+    for (const x of EXITS) {
+      if (!x.needs || !reachableRegions.has(x.map) || reachableRegions.has(x.to)) continue;
+      if (!x.needs(sim)) continue;
+      reachableRegions.add(x.to);
+      progressed = true;
     }
   }
   ok(reachableRegions.size === Object.keys(REGIONS).length,
@@ -445,8 +457,13 @@ head('the opening');
   /* Every wave has to be openable by the wave before it, or the beach is a
      locked room. The solvability simulation proves the whole island, this
      proves the beach in particular, from nothing. */
+  /* The beach's own waves, walked from nothing. One thing on this beach waits on
+     a page in another region -- the submarine card wants the water notebook in
+     the marsh -- so the walk is seeded with that one flag. It is still a wave;
+     it is just opened from further away, and the island-wide check above is
+     what proves the ordering of those. */
   const seen = new Set(atLanding.map(e => e.x + ',' + e.y));
-  const sim = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
+  const sim = { projects: {}, team: [], flags: { ledger: true }, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
   for (let pass = 0; pass < 8; pass++) {
     for (const e of W.visibleEntities('beach', sim)) {
       seen.add(e.x + ',' + e.y);
@@ -514,6 +531,11 @@ head('every region arrives in waves');
         reach.add(opened);
         landing[opened] = W.visibleEntities(opened, sim);   // what is there as you walk in
       }
+    }
+    for (const x of EXITS) {
+      if (!x.needs || !reach.has(x.map) || reach.has(x.to) || !x.needs(sim)) continue;
+      reach.add(x.to);
+      landing[x.to] = W.visibleEntities(x.to, sim);
     }
   }
 
@@ -588,6 +610,50 @@ head('rewards');
       `${d.id}: says what you just got, in one line`, String(d.reward && d.reward.length));
   }
   note(`reward pages: ${rewards.map(d => d.id).join(', ')}`);
+}
+
+/* ---------------- the way down ---------------- */
+/* The dive is the only crossing on the island that is not opened by clearing a
+   barrier, so it is the only one where "can I walk here yet" is a question about
+   the save file rather than about a tile. Both answers are checked, because
+   getting the first one wrong means a kid walks off the end of the dock into the
+   sea, and getting the second one wrong means the submarine never works. */
+head('the dive');
+{
+  const dive = EXITS.find(e => e.needs);
+  ok(!!dive, 'there is exactly one crossing you have to earn',
+    String(EXITS.filter(e => e.needs).length));
+  const before = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
+  const after = { ...before, flags: { submarine: true } };
+  W.buildWorld(before);
+  ok(W.blocked(dive.map, dive.x, dive.y, before),
+    'the moored submarine is a wall before you have read the card in its hatch');
+  ok(!W.blocked(dive.map, dive.x, dive.y, after),
+    'and a door afterwards');
+  ok(!!W.exitAt(dive.map, dive.x, dive.y), 'and the tile it stands on really is a crossing');
+  const back = EXITS.find(e => e.map === dive.to && e.to === dive.map);
+  ok(!!back && !back.needs, 'coming back up is never gated: you can always surface');
+  W.buildWorld(FULL);
+}
+
+/* The bed is meant to be entirely optional. Nothing in the chain may reach into
+   it, or "optional" quietly becomes "a place you must go and nobody told you". */
+{
+  const deepRegions = Object.keys(REGIONS).filter(k => REGIONS[k].deep);
+  ok(deepRegions.length === 1, 'one region is under the water', deepRegions.join(', '));
+  const inDeep = QUEST.filter(q => regionsFor(q).some(r => deepRegions.includes(r)));
+  ok(inDeep.length === 0, 'and no step in the chain ever sends you down there',
+    inDeep.map(q => q.id).join(', '));
+  const builds = PROJECTS.filter(p => deepRegions.includes(p.region));
+  ok(builds.length === 0, 'and there is nothing to build down there either',
+    builds.map(p => p.id).join(', '));
+  const jobs = SPECIES.filter(sp => sp.region === deepRegions[0]).map(sp => sp.job);
+  const needed = new Set(PROJECTS.flatMap(p => p.needs));
+  const onlyDown = [...needed].filter(j =>
+    SPECIES.filter(sp => sp.job === j).every(sp => sp.region === deepRegions[0]));
+  ok(onlyDown.length === 0, 'and no project depends on a job only the kelp bed can do',
+    onlyDown.join(', '));
+  note(`under the water: ${jobs.length} residents doing ${[...new Set(jobs)].join(', ')}`);
 }
 
 /* ---------------- questions ---------------- */
@@ -1379,7 +1445,10 @@ head('the home page');
    the number lives on a sign in a region you have already walked through. */
 head('sign arithmetic');
 
-const REGION_ORDER = ['beach', 'meadow', 'grove', 'marsh', 'caverns', 'ridge'];
+/* The order a player actually meets the regions, which is what a recall
+   question has to respect. The kelp bed sits after the marsh because the card
+   that opens it waits for the marsh notebook. */
+const REGION_ORDER = ['beach', 'meadow', 'grove', 'marsh', 'shallows', 'caverns', 'ridge'];
 const signMap = {};
 for (const e of ENTITIES) if (e.kind === 'sign') signMap[e.sign] = e.map;
 

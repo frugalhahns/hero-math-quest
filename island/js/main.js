@@ -23,7 +23,10 @@ const RIDE_MS = 88;       // one tile, on the bicycle
 
 /* Elm's two rules, in code. Underground is out because the cave floor is wet
    rock full of holes, and the sea is out because a bicycle is not a boat. */
-const NO_BIKE = { caverns: 'You wheel it as far as the tunnel and leave it there. Elm was firm about that.' };
+const NO_BIKE = {
+  caverns: 'You wheel it as far as the tunnel and leave it there. Elm was firm about that.',
+  shallows: 'You left it on the dock. A bicycle is not a boat.'
+};
 
 function riding() { return !!S.riding && !!S.flags.bicycle && !NO_BIKE[P.map]; }
 function stepMs() { return riding() ? RIDE_MS : STEP_MS; }
@@ -150,6 +153,7 @@ function loop(now) {
 
   W.drawMap(ctx, P.map, cam, waterFrame, S);
   if (REGIONS[P.map] && REGIONS[P.map].dark) W.drawGloom(ctx, canvas.width, canvas.height);
+  if (REGIONS[P.map] && REGIONS[P.map].deep) W.drawDeep(ctx, canvas.width, canvas.height, now);
   syncActors(cam);
   drawPlayer(rx, ry, cam, now);
 
@@ -365,8 +369,9 @@ function edgeArrow(e, cam, bounce) {
 
 function drawPlayer(rx, ry, cam, now) {
   const dirPart = P.dir === 'up' ? 'up' : P.dir === 'down' ? 'down' : 'side';
-  const onBike = riding();
-  const base = (onBike ? 'bike_' : 'player_') + dirPart;
+  const under = !!(REGIONS[P.map] && REGIONS[P.map].deep);
+  const onBike = !under && riding();
+  const base = (under ? 'sub_' : onBike ? 'bike_' : 'player_') + dirPart;
   const flip = P.dir === 'right';
   const walking = P.t < 1;
   /* Two frames per direction, alternating one per tile, so a walk is legs
@@ -375,15 +380,16 @@ function drawPlayer(rx, ry, cam, now) {
      the rate both of them want. The bicycle has one alternate frame; walking
      has two, because legs go somewhere and wheels only go round. */
   const art = !walking ? base
-    : onBike ? (stepParity ? base + '_b' : base)
+    : (onBike || under) ? (stepParity ? base + '_b' : base)
     : base + (stepParity ? '_a' : '_b');
   const bob = walking && P.t > 0.22 && P.t < 0.78 ? -1 : 0;
   const sx = Math.round((rx - cam.cx) * TS);
   const sy = Math.round((ry - cam.cy) * TS) + bob;
   hctx.clearRect(0, 0, heroCanvas.width, heroCanvas.height);
   if (!U.sheetOpen()) drawMarkers(cam, now);
-  // a small shadow keeps the sprite from floating over tall grass
-  hctx.globalAlpha = 0.18;
+  // a small shadow keeps the sprite from floating over tall grass. Nothing casts
+  // one on to water it is swimming through.
+  hctx.globalAlpha = under ? 0 : 0.18;
   hctx.fillStyle = '#000';
   hctx.beginPath();
   hctx.ellipse(sx + 8, sy + 15, 5, 2, 0, 0, 7);

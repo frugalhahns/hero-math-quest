@@ -325,6 +325,74 @@ export const DOCS = {
     ]
   },
 
+  submarine: {
+    id: 'submarine', title: 'The Little Submarine', source: 'Ranger Elm, on a card inside the hatch',
+    reward: 'The submarine is yours. Take it down off the end of the dock.',
+    text: [
+      'There is a submarine tied under the end of this dock. It is yellow, it is older than you are, and it works. Three things before you take it down.',
+      'One. It holds one person and it goes slowly. That is on purpose. Fast is how you hit the thing you did not see.',
+      'Two. The way down is here, off the end of these boards, and nowhere else. Everywhere else round this island the bottom comes up at you too quickly.',
+      'Three. Down there you are the visitor. Nothing in the {kelp} has ever been chased by anything your size, so if you go slowly they will come and look at you. Nothing on land has ever done that.',
+      'I left a page down there, in a case on a post. Read it before you try to make friends with anything.'
+    ],
+    questions: [
+      { tag: 'What to do',
+        q: 'Where can you take the submarine down?',
+        choices: ['Off the end of this dock', 'Anywhere along the beach', 'From the marsh landing', 'Out past the rock finger'],
+        answer: 0,
+        why: 'Elm is exact about it: here and nowhere else, because everywhere else the bottom comes up too quickly.' },
+      { tag: 'Cause and effect',
+        q: 'Why is the submarine built to go slowly?',
+        choices: ['Fast is how you hit what you did not see', 'It would use too much power', 'It would frighten the animals', 'It cannot go any faster'],
+        answer: 0,
+        why: 'He calls the slowness deliberate and then gives the reason in one line. Under water you cannot see far ahead.' },
+      { tag: 'Inference',
+        q: 'Why do the kelp animals come and look at you?',
+        choices: ['Nothing down there has been chased by your size', 'They think the submarine is food', 'They have seen the submarine before', 'They want to get past you'],
+        answer: 0,
+        why: 'On land the animals have learned to keep away from big things. In the kelp nobody has taught them that yet.' },
+      { tag: 'Detail',
+        q: 'What did Elm leave down in the kelp?',
+        choices: ['A page in a case on a post', 'A second submarine', 'A lamp', 'Nothing at all'],
+        answer: 0,
+        why: 'And he says to read it before trying to make friends with anything, which makes it the first thing to find.' }
+    ]
+  },
+
+  kelp: {
+    id: 'kelp', title: 'The Slate in the Kelp', source: 'Ranger Elm, in a case on a post',
+    text: [
+      'You got down here. Good. This is the one part of the island that is not island.',
+      'Kelp is not a plant the way grass is a plant. It has no roots at all. It takes hold of one rock with a foot like a hand, and then it grows up toward the light.',
+      'So a kelp {bed} is a wood. Everything down here lives at its own height in it, the way birds live at their own height in a tree.',
+      'Three live in this one. The stone grower is on the floor. The one with a light in the middle of it is halfway up. So is the one with its tail wrapped round a stalk, and that one is holding on because it cannot swim.',
+      'A fourth is not a resident. It comes through when it feels like it, it is the size of a boat, and it will let you know it is there before you see it.',
+      'And there are Magikarp everywhere. You are going to want to ignore them. Read their page before you decide that.'
+    ],
+    questions: [
+      { tag: 'Detail',
+        q: 'What does kelp hold on to?',
+        choices: ['One rock, with a foot like a hand', 'The sand, with long roots', 'Other kelp', 'Nothing, it floats'],
+        answer: 0,
+        why: 'Elm makes the point twice: no roots at all, and a foot like a hand on a single rock.' },
+      { tag: 'Main idea',
+        q: 'Why does Elm say a kelp bed is like a wood?',
+        choices: ['Everything lives at its own height in it', 'It is dark inside', 'It is full of birds', 'It is hard to walk through'],
+        answer: 0,
+        why: 'That is the comparison he draws, and then he uses it to tell you where each animal will be.' },
+      { tag: 'Inference',
+        q: 'Why does one of them hold on to a stalk?',
+        choices: ['It cannot swim', 'It is asleep', 'It is eating', 'It is hiding from you'],
+        answer: 0,
+        why: 'The slate gives the reason with the description: it holds on because it cannot swim.' },
+      { tag: 'Word meaning',
+        q: 'A kelp {bed} is —',
+        choices: ['a patch where kelp grows thickly', 'a place where kelp sleeps', 'the sand under the kelp', 'one very old kelp plant'],
+        answer: 0,
+        why: 'Nothing sleeps in it. A bed is a patch of ground where one kind of plant grows thick, like a flower bed.' }
+    ]
+  },
+
   rocketBeach: {
     id: 'rocketBeach', title: 'A Crumpled Plan', source: 'Dropped on the beach',
     outcome: 'The grunt reads the chart over your shoulder, looks at the hole, and goes very red. Then they walk off up the beach without saying anything.',
@@ -592,6 +660,38 @@ export const SIGNS = {
       choices: ['12 things', '4 things', '7 things', '3 things'],
       answer: 0,
       why: 'This box holds 4 things: a pencil, a lace, a candle, a note. 3 boxes of 4 is 12.'
+    }
+  },
+
+  kelpPost: {
+    text: [
+      'A measuring post, driven into the sand where the kelp begins.',
+      'The paint has gone but the marks are cut in.',
+      'Cut across the top: THIS {FROND} WAS 18 FEET IN AUGUST. KELP GROWS 2 FEET A DAY.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.OA.A.2',
+      q: 'How many days did this frond take to grow 18 feet?',
+      choices: ['9 days', '18 days', '20 days', '36 days'],
+      answer: 0,
+      why: '18 feet, growing 2 feet each day. 18 split into 2s is 9, so 9 days.'
+    }
+  },
+
+  wreckSign: {
+    text: [
+      'A boat on her side in the sand, half buried, with the kelp growing through her.',
+      'A plank is nailed across the {timbers}, and somebody has written on it.',
+      'THE ROSA. SHE WENT DOWN WITH 24 CRATES. WE GOT 18 OF THEM BACK.'
+    ],
+    gives: 'berries',
+    q: {
+      code: '3.NBT.A.2',
+      q: 'How many of the Rosa\'s crates are still down here?',
+      choices: ['6 crates', '18 crates', '24 crates', '42 crates'],
+      answer: 0,
+      why: '24 crates went down and 18 came back up. 24 take away 18 leaves 6 still on the bottom.'
     }
   },
 
