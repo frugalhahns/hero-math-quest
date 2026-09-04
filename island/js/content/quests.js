@@ -281,6 +281,50 @@ export const DOCS = {
      before Team Rocket were.
      --------------------------------------------------------------------- */
 
+  /* ------------------------------------------------------------------
+     The two rewards. Neither is on the chain and nothing is blocked by
+     either, which is the point: they are what a kid gets for reading a page
+     he did not have to read. Both are gated so they arrive when they are
+     worth having -- the bicycle once the gate opens and the island stops
+     being one beach, the submarine once the water notebook has taught you
+     what a tide does.
+     ------------------------------------------------------------------ */
+
+  bicycle: {
+    id: 'bicycle', title: 'The Bicycle', source: 'Ranger Elm, on a card tied to the bars',
+    reward: 'The bicycle is yours. Ride it with the Bike button, or press R.',
+    text: [
+      'If you are reading this, the gate is open. That means the rest of the island is yours to cross, and it is a lot bigger than it looks from this beach.',
+      'So take the bicycle. Where I am going I would only have to carry it.',
+      'Two rules, and I mean both of them.',
+      'One. Do not take it underground. The cave floor is wet rock full of holes, and a wheel finds every one of them. I broke a wrist that way in my third year. Walk down there.',
+      'Two. Get off it before you say hello to anybody. An animal that has never seen a bicycle sees a big fast thing coming straight at it. You would run too.',
+      'Everywhere else, ride. The paths are {firm} and flat and they go where you are going. Three hours of walking is one hour of this.'
+    ],
+    questions: [
+      { tag: 'What to do',
+        q: 'Where must you not ride the bicycle?',
+        choices: ['Underground, in the caves', 'On the dirt paths', 'On the sand', 'Up the ridge trail'],
+        answer: 0,
+        why: 'Elm gives the rule and the reason together. The cave floor is wet rock full of holes, and he broke a wrist finding that out.' },
+      { tag: 'Cause and effect',
+        q: 'Why should you get off before you say hello to an animal?',
+        choices: ['It sees a big fast thing coming at it', 'The bicycle makes too much noise', 'You cannot reach down that far', 'The animal might take the bicycle'],
+        answer: 0,
+        why: 'The card says it from the animal\'s side: it has never seen a bicycle, so all it sees is something big coming fast. Elm adds, "You would run too."' },
+      { tag: 'Inference',
+        q: 'Why is the bicycle worth having at all?',
+        choices: ['The island is big and this crosses it fast', 'It carries things for you', 'It keeps the animals away', 'It works in the caves'],
+        answer: 0,
+        why: 'Two things joined up: the island is "a lot bigger than it looks", and three hours of walking is one hour of riding.' },
+      { tag: 'Word meaning',
+        q: 'The paths are {firm}, which means they are —',
+        choices: ['hard enough to hold you up', 'soft and wet', 'covered in loose sand', 'going downhill'],
+        answer: 0,
+        why: 'Firm ground does not sink under you. That is exactly what a wheel needs, which is why Elm names the paths and the sand.' }
+    ]
+  },
+
   rocketBeach: {
     id: 'rocketBeach', title: 'A Crumpled Plan', source: 'Dropped on the beach',
     outcome: 'The grunt reads the chart over your shoulder, looks at the hole, and goes very red. Then they walk off up the beach without saying anything.',

@@ -101,6 +101,11 @@ body {
 }
 .chip:hover { background: var(--card2); }
 .chip[data-on="1"] { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+/* riding: the same treatment as any other switched-on chip, and greyed out
+   rather than hidden in the one place the bicycle is not allowed */
+.chip.on { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.chip:disabled { opacity: .45; cursor: default; }
+.chip:disabled:hover { background: var(--card); }
 
 /* ---------------- the world ---------------- */
 

@@ -18,7 +18,15 @@ import { pending, form } from './evolve.js';
 import { REGIONS } from './content/entities.js';
 import { BASE_DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
 
-const STEP_MS = 145;
+const STEP_MS = 145;      // one tile, walking
+const RIDE_MS = 88;       // one tile, on the bicycle
+
+/* Elm's two rules, in code. Underground is out because the cave floor is wet
+   rock full of holes, and the sea is out because a bicycle is not a boat. */
+const NO_BIKE = { caverns: 'You wheel it as far as the tunnel and leave it there. Elm was firm about that.' };
+
+function riding() { return !!S.riding && !!S.flags.bicycle && !NO_BIKE[P.map]; }
+function stepMs() { return riding() ? RIDE_MS : STEP_MS; }
 
 const canvas = document.getElementById('screen');
 const ctx = canvas.getContext('2d');
@@ -151,7 +159,7 @@ function loop(now) {
 
 function tick(dt) {
   if (P.t < 1) {
-    P.t = Math.min(1, P.t + dt / STEP_MS);
+    P.t = Math.min(1, P.t + dt / stepMs());
     if (P.t >= 1) arrive();
     return;
   }
@@ -175,7 +183,10 @@ function tryMove(dir) {
   // relentless, and it buries the music. The tile you are landing on picks the
   // sound, and the two feet alternate, so a dock knocks and a cave clicks.
   stepParity ^= 1;
-  if (stepParity) sfx.step(W.surfaceAt(P.map, nx, ny), footParity ^= 1);
+  if (stepParity) {
+    if (riding()) sfx.wheel(footParity ^= 1);
+    else sfx.step(W.surfaceAt(P.map, nx, ny), footParity ^= 1);
+  }
 }
 
 function arrive() {
@@ -189,6 +200,14 @@ function arrive() {
     refreshBar(P.map);
     music.setRegion(P.map);
     U.toast(REGIONS[P.map] ? REGIONS[P.map].name : P.map, 1800);
+    /* Walking into somewhere the bicycle cannot go leaves you on foot without
+       taking it off you: riding stays true, so it is waiting when you come back
+       up. Say why once, because a kid who suddenly walks slower and was not told
+       assumes something is broken. */
+    if (S.riding && S.flags.bicycle && NO_BIKE[P.map]) {
+      setTimeout(() => U.toast(NO_BIKE[P.map], 4200), 1900);
+    }
+    syncBikeButton();
   }
   persist();
 }
@@ -345,13 +364,19 @@ function edgeArrow(e, cam, bounce) {
 }
 
 function drawPlayer(rx, ry, cam, now) {
-  const base = P.dir === 'up' ? 'player_up' : P.dir === 'down' ? 'player_down' : 'player_side';
+  const dirPart = P.dir === 'up' ? 'up' : P.dir === 'down' ? 'down' : 'side';
+  const onBike = riding();
+  const base = (onBike ? 'bike_' : 'player_') + dirPart;
   const flip = P.dir === 'right';
   const walking = P.t < 1;
-  /* Two step frames per direction, alternating one per tile, so a walk is legs
-     rather than a sprite sliding along the ground. stepParity already flips on
-     every tile for the footsteps, which is exactly the rate the legs want. */
-  const art = walking ? base + (stepParity ? '_a' : '_b') : base;
+  /* Two frames per direction, alternating one per tile, so a walk is legs
+     rather than a sprite sliding along the ground and a ride is wheels turning.
+     stepParity already flips on every tile for the footsteps, which is exactly
+     the rate both of them want. The bicycle has one alternate frame; walking
+     has two, because legs go somewhere and wheels only go round. */
+  const art = !walking ? base
+    : onBike ? (stepParity ? base + '_b' : base)
+    : base + (stepParity ? '_a' : '_b');
   const bob = walking && P.t > 0.22 && P.t < 0.78 ? -1 : 0;
   const sx = Math.round((rx - cam.cx) * TS);
   const sy = Math.round((ry - cam.cy) * TS) + bob;
@@ -459,7 +484,7 @@ function act() {
   if (U.sheetOpen()) return;
   const e = facingEntity();
   if (!e) return;
-  const refresh = () => { advance(); refreshBar(P.map); persist(); checkGrowth(); };
+  const refresh = () => { advance(); refreshBar(P.map); persist(); checkGrowth(); syncBikeButton(); };
 
   switch (e.kind) {
     case 'doc':
@@ -523,6 +548,15 @@ function act() {
     }
 
     case 'wild':
+      /* Elm's second rule, and the only place the game enforces one of his
+         rules for you: you get off first. It does not refuse the hello, it
+         just does the sensible thing and says so. */
+      if (riding()) {
+        S.riding = false;
+        save();
+        syncBikeButton();
+        U.toast('You get off the bicycle first.', 2600);
+      }
       meet(e, () => { refresh(); });
       break;
 
@@ -562,6 +596,7 @@ window.addEventListener('keydown', ev => {
   if (ev.key === 'j' || ev.key === 'J') openJournal();
   if (ev.key === 't' || ev.key === 'T') openTeam();
   if (ev.key === 'b' || ev.key === 'B') openBuildList(() => { advance(); refreshBar(P.map); checkGrowth(); });
+  if (ev.key === 'r' || ev.key === 'R') toggleRide();
   if (ev.key === '?' || ev.key === '/') openHelp();
 });
 
@@ -603,12 +638,47 @@ canvas.addEventListener('click', ev => {
     tryMove(P.dir);
   } else if (Math.abs(dx) > Math.abs(dy)) {
     held[dx > 0 ? 'right' : 'left'] = true;
-    setTimeout(() => { held.right = held.left = false; }, STEP_MS * Math.min(6, Math.abs(dx)));
+    setTimeout(() => { held.right = held.left = false; }, stepMs() * Math.min(6, Math.abs(dx)));
   } else if (dy !== 0) {
     held[dy > 0 ? 'down' : 'up'] = true;
-    setTimeout(() => { held.down = held.up = false; }, STEP_MS * Math.min(6, Math.abs(dy)));
+    setTimeout(() => { held.down = held.up = false; }, stepMs() * Math.min(6, Math.abs(dy)));
   }
 });
+
+/* ---------------- the bicycle ---------------- */
+
+/* The button only exists once the card by the cabin has been read, and it says
+   what pressing it does rather than what you are doing now. It goes grey where
+   the bicycle is not allowed instead of disappearing, because a button that
+   vanishes reads as a bug and a greyed one reads as a rule. */
+const bikeBtn = document.getElementById('btn-bike');
+
+function syncBikeButton() {
+  if (!bikeBtn) return;
+  const owned = !!S.flags.bicycle;
+  bikeBtn.classList.toggle('hidden', !owned);
+  if (!owned) return;
+  const barred = !!NO_BIKE[P.map];
+  bikeBtn.disabled = barred;
+  bikeBtn.classList.toggle('on', riding());
+  bikeBtn.textContent = barred ? 'On foot' : S.riding ? 'Walk' : 'Bike';
+}
+
+function toggleRide(sayNo = true) {
+  if (!S.flags.bicycle) return;
+  if (NO_BIKE[P.map]) {
+    if (sayNo) U.toast(NO_BIKE[P.map], 3600);
+    return;
+  }
+  S.riding = !S.riding;
+  save();
+  sfx.open();
+  U.toast(S.riding ? 'On the bicycle.' : 'Off the bicycle.', 1500);
+  syncBikeButton();
+}
+
+if (bikeBtn) bikeBtn.addEventListener('click', () => toggleRide());
+syncBikeButton();
 
 /* top bar */
 document.querySelectorAll('#tools [data-open]').forEach(b =>

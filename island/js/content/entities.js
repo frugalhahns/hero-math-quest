@@ -75,6 +75,14 @@ export const ENTITIES = [
   { map: 'beach', x: 20, y: 18, art: null,      kind: 'wild', species: 'krabby',
     when: s => !!s.projects.gate, need: 2 },
 
+  /* Elm's bicycle, against the cabin wall. Nothing on the chain needs it and no
+     step ever points at it: it is a page you did not have to read, paying out.
+     It waits for the gate for the reason the card gives -- until the gate is
+     open the island is one beach, and a bicycle on one beach is a toy. */
+  { map: 'beach', x: 10, y: 5,  art: 'bike_parked', kind: 'doc', doc: 'bicycle',
+    when: s => !!s.projects.gate,
+    label: 'A bicycle leaning on the cabin wall, with a card tied to the bars.' },
+
   /* ------------------------------------------------ Meadow Hollow
 
      Every region after the beach used to hand over everything it had the

@@ -174,8 +174,13 @@ function runQuestions(doc) {
 function finish(doc, firstTry, total) {
   const wasNew = !S.flags[doc.id];
   S.flags[doc.id] = true;
+  /* A reward page pays out the moment its questions are done: the flag the
+     document already sets IS the thing you now own, so there is nothing else to
+     record. Riding starts switched on, because a kid who has just been given a
+     bicycle should not have to find a button to use it. */
+  if (wasNew && doc.reward && doc.id === 'bicycle') S.riding = true;
   save();
-  sfx.build();
+  if (wasNew && doc.reward) sfx.unlock(); else sfx.build();
 
   const before = step().id;
   advance();
@@ -191,8 +196,9 @@ function finish(doc, firstTry, total) {
         : `You got there. <b>${firstTry} of ${total}</b> right the first time, and the rest after you read why.`}</p>
       ${doc.outcome
         ? `<p>${U.esc(doc.outcome)}</p>`
-        : (wasNew ? `<p><b>Written in your journal.</b> ${U.esc(nowStep.log || '')}</p>` : '')}
+        : (wasNew && !doc.reward ? `<p><b>Written in your journal.</b> ${U.esc(nowStep.log || '')}</p>` : '')}
     </div>
+    ${doc.reward ? `<div class="why"><b>${U.esc(doc.reward)}</b></div>` : ''}
     ${before !== nowStep.id
       ? `<h3>What now</h3><div class="passage"><p>${U.esc(nowStep.objective)}</p></div>`
       : ''}

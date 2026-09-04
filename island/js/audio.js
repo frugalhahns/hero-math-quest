@@ -102,10 +102,18 @@ const SURFACE = {
 
 export const SURFACES = Object.keys(SURFACE);
 
+/* On the bicycle. Not a footstep: a short low hum with a tick of chain on top,
+   quieter than any of the feet, because it fires nearly twice as often. */
+function wheel(f) {
+  tone(f ? 96 : 88, 0, 0.07, 'sine', 0.020);
+  noise(0.02, 3200, 0.008, 'bandpass');
+}
+
 export const sfx = {
   /* A soft tap, never a tone: a pitched blip on every tile is what was drowning
      the music. `where` is a surface name from SURFACES, `foot` alternates. */
   step:    (where, foot) => on && (SURFACE[where] || SURFACE.dirt)(foot ? 1 : 0),
+  wheel:   foot => on && wheel(foot ? 1 : 0),
   bump:    () => on && tone(120, 0, 0.06, 'sine', 0.030),
   open:    () => seq([[520, .06], [700, .1]], 'triangle', 0.06),
   page:    () => noise(0.1, 2200, 0.030),

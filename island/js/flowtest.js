@@ -131,6 +131,37 @@ try {
     await wait(4);
   }
 
+  /* ---------------- a page that pays out ---------------- */
+  /* The bicycle is the first thing in the game you get for reading something
+     nothing made you read, so the payout is a real click-through rather than a
+     flag somebody set in a test: open the card, answer every question, and the
+     save has to come out of it owning a bicycle and already on it. */
+  head('a reward page pays out');
+  {
+    delete S.flags.bicycle;
+    S.riding = false;
+    save();
+    openDoc('bicycle');
+    await wait(8);
+    ok(sheetText().includes('the gate is open'), 'the bicycle card opens on its first page',
+      sheetText().slice(0, 50).replace(/\s+/g, ' '));
+    await pageThrough();
+    $('#pg-done').click();
+    await wait(8);
+    for (let n = 0; n < 10 && $('.qtext'); n++) {
+      if (!await answerRight(DOCS.bicycle.questions)) break;
+      if ($('#q-next')) { $('#q-next').click(); await wait(8); }
+    }
+    ok(S.flags.bicycle === true, 'answering it is what hands the bicycle over');
+    ok(S.riding === true, 'and you start out on it, without hunting for a button');
+    ok(sheetText().includes('The bicycle is yours'), 'and the page says what you just got',
+      sheetText().slice(-90).replace(/\s+/g, ' '));
+    const bikeChip = $('#btn-bike');
+    ok(!!bikeChip, 'there is a Bike button in the top bar');
+    U.closeSheet(true);
+    await wait(4);
+  }
+
   /* ---------------- getting it wrong ---------------- */
   head('getting a sign wrong');
   {

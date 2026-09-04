@@ -279,6 +279,33 @@ Some deliberate choices:
   job is done. What is on your map at any moment is roughly what you have been
   told about, which is what keeps "not everything at once" true past the tutorial.
 
+## Two things you only get for reading something optional
+
+Everything else on the island is on the chain: read this, so you can do that, so
+you can get there. These two are not. Nothing is blocked by either of them and no
+step ever points at one. They are what a kid gets for reading a page nobody made
+him read, which is the only reward this game has any business handing out.
+
+**The bicycle** leans on the cabin wall once the channel gate is open, with a
+card tied to the bars. Read the card, answer it, and it is yours: one tile every
+88 milliseconds instead of 145, which is most of the walking gone. Elm's card
+gives two rules and the game keeps both of them. Not underground, because the
+cave floor is wet rock full of holes and he broke a wrist finding that out, so
+the Bike button greys out in the caves rather than disappearing -- a button that
+vanishes reads as a bug and a greyed one reads as a rule. And you get off before
+you say hello to anybody, because an animal that has never seen a bicycle sees a
+big fast thing coming straight at it. Walking up to a resident while riding gets
+off the bicycle for you and says so.
+
+It waits for the gate because until the gate is open the island is one beach, and
+a bicycle on one beach is a toy.
+
+The self test knows what a reward page is now: it must be standing somewhere,
+must wait for something rather than being there at the start, must say in one
+line what you just got, and no step may point at it. And flowtest clicks all the
+way through the card -- open, page, answer every question -- then checks the save
+came out of it owning a bicycle and already on it.
+
 ## Looking a bit more like the games it borrows from
 
 The residents have been real Generation V sprites since the second week. The
@@ -304,7 +331,14 @@ alone on purpose -- the caves are meant to be gloomy, and it is the grey that
 makes the green look green.
 
 `island/spritelab.html` draws every 16x16 sprite in the game at 9x, which is how
-this was iterated on rather than by squinting at screenshots of the map.
+this was iterated on rather than by squinting at screenshots of the map. The kid
+on the bicycle came out of three passes there.
+
+One more thing the shell has to survive: `flowtest.html` carries its own copy of
+the game markup so it can press real buttons, so the two can drift apart, and the
+first sign of that is a handler that quietly never fires. The self test now
+checks that every id in `index.html` exists in `flowtest.html` too. It caught the
+Bike button the day it was added.
 
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the

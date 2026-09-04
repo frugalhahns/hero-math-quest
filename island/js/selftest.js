@@ -418,16 +418,20 @@ head('the opening');
   ok(landingWords <= 400, 'and under 400 words of reading in front of you', `${landingWords} words`);
 
   /* Everything the chain actually requires before the first gate opens. Signs
-     are not counted: they are the optional layer, and the prompt now says so. */
-  const beachDocs = ENTITIES.filter(e => e.kind === 'doc' && e.map === 'beach').map(e => DOCS[e.doc]);
-  const askedByDocs = beachDocs.reduce((n, d) => n + Math.min(d.ask || d.questions.length, d.questions.length), 0);
-  /* The residents standing on the beach at the moment the gate becomes
-     buildable: everything read, the handle dug, nothing built yet. A `when`
-     predicate reads a whole save, so it gets a whole save. */
+     are not counted: they are the optional layer, and the prompt now says so.
+
+     Everything here is measured against the save as it stands at the moment the
+     gate becomes buildable: everything read, the handle dug, nothing built yet.
+     A `when` predicate reads a whole save, so it gets a whole save. That matters
+     for the documents as well as the animals now -- the bicycle card is a beach
+     document that does not exist until the gate is open, and counting it here
+     would fail a budget about the opening for something that is not in it. */
   const beforeGate = {
     projects: {}, team: [], items: { crank: 1 }, read: {}, signs: {}, crew: {}, step: 0,
     flags: { notice: true, tidechart: true, fieldguide: true }
   };
+  const beachDocs = W.visibleEntities('beach', beforeGate).filter(e => e.kind === 'doc').map(e => DOCS[e.doc]);
+  const askedByDocs = beachDocs.reduce((n, d) => n + Math.min(d.ask || d.questions.length, d.questions.length), 0);
   const beachWilds = W.visibleEntities('beach', beforeGate).filter(e => e.kind === 'wild');
   const askedByAnimals = beachWilds.reduce((n, e) => n + (e.need || 3), 0);
   const mustAsk = askedByDocs + askedByAnimals;
@@ -543,6 +547,47 @@ head('every region arrives in waves');
   const orphans = ENTITIES.filter(e => !ever.has(key(e)));
   ok(orphans.length === 0, 'and every wave everywhere opens from the one before it',
     orphans.map(e => `${e.map} ${nameOf(e)}`).join(', '));
+}
+
+/* ---------------- the two copies of the game shell ---------------- */
+/* flowtest.html carries its own copy of the markup so it can press real
+   buttons, which means index.html and flowtest.html can drift apart and the
+   first sign of it is a handler that quietly never fires. Every id the game
+   looks up has to exist in both. This has already caught one. */
+head('the shell');
+{
+  const [a, b] = await Promise.all([
+    fetch('index.html').then(r => r.text()),
+    fetch('flowtest.html').then(r => r.text())
+  ]);
+  const idsOf = html => new Set(
+    [...html.matchAll(/\bid="([a-z0-9-]+)"/gi)].map(m => m[1]));
+  const game = idsOf(a);
+  const test = idsOf(b);
+  const missing = [...game].filter(id => !test.has(id));
+  ok(missing.length === 0, 'flowtest.html has every element the game does', missing.join(', '));
+  note(`${game.size} ids in the shell`);
+}
+
+/* ---------------- the two rewards ---------------- */
+/* The bicycle and the submarine are the only two things in the game you get for
+   reading something you did not have to read. That makes them the two easiest
+   things to get wrong in a way nobody notices: a reward page that no step points
+   at, on a gate nobody opens, is simply a page that never appears. */
+head('rewards');
+{
+  const rewards = Object.values(DOCS).filter(d => d.reward);
+  ok(rewards.length >= 1, 'there is at least one page that pays out', String(rewards.length));
+  for (const d of rewards) {
+    const at = ENTITIES.find(e => e.kind === 'doc' && e.doc === d.id);
+    ok(!!at, `${d.id}: the page is standing somewhere on the island`);
+    ok(!!at && !!at.when, `${d.id}: and it waits for something rather than being there at the start`);
+    ok(!QUEST.some(q => q.target && q.target.kind === 'doc' && q.target.id === d.id),
+      `${d.id}: no step points at it, because nothing on the chain needs it`);
+    ok(typeof d.reward === 'string' && d.reward.length > 20 && d.reward.length < 120,
+      `${d.id}: says what you just got, in one line`, String(d.reward && d.reward.length));
+  }
+  note(`reward pages: ${rewards.map(d => d.id).join(', ')}`);
 }
 
 /* ---------------- questions ---------------- */

@@ -60,6 +60,7 @@ const DEFAULT = {
   projects: {},           // projectId -> true
   crew: {},               // projectId -> [speciesId, ...] who did it
   items: {},              // crank: 1, berries: 2
+  riding: false,          // on the bicycle, once the card by the cabin is read
   asked: 0,
   right: 0,
   looked: 0,              // glossary words tapped
