@@ -82,9 +82,9 @@ export const SPECIES = [
       title: 'Field Notes: Psyduck',
       source: 'Ranger Elm, note 22',
       text: [
-        'Psyduck always looks confused. That is because its head hurts almost all the time. The headache is the whole story of this animal.',
+        'Psyduck always looks {confused}. That is because its head hurts almost all the time. The headache is the whole story of this animal.',
         'Power builds up inside a Psyduck\'s head. It cannot let that power out when it wants to. So it stands in the {shallow} water, holds its head, and waits.',
-        'When the power finally comes out, rocks lift off the sand. The water ripples the wrong way. And the Psyduck looks just as surprised as you do. It never knows when it will happen.',
+        'When the power finally comes out, rocks lift off the sand. The water {ripples} the wrong way. And the Psyduck looks just as surprised as you do. It never knows when it will happen.',
         'Here is the part we can use. A Psyduck can smell fresh water from far away. It always walks toward the fresh water and away from the salty sea. Follow a thirsty Psyduck and you will find a spring.',
         'Walk up to one slowly. Loud noise makes the headache worse. And a Psyduck whose head hurts will not trust anybody.'
       ]
@@ -138,7 +138,7 @@ export const SPECIES = [
       text: [
         'Krabby lives where the sand stays wet. It digs a {burrow} down into the shallow water and backs into it when anything comes near.',
         'Its two claws do not match. One is always bigger. If a Krabby loses the big one, the small one grows to take its place, and a new small one grows on the other side.',
-        'The big claw is not really for fighting. It is a shovel. A Krabby can move a pile of wet sand faster than a person with a spade.',
+        'The big claw is not really for fighting. It is a shovel. A Krabby can move a pile of wet sand faster than a person with a {spade}.',
         'Elm used them to sink the first posts on the dock. He wrote that a Krabby will dig all day, as long as the sand stays wet.',
         'They are shy. Stand still and one will come out and get back to work right in front of you. Move fast and you will be looking at an empty hole.'
       ]
@@ -362,7 +362,7 @@ export const SPECIES = [
         'So the more it walks, the more it holds. The tip of its tail glows brighter as the day goes on.',
         'That makes a Mareep easy to read. Dim tail, walk it further. Bright tail, it is ready.',
         'Do not brush a Mareep. The fleece is doing a job. A brushed Mareep holds almost nothing until the wool grows back.',
-        'Elm kept one by the sluice gate for a whole summer. He wrote that it never once gave him a shock he had not asked for.'
+        'Elm kept one by the {sluice} gate for a whole summer. He wrote that it never once gave him a shock he had not asked for.'
       ]
     },
     questions: [
@@ -471,7 +471,7 @@ export const SPECIES = [
         'I will be honest with you. Most of this page is a list of things we do not know.',
         'Nobody here has ever seen the bottom half of a Diglett. Not once in nine years. They pop up to the neck, look around, and drop back down.',
         'Here is what we do know. A Diglett moves through hard dirt about as fast as you walk on a path. And the {tunnel} behind it does not fall in. Something is pressing those walls tight.',
-        'One day we were hammering posts by the brook. Seven Digletts popped up in four minutes. They came up in a line, spaced out evenly.',
+        'One day we were hammering posts by the brook. Seven Digletts popped up in four minutes. They came up in a line, spaced out {evenly}.',
         'They were too far apart to all feel the same hammer. I think they were talking to each other under the ground.',
         'I cannot prove that. I wrote it down anyway, so that you know which part of this page is only a guess.'
       ]
@@ -523,11 +523,11 @@ export const SPECIES = [
       title: 'Field Notes: Hoothoot',
       source: 'Ranger Elm, note 56',
       text: [
-        'Hoothoot stands on one foot. The other one is tucked up in its feathers. It swaps them over so fast that most people never see it happen.',
+        'Hoothoot stands on one foot. The other one is {tucked} up in its feathers. It swaps them over so fast that most people never see it happen.',
         'It has a very good clock inside it. A Hoothoot turns its head at the same {steady} beat all night long, like something ticking.',
         'That clock is what makes it useful. A Hoothoot always knows how long it has been flying. So it always knows how far it has gone.',
         'Send one out over the trees and it comes back and tells you the distance, not just the way.',
-        'It sleeps through the day. If you want a Hoothoot, come to the grove at dusk and wait for the ticking to start.'
+        'It sleeps through the day. If you want a Hoothoot, come to the grove at {dusk} and wait for the ticking to start.'
       ]
     },
     questions: [
@@ -580,9 +580,9 @@ export const SPECIES = [
       text: [
         'Oddish spends the whole day buried. Only the leaves on its head show, and from a step away they look exactly like a small plant.',
         'It is not hiding from you. It is drinking. An Oddish sits in the ground all day and takes water up through its feet.',
-        'At dusk it pulls itself out and walks. It goes a long way for something so small, and it plants seeds the whole time it is moving.',
+        'At {dusk} it pulls itself out and walks. It goes a long way for something so small, and it plants seeds the whole time it is moving.',
         'Sun hurts an Oddish. It looks for {shade} before it looks for food.',
-        'So if you want one, look for leaves in a patch of ground with no other plants in it. Then wait for the sun to go down.'
+        'So if you want one, look for leaves in a {patch} of ground with no other plants in it. Then wait for the sun to go down.'
       ]
     },
     questions: [
@@ -634,7 +634,7 @@ export const SPECIES = [
       source: 'Ranger Elm, note 71',
       text: [
         'Wooper live in the {marsh}, where the river runs into the sea. The water there is half fresh and half salty. Most animals have to work hard to live in water like that.',
-        'A Wooper does not. Its skin has a thick coat of slime. The slime keeps the water out. So a Wooper can sit there all day and never worry about it.',
+        'A Wooper does not. Its skin has a thick coat of {slime}. The slime keeps the water out. So a Wooper can sit there all day and never worry about it.',
         'The slime also tastes bad, so most things leave it alone. That is probably just good luck and not the reason the slime grew.',
         'On land the slime dries out in about half an hour. A dry Wooper is a sad Wooper. If you take one away from the water, bring water with you. Give it a puddle at every stop.',
         'That is not being nice. That is the deal. A Wooper you let dry out will not follow you a second time.',
@@ -688,7 +688,7 @@ export const SPECIES = [
       source: 'Ranger Elm, note 78',
       text: [
         'The two long parts trailing behind a Chinchou used to be fins. They do not help it swim any more. Now each one ends in a bulb that can {glow} for hours.',
-        'People used to think the light was for hunting. That is wrong. A hunting Chinchou goes dark. It drifts, and it finds its food by feeling tiny sparks in the water.',
+        'People used to think the light was for hunting. That is wrong. A hunting Chinchou goes dark. It {drifts}, and it finds its food by feeling tiny sparks in the water.',
         'The light is for talking. Where a dozen Chinchou gather, the flashes make a pattern. The pattern takes about forty seconds. Then it starts over again.',
         'Nobody knows what the pattern means. We do know it stops the second you lower a lantern into the water. And it does not start again for twenty minutes.',
         'So keep your own light above the water. A Chinchou that agrees to help will hold its bulb steady for as long as you ask.',

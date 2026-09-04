@@ -241,7 +241,14 @@ Some deliberate choices:
 - **Vocabulary is supported, not withheld.** Any word in a passage with a dotted
   underline gives its meaning *for that sentence* when tapped, in words easier
   than the one being explained. The same word appears in a question in plain
-  italics, so a vocabulary question never hands over its answer.
+  italics, so a vocabulary question never hands over its answer. There are 56 of
+  them, tappable in 72 places, and every passage in the game has at least one.
+  The list grew because a kid hit *intake* on the meadow water sign and had
+  nowhere to go: the second batch is the words he would not have met yet, in the
+  sentences where not knowing costs him the sentence. Three rules are checked
+  rather than intended -- no definition leans on another word that also needed
+  defining, none runs over 16 words, and the definitions as a body read at or
+  under the same grade level as the game.
 - **There is deliberately no read-aloud.** The other game in this repo has a
   read-it-to-me button on every story, because there decoding is the bottleneck
   and speech removes it. Here comprehension *is* the skill being practised, so

@@ -672,6 +672,47 @@ ok(missing.size === 0, 'every {braced} word has a definition', [...missing].join
 const unused = Object.keys(GLOSSARY).filter(w => !used.has(w));
 ok(unused.length === 0, 'no unused glossary entries', unused.join(', '));
 
+/* The three rules the glossary is written to, which were a comment at the top
+   of the file and are now checked. The one that matters is the second: a
+   definition written in words harder than the word it defines is a dead end for
+   the reader who needed it, and it is very easy to write one by accident. */
+{
+  const heads = Object.keys(GLOSSARY);
+  const circular = [];
+  const wordy = [];
+  for (const [w, d] of Object.entries(GLOSSARY)) {
+    const other = heads.filter(h => h !== w && new RegExp(`\\b${h}\\b`, 'i').test(d));
+    if (other.length) circular.push(`${w} uses ${other.join('/')}`);
+    if (grade(d).words > 16) wordy.push(`${w} (${grade(d).words} words)`);
+  }
+  ok(circular.length === 0, 'no definition leans on another word that also needed defining',
+    circular.join(', '));
+  ok(wordy.length === 0, 'every definition fits in 16 words', wordy.join(', '));
+  const dg = grade(Object.values(GLOSSARY).join(' '));
+  ok(dg.fk <= TARGET, `the definitions themselves read at ${dg.fk.toFixed(1)}, at or under ${TARGET.toFixed(1)}`);
+}
+
+/* A passage with nothing tappable in it is the state this started from: a kid
+   hits "intake" on the meadow sign, has nowhere to go, and stops. Every page in
+   the game now offers at least one word, and the count is a note rather than a
+   ceiling because there is no such thing as too many definitions -- only
+   definitions on words that did not need one. */
+{
+  const bare = [];
+  let glossed = 0;
+  const check = (what, text) => {
+    const n = (text.match(/\{/g) || []).length;
+    glossed += n;
+    if (!n) bare.push(what);
+  };
+  for (const [id, d] of Object.entries(DOCS)) check('doc ' + id, d.text.join(' '));
+  for (const [id, s2] of Object.entries(SIGNS)) check('sign ' + id, s2.text.join(' '));
+  for (const sp of SPECIES) check(sp.id, sp.passage.text.join(' '));
+  ok(bare.length === 0, 'every passage has at least one word you can tap for a meaning',
+    bare.join(', '));
+  note(`${Object.keys(GLOSSARY).length} words defined, tappable in ${glossed} places across the island`);
+}
+
 /* every glossary word must actually appear in the prose of its own passage */
 head('vocabulary questions are answerable from the text');
 for (const sp of SPECIES) {

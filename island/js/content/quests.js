@@ -49,7 +49,7 @@ export const DOCS = {
       'The gate does not swing open. A handle turns a drum. The drum winds up a chain. The chain lifts the door up out of the water.',
       'The handle is iron and it is heavy. I do not keep it on the gate. In a storm, a loose iron handle turns into a flying weapon.',
       'The rock finger is that long line of stone on the west shore. At low water it throws a long shadow across the sand. Where the shadow ends there is a {hollow} full of rough {gravel}.',
-      'The handle is down in that hollow, wrapped in oiled cloth. Dig where the shadow ends.',
+      'The handle is down in that hollow, wrapped in {oiled} cloth. Dig where the shadow ends.',
       'Do not dig at the near end of the rock. Everybody digs there. There is nothing there but an old hole I made myself.'
     ],
     questions: [
@@ -81,7 +81,7 @@ export const DOCS = {
     id: 'fieldguide', title: 'Who Can Do What', source: 'Ranger Elm, on a post outside the cabin',
     text: [
       'The gate needs two jobs done at the same time. You cannot do either one yourself.',
-      'First, somebody has to go up the channel and check that it is clear. I cannot see up there from the beach. Neither can you.',
+      'First, somebody has to go up the {channel} and check that it is clear. I cannot see up there from the beach. Neither can you.',
       'You want that small brown bird in the bushes above the tide line. The one that throws sand at you and vanishes. It is no fighter. But it is the best path finder on this island, and it comes back, and it remembers what it saw.',
       'Second, the drum is bone dry. It will lock up the moment it takes any weight. It needs fresh water. Not sea water. Salt would lock it up for good.',
       'Do not go hunting for a spring yourself. That takes a week. There is an animal in the {shallow} water at the west end of this beach. It stands around holding its head and looks completely useless.',
@@ -111,12 +111,12 @@ export const DOCS = {
     id: 'cairns', title: 'The Tablet by the Stone Circle', source: 'Meadow Hollow',
     text: [
       'Read this before you decide what these stones are.',
-      'Visitors call this circle a shrine. They leave little gifts on it. That is harmless, and it misses the point completely.',
-      'The stones are sorted by weight. The smallest ones sit at the east edge. The biggest ones sit in the middle. And they move.',
-      'I marked six of them with chalk over three summers. Every single mark ended up somewhere new. Nobody is praying here. Somebody is training.',
+      '{Visitors} call this circle a shrine. They leave little gifts on it. That is {harmless}, and it misses the point completely.',
+      'The stones are {sorted} by weight. The smallest ones sit at the east edge. The biggest ones sit in the middle. And they move.',
+      'I marked six of them with {chalk} over three summers. Every single mark ended up somewhere new. Nobody is praying here. Somebody is training.',
       'The trainers are the grey ones with the heavy brows. If you need something heavy moved, they are the only real answer. Wait at the circle. Do not help them lift. One will stop and look at you. That is the whole hello.',
       'You also want the small one with the leaf on its head. It is not at the circle. It stays on the sunniest ground in the hollow, where the tall grass grows thickest.',
-      'That one grows rope grass. The crossing west of here needs rope more than it needs boards. A gap like that takes two workers. One to carry the weight. One to grow the line.'
+      'That one grows rope grass. The {crossing} west of here needs rope more than it needs boards. A gap like that takes two workers. One to carry the weight. One to grow the line.'
     ],
     questions: [
       { tag: 'Main idea',
@@ -144,8 +144,8 @@ export const DOCS = {
       'The ground in this grove is soft. And soft ground is a road for anything that travels underneath it.',
       'Follow the brook. That is the thin bit of water running from north to south through the trees. Watch the dirt on its banks, where the mushrooms grow thickest. That is where the {tunnel} comes closest to the top.',
       'Stand still on that bank. Something will come up to its neck, look at you, and drop back down. Do not dig for them. They decide, not you.',
-      'Those diggers are what the marsh crossing needs. Soft reed ground will not hold a walkway unless the posts go down deep. No group of people has ever gotten a post into that mud.',
-      'So put a digger together with the path finding bird. The bird finds the firm line. The digger sinks the posts along it. Neither one is any use out there on its own.',
+      'Those diggers are what the marsh {crossing} needs. Soft reed ground will not hold a {walkway} unless the posts go down deep. No group of people has ever gotten a post into that mud.',
+      'So put a digger together with the path finding bird. The bird finds the {firm} line. The digger sinks the posts along it. Neither one is any use out there on its own.',
       'One more thing, and it matters later. The trees around this clearing are Rowan. Their berries have the strongest smell on the island. One day you are going to need two of them badly. Remember where they grow.'
     ],
     questions: [
@@ -176,9 +176,9 @@ export const DOCS = {
     id: 'ledger', title: 'The Water Notebook', source: 'On a post at the marsh landing',
     text: [
       'The marsh is the reason this island has water you can drink. Almost nobody knows why. So here it is.',
-      'Salt water pushes in from the south on every high tide. Fresh water runs down from the ridge. Where the two meet, the reeds hold the line.',
-      'That half salty band is what keeps the salt away from our springs. Cut the reeds and the springs go bad. That is not a warning. It happened in my second year. It took four years to come back.',
-      'You are going to want to get south, into the caves under the channel. You cannot go in the daytime. The tunnel floods at every high tide.',
+      'Salt water pushes in from the south on every high tide. Fresh water runs down from the ridge. Where the two meet, the {reeds} hold the line.',
+      'That half salty band is what keeps the salt away from our {springs}. Cut the reeds and the springs go bad. That is not a warning. It happened in my second year. It took four years to come back.',
+      'You are going to want to get south, into the caves under the {channel}. You cannot go in the daytime. The tunnel floods at every high tide.',
       'So you go at night, at low water. And at night that tunnel is completely dark for a long way.',
       'Do not carry a lantern into that water. There is an animal in the deep channel at the south end of the marsh. After dark you will see it as two little lights. A lantern in the water shuts down everything it is doing for twenty minutes.',
       'Ask one to come with you instead. It will hold a steady {glow} for hours.',
@@ -212,7 +212,7 @@ export const DOCS = {
     id: 'vault', title: 'Words Cut Into the Cave Wall', source: 'West room, Tidepool Caves',
     text: [
       'Whoever you are: it is asleep, not sick. And you are going to need it awake.',
-      'The rock slide on the ridge trail came down in my sixth year. It buried the only path to the top. I brought eight people out there. We moved maybe a fifth of it before the season turned.',
+      'The rock slide on the ridge trail came down in my sixth year. It {buried} the only path to the top. I brought eight people out there. We moved maybe a fifth of it before the season turned.',
       'The animal breathing behind this wall could clear the whole thing in one afternoon.',
       'You will not wake it with noise. I tried yelling. I tried a drum. I once watched it sleep through a rock fall close enough to shake dust off the ceiling.',
       'It has learned that loud noise in a cave is not worth getting up for. And it is right about that.',
@@ -246,7 +246,7 @@ export const DOCS = {
       'Every animal on this island said no to me at least once. Not because I was mean. I was not mean. It was because I showed up with a plan and expected the island to fit it.',
       'The Chikorita would not make its smell for me. The Bulbasaur walked away from a hill I was sure about, and that hill came down in the spring rain.',
       'The Wooper I let dry out on the trail never followed me again. And it was right not to.',
-      'What changed was not my skill. What changed was that I started reading a place before I acted in it. A tide chart before a gate. A brook bank before a walkway. A smell before a shout.',
+      'What changed was not my skill. What changed was that I started reading a place before I acted in it. A tide chart before a gate. A brook bank before a {walkway}. A smell before a shout.',
       'None of that is hard. It is just slower than being sure of yourself.',
       'If you got this far, you got here by reading. So you already know the lesson. I am only giving it a name.',
       'One more animal lives up here. It will not care about your team or your record. It will want to know whether you were paying attention. So: were you?'
@@ -285,7 +285,7 @@ export const DOCS = {
     id: 'rocketBeach', title: 'A Crumpled Plan', source: 'Dropped on the beach',
     outcome: 'The grunt reads the chart over your shoulder, looks at the hole, and goes very red. Then they walk off up the beach without saying anything.',
     text: [
-      'There is a hole in the sand at the near end of the rock finger. Somebody in a black uniform is digging it. There is a big red R on the front of the uniform.',
+      'There is a hole in the sand at the near end of the rock finger. Somebody in a black {uniform} is digging it. There is a big red R on the front of the uniform.',
       'They have not noticed you. A piece of paper has blown out of their pocket and landed by your boot. You pick it up.',
       'The paper says: PLAN. Go to the west beach. Find the big rock. Dig at the rock. Get the handle. Easy.',
       'But you have read the tide chart. It does not say dig at the rock. It says dig where the rock\'s shadow ends.',
@@ -315,11 +315,11 @@ export const DOCS = {
     id: 'rocketMarsh', title: 'Team Rocket\'s Orders', source: 'Pinned to a post in the marsh',
     outcome: 'You hold the notebook out and let them read the page about the four years. The one holding the shears puts them down in the mud and does not pick them back up.',
     text: [
-      'Two people in black uniforms are standing at the edge of the reeds. One of them is holding a very large pair of shears.',
-      'Their orders are pinned to the post next to them. You read them.',
+      'Two people in black {uniforms} are standing at the edge of the {reeds}. One of them is holding a very large pair of shears.',
+      'Their {orders} are pinned to the post next to them. You read them.',
       'TODAY: cut the tall grass by the water. We need a clear path for the truck. Should take about an hour.',
       'But you have read the water notebook. The reeds are not tall grass in the way of anything.',
-      'They hold the line between the salt water and the fresh water. Cut them and the salt gets to the springs.',
+      'They hold the line between the salt water and the fresh water. Cut them and the salt gets to the {springs}.',
       'It happened once before. The island had no water you could drink for four years.'
     ],
     questions: [
@@ -345,7 +345,7 @@ export const DOCS = {
     id: 'rocketCaves', title: 'A Note Taped to a Drum', source: 'Tidepool Caves',
     outcome: 'You point at the wall and wait. They read it twice. Then they pick up the drum between them and carry it back out through the tunnel.',
     text: [
-      'There is a drum in the middle of the cave floor. A very big drum. Two people in black uniforms are taking turns hitting it.',
+      'There is a drum in the middle of the cave floor. A very big drum. Two people in black {uniforms} are taking turns hitting it.',
       'The Snorlax has not moved. It has not even changed the way it is breathing.',
       'There is a note taped to the side of the drum. STEP ONE: wake it with the drum. STEP TWO: it moves the rocks for us. STEP THREE: we take the rocks.',
       'But you have read the wall. Yelling does not work. Drums do not work.',
@@ -393,7 +393,7 @@ export const SIGNS = {
   beachSign: {
     text: [
       'VERDANT ISLE RANGER STATION',
-      'Landing beach. Cabin to the northwest. Dock to the southeast.',
+      'Landing beach. Cabin to the {northwest}. Dock to the {southeast}.',
       'Ranger E. Elm, nine years here. Elm walks the beach twice a day, every day. Please do not feed the Snorlax.'
     ],
     gives: 'berries',
@@ -410,7 +410,7 @@ export const SIGNS = {
     text: [
       'The boards past this post are older than the post is.',
       'Walk out to the far end if you have to. Do not run.',
-      'A tally is burned into the post: 24 BOARDS LAID. 6 SWAPPED FOR NEW ONES.'
+      'A {tally} is burned into the post: 24 BOARDS LAID. 6 SWAPPED FOR NEW ONES.'
     ],
     gives: 'berries',
     q: {
@@ -425,7 +425,7 @@ export const SIGNS = {
   cabinDoor: {
     text: [
       'The cabin door is locked from the inside. The key is gone.',
-      'A notice is nailed to it, right at eye height.',
+      'A {notice} is nailed to it, right at eye height.',
       'A card hangs in the window: GONE UP THE RIDGE. BACK IN 3 DAYS. The card is dated the 5th.'
     ],
     gives: 'berries',
@@ -442,7 +442,7 @@ export const SIGNS = {
     text: [
       'A long line of grey stone runs out into the water.',
       'At low tide it throws a long shadow across the sand.',
-      'A tide board is bolted to the first rock: LOW WATER 2:00. THE SEA COMES BACK UP 2 FEET AN HOUR. THIS ROCK STANDS 6 FEET ABOVE LOW WATER.'
+      'A tide board is {bolted} to the first rock: LOW WATER 2:00. THE SEA COMES BACK UP 2 FEET AN HOUR. THIS ROCK STANDS 6 FEET ABOVE LOW WATER.'
     ],
     gives: 'berries',
     q: {
@@ -456,7 +456,7 @@ export const SIGNS = {
 
   pondSign: {
     text: [
-      'MEADOW WATER INTAKE. Keep the reeds off the screen.',
+      'MEADOW WATER {INTAKE}. Keep the {reeds} off the {screen}.',
       'A card is wired to the frame: THIS PIPE FILLS THE DRUM. 5 LITRES A MINUTE. THE DRUM HOLDS 40 LITRES.',
       'Somebody scratched underneath: "the yellow one lives on the little island"'
     ],
@@ -474,7 +474,7 @@ export const SIGNS = {
     text: [
       'The brook runs from north to south. Mushrooms crowd both banks.',
       'The dirt here sinks under your boot like bread.',
-      'A stake by the water: 9 CLUMPS ON EACH BANK. 4 MUSHROOMS TO A CLUMP.'
+      'A {stake} by the water: 9 CLUMPS ON EACH BANK. 4 MUSHROOMS TO A {CLUMP}.'
     ],
     gives: 'berries',
     q: {
@@ -490,7 +490,7 @@ export const SIGNS = {
     text: [
       'Rowan. The berries are small and orange and they smell very strong.',
       'They are ripe all season long.',
-      'A ranger tag hangs from a low branch: TAKE NO MORE THAN A THIRD OF ANY BUNCH. The bunch by your hand holds 12.'
+      'A ranger tag hangs from a low branch: TAKE NO MORE THAN A THIRD OF ANY {BUNCH}. The bunch by your hand holds 12.'
     ],
     gives: 'berries',
     q: {
@@ -504,7 +504,7 @@ export const SIGNS = {
 
   marshPost: {
     text: [
-      'HALF SALT WATER. DO NOT CUT THE REEDS.',
+      'HALF SALT WATER. DO NOT CUT THE {REEDS}.',
       'Underneath, in different writing: "second year. four years. never again."',
       'A ranger note in pencil: THE MEADOW DRUM FILLS FROM HERE TOO. HALF OF WHAT IT HOLDS COMES OUT OF THIS MARSH.'
     ],
@@ -521,7 +521,7 @@ export const SIGNS = {
 
   cavernWall: {
     text: [
-      'Somebody scratched a line into the rock at shoulder height.',
+      'Somebody {scratched} a line into the rock at shoulder height.',
       'Above the line: HIGH WATER. Below the line: YOU DROWN.',
       'Beside it, small and neat: THE LINE IS 5 FEET UP. THE WATER CLIMBS 1 FOOT EVERY 20 MINUTES.'
     ],
@@ -537,7 +537,7 @@ export const SIGNS = {
 
   vaultCache: {
     text: [
-      'A tin box, dry inside. A spare pencil, a boot lace, a candle, and a note.',
+      'A tin box, dry inside. A {spare} pencil, a boot lace, a candle, and a note.',
       '"If you are reading this, you got it awake. That means you read the wall. You will be fine."',
       'On the back of the note: "I left 3 boxes like this one, packed the same way. Find them all."'
     ],
@@ -553,9 +553,9 @@ export const SIGNS = {
 
   ridgeMarker: {
     text: [
-      'A trail marker, snapped off at the bottom and wedged back up.',
+      'A trail marker, snapped off at the bottom and {wedged} back up.',
       'The arrow points up.',
-      'The paint on the post still reads: SUMMIT 3 MILES. 4 MARKERS TO EVERY MILE. 2 OF THEM ARE DOWN.'
+      'The paint on the post still reads: {SUMMIT} 3 MILES. 4 MARKERS TO EVERY MILE. 2 OF THEM ARE DOWN.'
     ],
     gives: 'berries',
     q: {
@@ -571,7 +571,7 @@ export const SIGNS = {
     text: [
       'Old stone steps go down the west face and hold the slope together.',
       'There is not one tool mark on any of the stones.',
-      'A note is wedged under a stone: THESE STEPS RISE AS HIGH AS THE HIGH WATER LINE DOWN IN THE CAVES. 3 STEPS TO EVERY FOOT.'
+      'A note is {wedged} under a stone: THESE STEPS RISE AS HIGH AS THE HIGH WATER LINE DOWN IN THE CAVES. 3 STEPS TO EVERY FOOT.'
     ],
     gives: 'berries',
     q: {
