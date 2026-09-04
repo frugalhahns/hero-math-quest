@@ -16,6 +16,7 @@ import * as W from './world.js';
 import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
 import { form, nextForm, canGrow, growableCount } from './evolve.js';
 import { isTarget, markers, nextHop, regionsFor } from './quest.js';
+import { SURFACES, sfx } from './audio.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 import {
@@ -59,6 +60,26 @@ for (const [k, rows] of Object.entries(GRIDS)) {
 ok(Object.keys(GRIDS).length === Object.keys(REGIONS).length,
   'every grid has a region name', `${Object.keys(GRIDS).length} grids, ${Object.keys(REGIONS).length} regions`);
 for (const k of Object.keys(GRIDS)) ok(!!REGIONS[k], `region name for ${k}`);
+
+/* ---------------- what the ground sounds like ---------------- */
+/* Footsteps are per surface now, which is only world-building if the surface is
+   right. A tile nobody mapped falls back to dirt at run time rather than going
+   silent, and a wrong footstep is exactly the kind of thing nobody ever files a
+   bug about, so the mapping is checked instead of trusted. */
+head('footsteps');
+{
+  const walkable = new Set();
+  for (const rows of Object.values(GRIDS)) {
+    for (const row of rows) for (const ch of row) if (!isSolidTile(ch)) walkable.add(ch);
+  }
+  const unmapped = [...walkable].filter(ch => !W.TILE_SURFACE[ch]);
+  ok(unmapped.length === 0, 'every tile you can stand on has a footstep of its own',
+    unmapped.join(' '));
+  const strange = Object.entries(W.TILE_SURFACE).filter(([, v]) => !SURFACES.includes(v));
+  ok(strange.length === 0, 'and every one of those names a sound audio.js can make',
+    strange.map(([k, v]) => `${k}=${v}`).join(', '));
+  note(`surfaces in use: ${[...new Set([...walkable].map(ch => W.TILE_SURFACE[ch]))].sort().join(', ')}`);
+}
 
 /* ---------------- a fully finished save, for reachability ---------------- */
 const FULL = {
@@ -1417,6 +1438,17 @@ head('soundtrack engine');
   } else {
     note(`audio context is "${st.contextState}" here, so note timing was not exercised`);
   }
+  /* Every footstep, actually played. These are six different code paths through
+     the little synth and the only place they run is a keypress, so a typo in one
+     of them would ship as "the dock is silent" and nobody would ever say so. */
+  let stepThrew = '';
+  try {
+    for (const surface of SURFACES) { sfx.step(surface, 0); sfx.step(surface, 1); }
+    sfx.step('nothing-like-this', 0);
+  } catch (e) { stepThrew = e.message; }
+  ok(!stepThrew, 'every surface can be walked on without throwing, unknown ones included',
+    stepThrew || SURFACES.join(', '));
+
   musicSet(false);   // do not leave a dev page humming
   ok(true, 'soundtrack stopped cleanly after the check');
   note('loudness is measured by hand with renderOne() in js/music.js -- see the comment there for why it is not automated');

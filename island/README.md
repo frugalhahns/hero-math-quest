@@ -388,6 +388,15 @@ Details that matter more than they sound like they should:
   footstep is a soft low-passed tap rather than a tone, and only every other one
   plays: a pitched blip on all eight steps of a walk across the screen buries
   the pads completely, which is exactly what it did on the first pass.
+- **The ground you are on picks the footstep.** Six of them: grass swishes, sand
+  is a soft low shuffle, a dock board knocks, cave floor clicks and comes back
+  off the wall about a tenth of a second later, the stepping stones in the
+  meadow pond splash, and dirt is the tap it always was. The two feet alternate,
+  which is most of what stopped one repeated tick sounding like a machine.
+  Nothing goes over 0.036, because footsteps fire hundreds of times a minute and
+  are the one effect that can ruin the balance on its own. The self test proves
+  every tile you can stand on has a surface, that each names a sound the synth
+  can actually make, and plays all six.
 - **Nothing is built until you touch the page.** Browsers block audio before a
   gesture, so the whole graph waits for the first key press or tap rather than
   being created at load and silently refused.

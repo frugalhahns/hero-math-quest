@@ -34,6 +34,7 @@ const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
 
 let lastBump = 0;
 let stepParity = 0;
+let footParity = 0;
 const announced = new Set();   // growth nudges already given this session
 let waterFrame = 0;
 let waterAt = 0;
@@ -171,9 +172,10 @@ function tryMove(dir) {
   P.fromX = P.x; P.fromY = P.y;
   P.x = nx; P.y = ny; P.t = 0;
   // every other tile: a tap on all eight steps of a walk across the screen is
-  // relentless, and it buries the music
+  // relentless, and it buries the music. The tile you are landing on picks the
+  // sound, and the two feet alternate, so a dock knocks and a cave clicks.
   stepParity ^= 1;
-  if (stepParity) sfx.step();
+  if (stepParity) sfx.step(W.surfaceAt(P.map, nx, ny), footParity ^= 1);
 }
 
 function arrive() {

@@ -89,6 +89,18 @@ export function blocked(map, x, y, S) {
   return !!entityAt(map, x, y, S);
 }
 
+/* What you are standing on, for the footstep. Everything walkable on the island
+   is one of six things, and anything unmapped falls back to dirt rather than
+   going silent -- a missing sound is harder to notice than a wrong one. */
+export const TILE_SURFACE = {
+  '.': 'grass', ',': 'grass', f: 'grass', m: 'grass',
+  S: 'sand', '=': 'dirt', _: 'wood', ':': 'stone', o: 'water'
+};
+
+export function surfaceAt(map, x, y) {
+  return TILE_SURFACE[tileAt(map, x, y)] || 'dirt';
+}
+
 export function exitAt(map, x, y) {
   return EXITS.find(e => e.map === map && e.x === x && e.y === y) || null;
 }
