@@ -329,8 +329,9 @@ head('where to go next');
        after the first one. It used to lose its marker halfway through the step
        it belongs to. */
     S.step = at('berries');
-    const picked = { projects: {}, team: [], flags: { 'took:rowan': true }, items: { berries: 1 },
-                     read: {}, signs: {}, crew: {}, step: S.step };
+    const picked = { projects: { gate: true, bridge: true, boardwalk: true, lantern: true },
+                     team: [], flags: { shrine: true, vault: true, 'took:rowan': true },
+                     items: { berries: 1 }, read: {}, signs: {}, crew: {}, step: S.step };
     const stillLit = markers('grove', picked, 19, 11, 5).filter(m => m.goal && m.e.id === 'rowan');
     ok(stillLit.length === 1, 'the berry step keeps its marker after the first berry',
       `${stillLit.length} marked`);
@@ -435,6 +436,92 @@ head('the opening');
   ok(stuck.length === 0, 'and every wave of the beach opens from the one before it',
     stuck.map(e => e.doc || e.sign || e.species || e.project || e.id).join(', '));
   note(`landing: ${atLanding.length} things, ${landingWords} words. Whole beach before the gate: ${mustAsk} questions, ${beachWords} words.`);
+}
+
+/* ---------------- and the same for every other region ---------------- */
+/* The beach was handed over a wave at a time and the other five regions were
+   not, which is worse than doing it nowhere: the tutorial teaches a kid that a
+   place gives him one thing at a time, and then Meadow Hollow opens with nine
+   things standing in it and four animals in the grass. That is the version that
+   got reported, in those words -- the first level is clear and the later ones
+   are not.
+
+   So the shape is asserted everywhere now. You walk in on the region's page and
+   the sign nearest the way in, reading that page brings out what it describes,
+   and what nobody wrote about arrives once the crossing is standing. This walks
+   the real chain and looks at each region at the exact moment it opens, because
+   that is the only state that matters here and it is twenty minutes of playing
+   away from being visible in a screenshot. */
+head('every region arrives in waves');
+{
+  const sim = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {}, crew: {}, step: 0 };
+  const reach = new Set(['beach']);
+  const landing = { beach: W.visibleEntities('beach', sim) };
+  const ever = new Set();
+  const nameOf = e => e.doc || e.sign || e.species || e.project || e.id;
+  const key = e => `${e.map} ${e.x},${e.y}`;
+  const shown = (e, where) => where.has(e.map) && (!e.when || e.when(sim));
+
+  for (let pass = 0; pass < 24; pass++) {
+    for (const e of ENTITIES) if (shown(e, reach)) ever.add(key(e));
+    for (const e of ENTITIES) {
+      if (!shown(e, reach)) continue;
+      if (e.kind === 'doc') sim.flags[e.doc] = true;
+      if (e.kind === 'dig' && e.gives) sim.items[e.gives] = 1;
+      if (e.kind === 'item' && e.gives) sim.items[e.gives] = 2;
+    }
+    for (const e of ENTITIES) {
+      if (e.kind !== 'wild' || !shown(e, reach)) continue;
+      if (e.needsItem && (sim.items[e.needsItem.key] || 0) < e.needsItem.count) continue;
+      if (!sim.team.includes(e.species)) sim.team.push(e.species);
+    }
+    for (const p of PROJECTS) {
+      if (sim.projects[p.id]) continue;
+      const site = ENTITIES.find(e => e.kind === 'project' && e.project === p.id);
+      if (!site || !shown(site, reach)) continue;
+      if (p.learn && !sim.flags[p.learn]) continue;
+      if (p.needsItem && (sim.items[p.needsItem.key] || 0) < p.needsItem.count) continue;
+      const jobs = sim.team.map(id => BY_ID[id].job);
+      if (!p.needs.every(j => jobs.includes(j))) continue;
+      sim.projects[p.id] = true;
+      const opened = p.opens && Object.keys(REGIONS).find(k => REGIONS[k].name === p.opens);
+      if (opened && !reach.has(opened)) {
+        reach.add(opened);
+        landing[opened] = W.visibleEntities(opened, sim);   // what is there as you walk in
+      }
+    }
+  }
+
+  ok(reach.size === Object.keys(REGIONS).length, 'the walk gets into every region',
+    [...reach].join(', '));
+
+  for (const r of Object.keys(REGIONS)) {
+    const at = landing[r] || [];
+    const words = at.reduce((n, e) => {
+      if (e.kind === 'doc') return n + DOCS[e.doc].text.reduce((m, x) => m + grade(x).words, 0);
+      if (e.kind === 'sign') return n + SIGNS[e.sign].text.reduce((m, x) => m + grade(x).words, 0);
+      return n;
+    }, 0);
+    const wilds = at.filter(e => e.kind === 'wild');
+    ok(at.length > 0 && at.length <= 3, `${REGIONS[r].name}: three things at the door, not nine`,
+      `${at.length}: ${at.map(nameOf).join(', ')}`);
+    ok(at.some(e => e.kind === 'doc'), `${REGIONS[r].name}: and one of them is the page the place is about`,
+      at.map(e => e.kind).join(', ') || 'nothing');
+    ok(words <= 400, `${REGIONS[r].name}: under 400 words in front of you`, `${words} words`);
+    /* The complaint was about the animals specifically. One at the door is a
+       resident who is part of the scenery -- the sleeper in the caves is the
+       blocked gap -- and four is a field of markers. */
+    ok(wilds.length <= 1, `${REGIONS[r].name}: not a field of animals waiting at the door`,
+      wilds.map(e => e.species).join(', ') || 'none');
+    note(`${REGIONS[r].name}: ${at.length} at the door (${at.map(nameOf).join(', ') || 'nothing'}), ${words} words`);
+  }
+
+  /* The other half of a wave: something has to open it. A gate whose predicate
+     never comes true is an entity nobody will ever see, and the whole point of
+     staggering is lost the moment it silently deletes a page. */
+  const orphans = ENTITIES.filter(e => !ever.has(key(e)));
+  ok(orphans.length === 0, 'and every wave everywhere opens from the one before it',
+    orphans.map(e => `${e.map} ${nameOf(e)}`).join(', '));
 }
 
 /* ---------------- questions ---------------- */

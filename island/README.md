@@ -81,8 +81,7 @@ chart is what tells you the rock finger throws a shadow, so the rock finger and
 the digging appear once you have read the chart. The field guide is the page that
 explains how to make a friend, so the animals turn up after it and not before.
 The crab waits until the gate is open, so there is a reason to come back. Nothing
-was cut to do this: it is the same beach, handed over a bit at a time. The later
-regions are small enough not to need it.
+was cut to do this: it is the same beach, handed over a bit at a time.
 
 **Everything looked equally urgent.** A marker used to sit over every unread
 thing in the whole region. Now one appears when you are within five tiles, so the
@@ -105,6 +104,54 @@ Eleven questions before the first gate, where there were twenty.
 
 Those are budgets in the self test now, not descriptions. They fail if the
 opening grows back.
+
+## And then the same thing everywhere else
+
+The beach got waves and the other five regions did not, and for a while I called
+that finished. It is worse than doing it nowhere. The tutorial teaches a kid that
+a place hands him one thing at a time, and then Meadow Hollow opens with nine
+things standing in it and four animals in the grass at once, which is the version
+that got reported: *the first map shows clear green arrow guides and not
+everything shows up at once, but the later maps all show up at once and it is
+overwhelming.*
+
+So every region arrives in the same three waves now.
+
+1. **You walk in on the page and the sign nearest the way in.** Two or three
+   things, never nine. The green chevron is on the page, because the page is what
+   the step is asking for.
+2. **Reading that page brings out what it describes.** The tablet is what says the
+   grey ones train at the circle, the leaf one stands in the tall grass, and the
+   west gap needs rope, so that is when those three are there. The plaque is what
+   says the diggers come up on the brook bank, names the bird to pair them with,
+   and tells you to remember where the Rowan grows. The notebook is what says
+   there is a light carrier in the deep channel. Each region's build site appears
+   with the page that explains it -- which was already in the data as `learn`, so
+   the map and the Build screen now agree about when a job exists.
+3. **What nobody wrote about turns up last**, once the crossing that region was
+   about is standing. The two extra planters in the grove, the two in the marsh
+   shallows, the south slope garden. Same idea as the crab on the beach: a region
+   you have finished is worth walking back into.
+
+Two of these are doing more than tidying.
+
+**The tablet's wave includes an animal the tablet never mentions.** Mareep stands
+in the same tall grass as Chikorita, and the step says *the tablet named two
+helpers, go find them both*. "The small one with the leaf on its head" is only a
+description worth reading if there is more than one thing standing there. Two
+named, one not, on purpose -- the same reason the digging step marks both mounds.
+
+**The one thing an optional sign now buys you.** The meadow intake sign is the only
+place on the island that says the yellow one lives on the little island, so
+reading it is what makes Pikachu appear. Skip the sign and it turns up when the
+rope crossing is built, because the notebook in the marsh sends you back for it
+either way and a step must never point at nobody.
+
+The self test walks the real chain and stops at each region the moment it opens:
+three things at the door at most, one of them the page the place is about, under
+400 words in front of you, and never more than one animal. It also proves the
+other half, which is the part that would fail silently -- that every wave
+everywhere is opened by the one before it, so no gate can quietly delete a page.
 
 ## The signs, and the arithmetic on them
 
@@ -220,6 +267,10 @@ Some deliberate choices:
   the helpers" steps show that there is somebody here and how many of them. Which
   ones the page described is still yours to work out: no step ever puts the green
   chevron on an animal.
+- **A region hands itself over in waves, all six of them.** You arrive to the page
+  and one sign, the page brings out what it names, and the rest waits until the
+  job is done. What is on your map at any moment is roughly what you have been
+  told about, which is what keeps "not everything at once" true past the tutorial.
 
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the

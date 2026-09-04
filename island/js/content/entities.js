@@ -27,7 +27,8 @@ export const ENTITIES = [
      the thing you just read. You land with two things in front of you. The
      chart tells you about the rock finger, and then the rock finger is there.
      Nothing was cut to do this; it is the same beach, handed over a bit at a
-     time. Later regions are small enough not to need it. */
+     time. Every other region does the same thing now, for the same reason; see
+     the note over Meadow Hollow. */
   { map: 'beach', x: 6,  y: 6,  art: 'post',    kind: 'doc',  doc: 'notice',
     label: 'A notice, nailed to the cabin door at eye height.' },
   { map: 'beach', x: 5,  y: 7,  art: null,      kind: 'sign', sign: 'cabinDoor' },
@@ -74,60 +75,142 @@ export const ENTITIES = [
   { map: 'beach', x: 20, y: 18, art: null,      kind: 'wild', species: 'krabby',
     when: s => !!s.projects.gate, need: 2 },
 
-  /* ------------------------------------------------ Meadow Hollow */
+  /* ------------------------------------------------ Meadow Hollow
+
+     Every region after the beach used to hand over everything it had the
+     moment you walked in: nine things in the hollow, nine in the grove, four
+     animals standing in the grass at once. The beach was fixed and the rest of
+     the island was not, which is the version that got reported -- the first
+     level teaches you that things arrive as you earn them, and then the second
+     one drops a field of markers on you.
+
+     So the same three waves everywhere now. You land in front of the region's
+     page and the sign nearest the way in. Reading that page brings out
+     everything it actually describes: the animals it names, the crossing it
+     tells you to build, the tree it tells you to remember. What nobody wrote
+     about turns up last, once the crossing is standing, so coming back to a
+     region you have finished is worth something.
+
+     The tablet is the hollow's page: the grey ones at the circle, the leaf one
+     in the tall grass, and the west gap that needs rope. */
   { map: 'meadow', x: 27, y: 15, art: 'sign', kind: 'doc', doc: 'cairns',
     label: 'A tablet set flat in the ground at the edge of the circle.' },
   { map: 'meadow', x: 16, y: 10, art: 'sign', kind: 'sign', sign: 'pondSign' },
-  { map: 'meadow', x: 26, y: 14, art: 'machop',    kind: 'wild', species: 'machop' },
-  { map: 'meadow', x: 19, y: 19, art: 'chikorita', kind: 'wild', species: 'chikorita' },
-  { map: 'meadow', x: 17, y: 5,  art: 'pikachu',   kind: 'wild', species: 'pikachu' },
-  { map: 'meadow', x: 22, y: 20, art: null, kind: 'wild', species: 'mareep' },
-  { map: 'meadow', x: 4,  y: 12, art: null, kind: 'project', project: 'bridge' },
-  { map: 'meadow', x: 32, y: 9,  art: null, kind: 'project', project: 'boardwalk' },
-  { map: 'meadow', x: 12, y: 20, art: 'marker', kind: 'project', project: 'garden' },
 
-  /* ------------------------------------------------ Whispering Grove */
+  /* The tablet's wave. Mareep is in it and the tablet never mentions it, which
+     is deliberate: "the small one with the leaf on its head" is only a
+     description worth reading if there is more than one thing standing in that
+     grass. Two named, one not. */
+  { map: 'meadow', x: 26, y: 14, art: 'machop',    kind: 'wild', species: 'machop',
+    when: s => !!s.flags.cairns },
+  { map: 'meadow', x: 19, y: 19, art: 'chikorita', kind: 'wild', species: 'chikorita',
+    when: s => !!s.flags.cairns },
+  { map: 'meadow', x: 22, y: 20, art: null, kind: 'wild', species: 'mareep',
+    when: s => !!s.flags.cairns },
+  { map: 'meadow', x: 4,  y: 12, art: null, kind: 'project', project: 'bridge',
+    when: s => !!s.flags.cairns },
+
+  /* The yellow one lives on the little island, and the intake sign is the only
+     thing on the island that says so. Read the sign and it is there, which is
+     what an optional layer should pay for. Skip it and it turns up once the
+     crossing is built, because the notebook in the marsh sends you back here
+     for it either way and a step must never point at nobody. */
+  { map: 'meadow', x: 17, y: 5,  art: 'pikachu',   kind: 'wild', species: 'pikachu',
+    when: s => !!s.signs.pondSign || !!s.projects.bridge },
+
+  /* the reed walkway is the grove plaque's idea, not the tablet's */
+  { map: 'meadow', x: 32, y: 9,  art: null, kind: 'project', project: 'boardwalk',
+    when: s => !!s.flags.shrine },
+  /* nobody wrote about the south slope. It is the last thing on Elm's list, so
+     it waits until the hollow's real job is done. */
+  { map: 'meadow', x: 12, y: 20, art: 'marker', kind: 'project', project: 'garden',
+    when: s => !!s.projects.bridge },
+
+  /* ------------------------------------------------ Whispering Grove
+     The plaque, and the brook it spends half its words on. */
   { map: 'grove', x: 16, y: 11, art: 'sign', kind: 'doc', doc: 'shrine',
     label: 'A metal plaque bolted to the biggest stone in the clearing.' },
+  { map: 'grove', x: 10, y: 13, art: 'sign', kind: 'sign', sign: 'brookSign' },
+
+  /* The plaque's wave: the diggers that come up on the bank where the mushrooms
+     are thickest, the path finding bird it pairs them with, and the Rowan it
+     tells you outright to remember for later. The berries are not needed for
+     hours, but the plaque is where you were told about them, so that is when
+     the tree is there to be found again. */
+  { map: 'grove', x: 12, y: 10, art: 'diglett',   kind: 'wild', species: 'diglett',
+    when: s => !!s.flags.shrine },
+  { map: 'grove', x: 14, y: 8,  art: null, kind: 'wild', species: 'hoothoot',
+    when: s => !!s.flags.shrine },
   { map: 'grove', x: 19, y: 11, art: 'berry', kind: 'item', id: 'rowan',
+    when: s => !!s.flags.shrine,
     gives: 'berries', giveLabel: 'a Rowan berry', repeat: true,
     found: 'You pick a berry. The smell gets on your hands right away and stays there.' },
-  { map: 'grove', x: 20, y: 11, art: null, kind: 'sign', sign: 'rowanTree' },
-  { map: 'grove', x: 10, y: 13, art: 'sign', kind: 'sign', sign: 'brookSign' },
-  { map: 'grove', x: 12, y: 10, art: 'diglett',   kind: 'wild', species: 'diglett' },
-  { map: 'grove', x: 17, y: 13, art: 'bulbasaur', kind: 'wild', species: 'bulbasaur' },
-  { map: 'grove', x: 14, y: 8,  art: null, kind: 'wild', species: 'hoothoot' },
-  { map: 'grove', x: 20, y: 13, art: null, kind: 'wild', species: 'oddish' },
-  { map: 'grove', x: 17, y: 2,  art: null, kind: 'project', project: 'rockslide' },
+  { map: 'grove', x: 20, y: 11, art: null, kind: 'sign', sign: 'rowanTree',
+    when: s => !!s.flags.shrine },
 
-  /* ------------------------------------------------ Reed Marsh */
+  /* two the plaque never mentions, once the walkway it was about is standing */
+  { map: 'grove', x: 17, y: 13, art: 'bulbasaur', kind: 'wild', species: 'bulbasaur',
+    when: s => !!s.projects.boardwalk },
+  { map: 'grove', x: 20, y: 13, art: null, kind: 'wild', species: 'oddish',
+    when: s => !!s.projects.boardwalk },
+
+  /* The slide itself is rock on the map from the first time you walk up here.
+     The build site is the cave wall's idea, and it is the wall that tells you
+     what it takes to shift it. */
+  { map: 'grove', x: 17, y: 2,  art: null, kind: 'project', project: 'rockslide',
+    when: s => !!s.flags.vault },
+
+  /* ------------------------------------------------ Reed Marsh
+     The landing, and the post standing on it. */
   { map: 'marsh', x: 2,  y: 7,  art: 'post', kind: 'doc', doc: 'ledger',
     label: 'A notebook in a tin cover, chained to the landing post.' },
   { map: 'marsh', x: 4,  y: 5,  art: 'sign', kind: 'sign', sign: 'marshPost' },
-  { map: 'marsh', x: 14, y: 13, art: 'wooper',   kind: 'wild', species: 'wooper' },
-  { map: 'marsh', x: 18, y: 20, art: 'chinchou', kind: 'wild', species: 'chinchou' },
+
+  /* The notebook's wave: the light carrier in the deep channel at the south
+     end, the tunnel it is for, and the two who did not read it. */
+  { map: 'marsh', x: 18, y: 20, art: 'chinchou', kind: 'wild', species: 'chinchou',
+    when: s => !!s.flags.ledger },
+  { map: 'marsh', x: 17, y: 22, art: null, kind: 'project', project: 'lantern',
+    when: s => !!s.flags.ledger },
   { map: 'marsh', x: 9,  y: 5,  art: 'rocket_b', kind: 'rocket', doc: 'rocketMarsh',
     when: s => !!s.flags.ledger, label: 'Two black uniforms at the edge of the reeds.' },
   { map: 'marsh', x: 10, y: 5,  art: 'rocket_a', kind: 'rocket', doc: 'rocketMarsh',
     when: s => !!s.flags.ledger, label: 'Two black uniforms at the edge of the reeds.' },
-  { map: 'marsh', x: 10, y: 16, art: null, kind: 'wild', species: 'marill' },
-  { map: 'marsh', x: 17, y: 22, art: null, kind: 'project', project: 'lantern' },
 
-  /* ------------------------------------------------ Tidepool Caves */
+  /* the two in the shallows, once the light line is in */
+  { map: 'marsh', x: 14, y: 13, art: 'wooper', kind: 'wild', species: 'wooper',
+    when: s => !!s.projects.lantern },
+  { map: 'marsh', x: 10, y: 16, art: null, kind: 'wild', species: 'marill',
+    when: s => !!s.projects.lantern },
+
+  /* ------------------------------------------------ Tidepool Caves
+     Three at the mouth: the water line by the way in, the writing on the far
+     wall, and the thing the writing is about. The sleeper is the gap, so it has
+     to be standing there before you have read a word. */
   { map: 'caverns', x: 19, y: 3,  art: 'sign', kind: 'sign', sign: 'cavernWall' },
   { map: 'caverns', x: 9,  y: 11, art: 'sign', kind: 'doc', doc: 'vault',
     label: 'Words cut deep into the wall, next to a gap you cannot get through.' },
   { map: 'caverns', x: 7,  y: 12, art: 'snorlax', kind: 'wild', species: 'snorlax',
     needsItem: { key: 'berries', count: 2 },
     without: 'It fills the whole gap and does not move at all. Shouting does nothing. You are going to need something else.' },
+
+  /* the wall's wave: the grunts on the drum, and the other thing down here that
+     moves rock, which is what the wall is really about */
   { map: 'caverns', x: 11, y: 10, art: 'rocket_a', kind: 'rocket', doc: 'rocketCaves',
     when: s => !!s.flags.vault, label: 'Two black uniforms, taking turns on a drum.' },
   { map: 'caverns', x: 12, y: 10, art: 'rocket_b', kind: 'rocket', doc: 'rocketCaves',
     when: s => !!s.flags.vault, label: 'Two black uniforms, taking turns on a drum.' },
-  { map: 'caverns', x: 8,  y: 16, art: null, kind: 'wild', species: 'geodude' },
-  { map: 'caverns', x: 4,  y: 12, art: 'lockbox', kind: 'sign', sign: 'vaultCache' },
+  { map: 'caverns', x: 8,  y: 16, art: null, kind: 'wild', species: 'geodude',
+    when: s => !!s.flags.vault },
 
-  /* ------------------------------------------------ Ash Ridge */
+  /* The box is on the far side of the gap the sleeper was filling, and its own
+     note says so: "if you are reading this, you got it awake". */
+  { map: 'caverns', x: 4,  y: 12, art: 'lockbox', kind: 'sign', sign: 'vaultCache',
+    when: s => s.team.includes('snorlax') },
+
+  /* ------------------------------------------------ Ash Ridge
+     The trail up, and then the page at the top. Three things and a climb: this
+     one never needed handing over in waves. */
   { map: 'ridge', x: 8,  y: 12, art: 'sign', kind: 'sign', sign: 'ridgeMarker' },
   { map: 'ridge', x: 7,  y: 14, art: 'sign', kind: 'sign', sign: 'terrace' },
   { map: 'ridge', x: 14, y: 3,  art: null, kind: 'doc', doc: 'summit',
