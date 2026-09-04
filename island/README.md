@@ -279,6 +279,33 @@ Some deliberate choices:
   job is done. What is on your map at any moment is roughly what you have been
   told about, which is what keeps "not everything at once" true past the tutorial.
 
+## Looking a bit more like the games it borrows from
+
+The residents have been real Generation V sprites since the second week. The
+player was not: a 14 pixel figure with no arms, two dots for a face and a red
+blob where a mouth goes. Standing next to a Machop it looked like a different
+game, which it was.
+
+The trainer is redrawn. A cap with a brim that reads at 16 pixels, eyes with
+whites in them, arms down the sides with the outer edge in dark green so they do
+not vanish against grass, a satchel strap on the front and the bag itself on the
+back when you are walking away, and blue jeans -- red cap, green shirt, blue
+jeans is the shape a kid already knows a trainer to be.
+
+**And the legs move.** Two step frames per direction, alternating one per tile,
+which is the same parity the footsteps already used. Before this the sprite slid
+along the ground and only bobbed a pixel. The self test checks all three frames
+exist per direction and that they are actually different from each other, which
+is the failure that would otherwise ship silently.
+
+The world palette is warmed toward the Game Boy Advance games: yellower greens, a
+sandy path instead of a muddy one, brighter sea. Rock, cliff and cave are left
+alone on purpose -- the caves are meant to be gloomy, and it is the grey that
+makes the green look green.
+
+`island/spritelab.html` draws every 16x16 sprite in the game at 9x, which is how
+this was iterated on rather than by squinting at screenshots of the map.
+
 The theme running through Ranger Elm's notes — that reading a place before acting
 in it is slower than being confident and better than being confident — is also the
 game's design brief.

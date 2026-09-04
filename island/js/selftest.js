@@ -753,7 +753,15 @@ for (const [name, rows] of Object.entries(ART)) {
   const bad = rows.map((r, i) => r.length !== SPRITE_SIZE ? `row ${i}=${r.length}` : null).filter(Boolean);
   ok(bad.length === 0, `${name}: every row ${SPRITE_SIZE} wide`, bad.join(', '));
 }
-for (const d of ['player_down', 'player_up', 'player_side']) ok(!!ART[d], `player art "${d}" exists`);
+/* Three directions, and each one needs its two step frames or the walk goes
+   back to a sprite sliding along the ground. main.js builds the name by
+   appending _a and _b, so a missing one is a blank player rather than an error. */
+for (const d of ['player_down', 'player_up', 'player_side']) {
+  ok(!!ART[d], `player art "${d}" exists`);
+  ok(!!ART[d + '_a'] && !!ART[d + '_b'], `${d}: has both walking frames`);
+  const frames = [ART[d], ART[d + '_a'], ART[d + '_b']].filter(Boolean).map(r => r.join('\n'));
+  ok(new Set(frames).size === frames.length, `${d}: the three frames are actually different`);
+}
 
 /* ---------------- vendored sprites ---------------- */
 head('resident sprites');

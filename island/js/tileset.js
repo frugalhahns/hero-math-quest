@@ -31,20 +31,26 @@ function speckle(g, r, col, n, x0 = 0, y0 = 0, w = TS, h = TS) {
 
 /* ---------------- palettes ---------------- */
 
+/* Warmed toward the Game Boy Advance Pokemon palette: the greens are yellower,
+   the paths are sand rather than mud, and the sea is brighter. The originals
+   were a shade cooler and duller across the board, which read as a nature
+   documentary rather than a place a kid wants to walk around in. Rock, cliff
+   and cave are deliberately untouched -- the caves are meant to be gloomy, and
+   grey is what makes the green look green. */
 const C = {
-  grass: '#4b9153', grassD: '#3c7844', grassL: '#5ea562', grassX: '#33683a',
-  sand: '#dcc78d', sandD: '#c4ac72', sandL: '#ecdca8',
-  dirt: '#a5844f', dirtD: '#8a6c3d', dirtL: '#bd9c66',
-  water: '#2f6fa8', waterD: '#255b8c', waterL: '#4b8dc4',
-  shallow: '#4f9dc6', shallowL: '#77bcdd',
+  grass: '#56a04e', grassD: '#43863f', grassL: '#74b862', grassX: '#2f6b34',
+  sand: '#e6d49a', sandD: '#cfb47c', sandL: '#f5e6b8',
+  dirt: '#bf9a5e', dirtD: '#a07c46', dirtL: '#d4b47c',
+  water: '#3a7fc0', waterD: '#2d6aa4', waterL: '#63a8db',
+  shallow: '#5cb0d6', shallowL: '#8fd0e8',
   rock: '#8c95a0', rockD: '#6b737d', rockL: '#a8b0b9',
   cliff: '#6f6a63', cliffD: '#514d48', cliffL: '#8e8880',
-  wood: '#8a6134', woodD: '#5f4222', woodL: '#a87c48',
-  leaf: '#2f6b39', leafD: '#204d28', leafL: '#3f8a47',
+  wood: '#9c6f3c', woodD: '#6b4a26', woodL: '#b98a52',
+  leaf: '#357536', leafD: '#235526', leafL: '#4d9a4a',
   cave: '#2a3138', caveD: '#1b2126', caveL: '#3d474f',
   floor: '#4a545d', floorD: '#39424a', floorL: '#5c6871',
   pool: '#1f5f66', poolL: '#2f8189',
-  reed: '#5f7a3a', reedD: '#445a27',
+  reed: '#6b8a3f', reedD: '#4c6329',
   scree: '#8d8a7d', screeD: '#6b6960', screeL: '#a8a496',
   glow: '#9fe0ff'
 };

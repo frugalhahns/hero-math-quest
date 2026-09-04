@@ -1,0 +1,26 @@
+<!DOCTYPE html><meta charset="utf-8"><title>sprite lab</title>
+<style>body{background:#4b9153;font:12px ui-monospace,monospace;color:#fff;padding:12px}
+figure{display:inline-block;margin:6px;text-align:center}
+canvas{image-rendering:pixelated;background:rgba(0,0,0,.15)}
+figcaption{font-size:10px;opacity:.8}</style>
+<body><div id="out"></div>
+<script type="module">
+import { ART, bake } from './js/pixels.js';
+const only = new URLSearchParams(location.search).get('only');
+const scale = +(new URLSearchParams(location.search).get('s') || 8);
+const out = document.getElementById('out');
+for (const name of Object.keys(ART)) {
+  if (only && !name.includes(only)) continue;
+  const f = document.createElement('figure');
+  const c = document.createElement('canvas');
+  c.width = 16 * scale; c.height = 16 * scale;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.drawImage(bake(name, 1, false), 0, 0, 16 * scale, 16 * scale);
+  f.appendChild(c);
+  const cap = document.createElement('figcaption');
+  cap.textContent = name;
+  f.appendChild(cap);
+  out.appendChild(f);
+}
+</script>

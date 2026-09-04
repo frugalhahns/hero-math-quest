@@ -345,9 +345,13 @@ function edgeArrow(e, cam, bounce) {
 }
 
 function drawPlayer(rx, ry, cam, now) {
-  const art = P.dir === 'up' ? 'player_up' : P.dir === 'down' ? 'player_down' : 'player_side';
+  const base = P.dir === 'up' ? 'player_up' : P.dir === 'down' ? 'player_down' : 'player_side';
   const flip = P.dir === 'right';
   const walking = P.t < 1;
+  /* Two step frames per direction, alternating one per tile, so a walk is legs
+     rather than a sprite sliding along the ground. stepParity already flips on
+     every tile for the footsteps, which is exactly the rate the legs want. */
+  const art = walking ? base + (stepParity ? '_a' : '_b') : base;
   const bob = walking && P.t > 0.22 && P.t < 0.78 ? -1 : 0;
   const sx = Math.round((rx - cam.cx) * TS);
   const sy = Math.round((ry - cam.cy) * TS) + bob;
