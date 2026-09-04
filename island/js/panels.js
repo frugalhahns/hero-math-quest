@@ -9,6 +9,7 @@ import { SPECIES, BY_ID } from './content/pokemon.js';
 import { PROJECTS } from './content/projects.js';
 import { REGIONS } from './content/entities.js';
 import * as U from './ui.js';
+import { openDressingRoom } from './costume.js';
 import { openDoc } from './reading.js';
 import { openSaves } from './saves.js';
 import { setSound } from './audio.js';
@@ -235,9 +236,12 @@ export function openHelp(onChange) {
     Three players can share this device, and saving your island to a file keeps it safe
     if this browser ever forgets it &mdash; or carries it to another computer.</p>
     <div class="row" style="margin-top:8px">
+      <button class="btn ghost" type="button" id="dress">Get changed</button>
       <button class="btn ghost" type="button" id="home">Home page</button>
       <button class="btn ghost" type="button" id="saves">Players and backups</button>
     </div>
+    <p class="muted small">Getting changed lives here and on the home page: on the way in,
+    or on the way out, and not in the middle of the island.</p>
 
     <h3>Start over</h3>
     <p class="muted small">This erases ${U.esc(slotName(activeSlot()))}'s island and nobody
@@ -261,6 +265,7 @@ export function openHelp(onChange) {
     S.bigText = !S.bigText; save(); openHelp(onChange);
   });
   body.querySelector('#saves').addEventListener('click', openSaves);
+  body.querySelector('#dress').addEventListener('click', () => openDressingRoom());
   body.querySelector('#home').addEventListener('click', () => { clearEntered(); location.reload(); });
   body.querySelector('#reset').addEventListener('click', () => {
     const b2 = U.updateSheet(`

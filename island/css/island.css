@@ -711,3 +711,55 @@ html[data-home="off"] #title { display: none; }
 @media (prefers-reduced-motion: reduce) {
   * { animation: none !important; transition: none !important; }
 }
+
+
+/* ---------------- the dressing room ---------------- */
+
+/* A close up big enough to see from the sofa, and the swatches beside it on a
+   wide screen or under it on a phone. */
+.dress {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  margin: 10px 0 4px;
+}
+#dress-view {
+  image-rendering: pixelated;
+  background: var(--card2);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 6px;
+  flex: 0 0 auto;
+}
+.dress-slots { flex: 1 1 240px; display: flex; flex-direction: column; gap: 10px; }
+.swatches { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font: inherit;
+  font-size: .78rem;
+  color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 5px 10px 5px 6px;
+  cursor: pointer;
+  min-height: 32px;
+}
+.swatch i {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, .35);
+  display: inline-block;
+}
+.swatch:hover { background: var(--card2); }
+.swatch.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+/* Locked swatches stay on screen, greyed, with what to go and do in the tooltip:
+   a colour you cannot see yet is not something to work toward. */
+.swatch.locked { opacity: .5; cursor: default; }
+.swatch.locked i { filter: grayscale(1); }
+.swatch.locked:hover { background: var(--card); }

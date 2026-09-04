@@ -19,6 +19,7 @@ import { QUEST } from './content/quests.js';
 import { REGIONS } from './content/entities.js';
 import { openImport } from './saves.js';
 import { openHelp } from './panels.js';
+import { openDressingRoom } from './costume.js';
 
 /* index.html decides this before first paint, so the page never flashes the
    home screen at somebody who has already chosen, or the island at somebody who
@@ -79,7 +80,10 @@ function pick(list) {
 
 /* A string rather than a mounted element, so the self test can read it without
    a page to put it on. */
-export function homeHTML(list) {
+/* The dressing room edits the island that is actually loaded, which is the
+   active slot and no other. Offering it on a card that would need a page reload
+   to become current is how you dress the wrong kid. */
+export function homeHTML(list, active = activeSlot()) {
   const first = pick(list);
   const used = list.filter(taken);
   const cards = first ? [first, ...used.filter(s => s !== first)] : used;
@@ -124,6 +128,9 @@ export function homeHTML(list) {
       ${nobody ? '<p class="home-lead">Who is playing? Type a name and the island is yours.</p>' : ''}
       <div class="home-list">${cards.map(card).join('')}${newCard}</div>
       <div class="home-feet">
+        ${first && first.slot === active
+          ? '<button class="chip" type="button" id="home-dress">Get changed</button>'
+          : ''}
         <button class="chip" type="button" id="home-load">Load a saved file</button>
         <button class="chip" type="button" id="home-settings">Settings</button>
       </div>
@@ -164,7 +171,9 @@ export function mount(onStart) {
 }
 
 function draw() {
-  root.innerHTML = homeHTML(slots());
+  root.innerHTML = homeHTML(slots(), activeSlot());
+  const dress = root.querySelector('#home-dress');
+  if (dress) dress.addEventListener('click', () => openDressingRoom(draw));
   root.querySelectorAll('[data-play]').forEach(b =>
     b.addEventListener('click', () => enter(b.dataset.play)));
   root.querySelectorAll('[data-rename]').forEach(b =>

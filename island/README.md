@@ -306,6 +306,37 @@ line what you just got, and no step may point at it. And flowtest clicks all the
 way through the card -- open, page, answer every question -- then checks the save
 came out of it owning a bicycle and already on it.
 
+## Getting changed, on the way in or on the way out
+
+Costumes, with one constraint from the parent that shaped the whole thing: an 8
+year old given a dressing room will spend the afternoon in it. So it is reachable
+from the home page and from Settings, and from nowhere in the middle of the
+island. When something new is earned the game says so once, in a toast, and does
+not offer to open anything.
+
+Seventeen colours across three slots -- cap, shirt, trousers -- and fourteen of
+them are locked at the start. They are earned across the whole game: the channel
+gate, the rope crossing, the reed walkway, the light line, the garden, the rock
+slide, the bicycle, the submarine, ten animals, every animal, catching all three
+of Team Rocket out, working out every sign, Elm's last page, and finishing.
+
+Every piece is a **palette swap**, never a second drawing. There are nine player
+frames and six more on the bicycle; a costume that added pixels would have to add
+them fifteen times and would fall out of step with a walk frame the first time one
+changed. Swapping the letters `r`/`R`, `g`/`G` and `U` costs nothing, works on
+every frame that exists and every frame ever added, and still reads across a room.
+
+A locked swatch is pressable on purpose. Disabling it would be tidier, and would
+also mean that on the tablet this is actually played on -- where there is no such
+thing as hovering for a tooltip -- a kid could never find out what any of them
+were for. Press it and it tells you what to go and do, and changes nothing.
+
+The self test builds a save where everything in the game has been done and
+requires every colour to unlock on it, because a swatch whose condition can never
+come true is a lie told to a child. It also checks that a save naming a colour you
+have not earned, or one that does not exist, falls back to what you start in
+rather than to a blank sprite.
+
 ## The Kelp Shallows
 
 The seventh region is not on the island. It is the kelp bed under the water off

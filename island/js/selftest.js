@@ -26,6 +26,8 @@ import {
   save as saveNow, markEntered, enteredThisSession, clearEntered
 } from './state.js';
 import { homeHTML } from './title.js';
+import { SLOTS as DRESS_SLOTS, PIECES, isUnlocked, pieceOf, swap as costumeSwap,
+         unlockedCount, pieceCount } from './costume.js';
 
 const out = [];
 let fails = 0;
@@ -654,6 +656,82 @@ head('the dive');
   ok(onlyDown.length === 0, 'and no project depends on a job only the kelp bed can do',
     onlyDown.join(', '));
   note(`under the water: ${jobs.length} residents doing ${[...new Set(jobs)].join(', ')}`);
+}
+
+/* ---------------- the dressing room ---------------- */
+/* Costumes are palette swaps over the same nine frames, so the thing that can
+   go wrong is not the drawing, it is the bookkeeping: a piece whose unlock
+   condition never comes true, a locked piece a save file can wear anyway, or a
+   swatch whose colour is not the colour it paints. */
+head('costumes');
+{
+  const fresh = { projects: {}, team: [], flags: {}, items: {}, read: {}, signs: {},
+                  worked: {}, crew: {}, step: 0, costume: {}, finished: false };
+  /* Everything, done. Not a fixture for its own sake: it is the save the last
+     locked colour is waiting for, and if it does not open them all then some
+     colour in that list is unreachable and the swatch is a lie. */
+  const done = {
+    projects: Object.fromEntries(PROJECTS.map(p => [p.id, true])),
+    team: SPECIES.map(sp => sp.id),
+    flags: Object.fromEntries(Object.keys(DOCS).map(id => [id, true])),
+    items: {}, read: {}, signs: {},
+    worked: Object.fromEntries(Object.keys(SIGNS).map(id => [id, true])),
+    crew: {}, step: QUEST.length - 1, costume: {}, finished: true
+  };
+
+  const ids = new Set();
+  for (const slot of DRESS_SLOTS) {
+    const list = PIECES[slot.id];
+    ok(Array.isArray(list) && list.length >= 2, `${slot.id}: has something to choose between`,
+      String(list && list.length));
+    ok(new Set(list.map(p => p.id)).size === list.length, `${slot.id}: no two pieces share an id`);
+    for (const p of list) {
+      ids.add(slot.id + ':' + p.id);
+      ok(slot.letters.every(ch => typeof p.colours[ch] === 'string'),
+        `${slot.id}/${p.id}: paints every letter the slot owns`, slot.letters.join(''));
+      ok(Object.keys(p.colours).every(ch => slot.letters.includes(ch)),
+        `${slot.id}/${p.id}: and paints nothing the slot does not own`);
+      ok(Object.values(p.colours).every(c => /^#[0-9a-f]{6}$/i.test(c)),
+        `${slot.id}/${p.id}: colours are real colours`, Object.values(p.colours).join(' '));
+    }
+    ok(!list[0].have, `${slot.id}: the first piece is what you start in, so it never locks`);
+    for (const p of list.slice(1)) {
+      ok(typeof p.have === 'function', `${slot.id}/${p.id}: has something to earn it`);
+      ok(typeof p.how === 'string' && p.how.length > 8,
+        `${slot.id}/${p.id}: says what to go and do`, p.how);
+      ok(!isUnlocked(p, fresh), `${slot.id}/${p.id}: is locked on a brand new island`);
+      ok(isUnlocked(p, done), `${slot.id}/${p.id}: can actually be earned`, p.how);
+    }
+  }
+  ok(unlockedCount(fresh) === DRESS_SLOTS.length,
+    'a new island starts with exactly one colour per slot unlocked', String(unlockedCount(fresh)));
+  ok(unlockedCount(done) === pieceCount(),
+    'and every colour in the game is reachable', `${unlockedCount(done)} of ${pieceCount()}`);
+
+  /* A save file is a text file somebody can edit, and an old save can name a
+     piece that has since been renamed. Either way the answer is the one you
+     start in, never a blank sprite. */
+  const cheat = { ...fresh, costume: { cap: 'white', shirt: 'nonsense', legs: 'blue' } };
+  ok(pieceOf('cap', cheat).id === PIECES.cap[0].id,
+    'wearing a colour you have not earned falls back to the one you start in',
+    pieceOf('cap', cheat).id);
+  ok(pieceOf('shirt', cheat).id === PIECES.shirt[0].id,
+    'and so does wearing one that does not exist', pieceOf('shirt', cheat).id);
+
+  const paint = costumeSwap(done);
+  const letters = DRESS_SLOTS.flatMap(sl => sl.letters);
+  ok(letters.every(ch => typeof paint[ch] === 'string'),
+    'the swap handed to bake() covers every letter a costume owns', letters.join(''));
+  ok(Object.keys(paint).every(ch => letters.includes(ch)),
+    'and nothing else, so no costume can repaint the island');
+  /* The letters have to be letters the player art actually uses, or a colour
+     would be earned and then change nothing at all. */
+  const used = new Set(['player_down', 'player_up', 'player_side', 'bike_side']
+    .flatMap(n => ART[n] || []).flatMap(row => [...row]));
+  const dead = letters.filter(ch => !used.has(ch));
+  ok(dead.length === 0, 'and every one of them is a letter the player is actually drawn with',
+    dead.join(''));
+  note(`${pieceCount()} colours across ${DRESS_SLOTS.length} slots`);
 }
 
 /* ---------------- questions ---------------- */

@@ -18,6 +18,7 @@ import { SIGNS, DOCS } from './content/quests.js';
 import { openSign, openDoc } from './reading.js';
 import { meet } from './encounter.js';
 import { ENTITIES } from './content/entities.js';
+import { openDressingRoom, PIECES } from './costume.js';
 import { BY_ID } from './content/pokemon.js';
 import { visibleEntities } from './world.js';
 import * as title from './title.js';
@@ -160,6 +161,46 @@ try {
     ok(!!bikeChip, 'there is a Bike button in the top bar');
     U.closeSheet(true);
     await wait(4);
+  }
+
+  /* ---------------- getting changed ---------------- */
+  /* The dressing room is the one screen a kid will open for its own sake, so
+     the swatches have to actually do something and the locked ones have to
+     actually refuse. Both are real clicks here. */
+  head('the dressing room');
+  {
+    S.costume = {};
+    const hadGate = !!S.projects.gate;
+    S.projects.gate = true;      // unlocks exactly one extra cap
+    delete S.flags.bicycle;
+    save();
+    openDressingRoom();
+    await wait(12);
+    ok(!!$('#dress-view'), 'it opens with a close up of the player');
+    const blue = $('.swatch[data-slot="cap"][data-piece="blue"]');
+    ok(!!blue && !blue.disabled, 'a colour you have earned can be pressed');
+    const yellow = $('.swatch[data-slot="cap"][data-piece="yellow"]');
+    ok(!!yellow && yellow.classList.contains('locked'), 'and one you have not is there, greyed');
+    ok((yellow.getAttribute('title') || '').length > 8,
+      'the locked one says what to go and do', yellow.getAttribute('title'));
+    yellow.click();
+    await wait(10);
+    ok(S.costume.cap !== 'yellow', 'pressing a locked colour does not put it on',
+      String(S.costume.cap));
+    ok((($('#toast') || {}).textContent || '').includes('bicycle'),
+      'it says what to go and do instead', (($('#toast') || {}).textContent || '').trim());
+    blue.click();
+    await wait(12);
+    ok(S.costume.cap === 'blue', 'pressing it changes what you are wearing', String(S.costume.cap));
+    ok($('.swatch[data-slot="cap"][data-piece="blue"]').classList.contains('on'),
+      'and the swatch shows which one that is');
+    ok(!!$('#dress-view'), 'and the close up is still there afterwards');
+    U.closeSheet(true);
+    await wait(6);
+    // put the beach back: a later check counts what a new player lands in front of
+    S.costume = {};
+    if (!hadGate) delete S.projects.gate;
+    save();
   }
 
   /* ---------------- getting it wrong ---------------- */

@@ -843,8 +843,14 @@ const cache = new Map();
 
 /* Bake one sprite into an offscreen canvas at the requested scale. Sprites are
    drawn hundreds of times per second, so this happens once per (name, scale). */
-export function bake(name, scale = 1, flip = false) {
-  const key = name + '@' + scale + (flip ? 'f' : '');
+/* `swap` recolours palette letters for this one sprite: {r: '#3a6ea8'} paints
+   everything the cap uses in blue. That is the whole of the costume system --
+   the art is never duplicated, so a new colour costs nothing and cannot get out
+   of step with a walk frame. The swap is part of the cache key, so two costumes
+   never hand each other the same canvas. */
+export function bake(name, scale = 1, flip = false, swap = null) {
+  const tag = swap ? Object.entries(swap).map(([k, v]) => k + v).join('') : '';
+  const key = name + '@' + scale + (flip ? 'f' : '') + tag;
   if (cache.has(key)) return cache.get(key);
   const rows = ART[name];
   const c = document.createElement('canvas');
@@ -857,7 +863,7 @@ export function bake(name, scale = 1, flip = false) {
       for (let x = 0; x < SPRITE_SIZE; x++) {
         const ch = row[x];
         if (ch === '.') continue;
-        const col = PALETTE[ch];
+        const col = (swap && swap[ch]) || PALETTE[ch];
         if (!col) continue;
         g.fillStyle = col;
         const px = flip ? (SPRITE_SIZE - 1 - x) : x;

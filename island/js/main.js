@@ -17,6 +17,7 @@ import * as title from './title.js';
 import { pending, form } from './evolve.js';
 import { REGIONS } from './content/entities.js';
 import { BASE_DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
+import { swap as costume, checkWardrobe } from './costume.js';
 
 const STEP_MS = 145;      // one tile, walking
 const RIDE_MS = 88;       // one tile, on the bicycle
@@ -85,6 +86,7 @@ function begin(fromTap) {
   playing = true;
   U.setInputBlock(false);
   checkGrowth();
+  checkWardrobe();
   if (fromTap) onGesture();
 }
 
@@ -395,7 +397,7 @@ function drawPlayer(rx, ry, cam, now) {
   hctx.ellipse(sx + 8, sy + 15, 5, 2, 0, 0, 7);
   hctx.fill();
   hctx.globalAlpha = 1;
-  hctx.drawImage(bake(art, 1, flip), sx, sy);
+  hctx.drawImage(bake(art, 1, flip, costume()), sx, sy);
 }
 
 /* ---------------- the actor layer ---------------- */
@@ -490,7 +492,9 @@ function act() {
   if (U.sheetOpen()) return;
   const e = facingEntity();
   if (!e) return;
-  const refresh = () => { advance(); refreshBar(P.map); persist(); checkGrowth(); syncBikeButton(); };
+  const refresh = () => {
+    advance(); refreshBar(P.map); persist(); checkGrowth(); syncBikeButton(); checkWardrobe();
+  };
 
   switch (e.kind) {
     case 'doc':

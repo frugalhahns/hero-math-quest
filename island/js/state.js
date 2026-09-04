@@ -61,6 +61,8 @@ const DEFAULT = {
   crew: {},               // projectId -> [speciesId, ...] who did it
   items: {},              // crank: 1, berries: 2
   riding: false,          // on the bicycle, once the card by the cabin is read
+  costume: {},            // slot id -> piece id; see js/costume.js
+  wardrobe: 0,            // how many pieces had been unlocked last time we looked
   asked: 0,
   right: 0,
   looked: 0,              // glossary words tapped
