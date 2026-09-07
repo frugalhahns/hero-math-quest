@@ -364,4 +364,5 @@ try {
   ok(!!same, 'the game already on this browser was put back exactly as it was');
   out.push('\nThe save on this browser was borrowed and returned. The page itself is left mid-test on purpose: close it.');
   render();
+  document.documentElement.dataset.done = '1';
 }

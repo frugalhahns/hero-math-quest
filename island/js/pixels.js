@@ -6,6 +6,17 @@
 
 export const SPRITE_SIZE = 16;
 
+/* Which way the profile sprites are drawn. Everything with `_side` in its name
+   -- the player, the bicycle, the submarine -- looks this way, and the renderer
+   mirrors it for the other direction.
+
+   This is a constant rather than a hard-coded `flip` in main.js because it was
+   wrong for two days and nothing could have caught it: the old side sprite faced
+   left, the redrawn one faces right, and the mirror in the renderer was never
+   turned round. So the kid walked backwards. main.js reads this, and the self
+   test reads the art and checks the art agrees with it. */
+export const SIDE_FACING = 'right';
+
 export const PALETTE = {
   'k': '#241a12',
   'K': '#12161c',
@@ -158,7 +169,7 @@ export const ART = {
     '..KrrrrrrrrK....',
     '..KRRRRRRRRRKK..',
     '..KccccccccK....',
-    '..KcccceccK.....',
+    '..KcccccecK.....',
     '..KcccllccK.....',
     '...KggggggK.....',
     '...KgggggggK....',
@@ -176,7 +187,7 @@ export const ART = {
     '..KrrrrrrrrK....',
     '..KRRRRRRRRRKK..',
     '..KccccccccK....',
-    '..KcccceccK.....',
+    '..KcccccecK.....',
     '..KcccllccK.....',
     '...KggggggK.....',
     '...KggggggKc....',
@@ -194,7 +205,7 @@ export const ART = {
     '..KrrrrrrrrK....',
     '..KRRRRRRRRRKK..',
     '..KccccccccK....',
-    '..KcccceccK.....',
+    '..KcccccecK.....',
     '..KcccllccK.....',
     '...KggggggK.....',
     '...KgggggggKc...',
@@ -211,7 +222,7 @@ export const ART = {
     '..KrrrrrrrrK....',
     '..KRRRRRRRRRKK..',
     '..KccccccccK....',
-    '..KcccceccK.....',
+    '..KcccccecK.....',
     '..KcccllccK.....',
     '...KggggggK.....',
     '...KggggggggKc..',
@@ -229,7 +240,7 @@ export const ART = {
     '..KrrrrrrrrK....',
     '..KRRRRRRRRRKK..',
     '..KccccccccK....',
-    '..KcccceccK.....',
+    '..KcccccecK.....',
     '..KcccllccK.....',
     '...KggggggK.....',
     '...KggggggggKc..',
@@ -354,9 +365,9 @@ export const ART = {
     '................',
     '................',
     '........KKK.....',
-    '.x.....KyyyK....',
+    '.i.....KyyyK....',
     '..KKKKKKyyyKKK..',
-    'xKyyyyyyyyyyyyK.',
+    'iKyyyyyyyyyyyyK.',
     '.KyyyyyyyxxxyyK.',
     'SKYyyyyyyxxxyyK.',
     'S.KYYyyyyyyyyK..',
@@ -400,7 +411,7 @@ export const ART = {
     '.....KKKKKK.....',
     '.......SS.......',
     '......SSSS......',
-    '.......x........',
+    '.......i........',
     '................'
   ],
   sub_up: [
@@ -424,7 +435,7 @@ export const ART = {
   sub_up_b: [
     '................',
     '................',
-    '.......x........',
+    '.......i........',
     '......SSSS......',
     '.......SS.......',
     '.....KKKKKK.....',

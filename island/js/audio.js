@@ -2,18 +2,27 @@
    nothing to load before the first frame.
 
    Everything runs through one bus at SFX_LEVEL rather than straight to the
-   speakers. That is what lets the effects be balanced against the generated
-   music in js/music.js as a group: the music sits around rms 0.015, so a bare
-   0.03 square wave blip walks right over the top of it. Footsteps in
-   particular are a soft tick rather than a tone, and main.js only plays every
-   other one -- a beep on every tile at walking pace is the single loudest thing
-   in the game otherwise. */
+   speakers, which is what lets the effects be balanced against the generated
+   music in js/music.js as a group rather than one at a time. The balance is
+   measured, not described: island/audiotest.html renders every effect offline
+   through this bus and checks each one is louder than the music it lands on and
+   quieter than getting an answer right. Footsteps are the reason that page
+   exists -- they were four thousandths peak against a soundtrack sitting at
+   twenty-six, and "I cannot hear the footsteps" turned out to be arithmetic. */
 
 let ctx = null;
 let bus = null;
 let on = true;
+let offline = false;      // true only while measure() is rendering
 
-const SFX_LEVEL = 0.5;   // headroom for the music to sit under the effects
+/* The effects bus. It was 0.5, which was set by ear against a description of
+   the music rather than a measurement of it: the busiest region actually renders
+   at rms 0.026 and peaks at 0.082, so everything on this bus was sitting at or
+   under the soundtrack's continuous level and the quiet end of it -- footsteps --
+   was inaudible. At 1.0 a footstep peaks around twice the music's rms and the
+   reward sounds land near its peak, which is where they belong.
+   island/audiotest.html renders all of it offline and holds the line. */
+const SFX_LEVEL = 1.0;
 
 function ac() {
   if (!ctx) {
@@ -21,7 +30,8 @@ function ac() {
     if (!C) return null;
     try { ctx = new C(); } catch (e) { return null; }
   }
-  if (ctx.state === 'suspended') ctx.resume();
+  // an OfflineAudioContext must not be resumed by hand: rendering starts it
+  if (!offline && ctx.state === 'suspended') ctx.resume();
   return ctx;
 }
 
@@ -92,24 +102,30 @@ function noise(dur, freq, gain, type = 'bandpass', at = 0) {
    here goes over 0.036: the music sits at rms 0.015 and footsteps are the one
    effect that fires hundreds of times a minute. */
 const SURFACE = {
-  grass: f => { noise(0.055, 1300 + f * 260, 0.020, 'bandpass'); },
-  sand:  f => { noise(0.075, 240 + f * 40, 0.030, 'lowpass'); },
-  dirt:  f => { noise(0.045, 230 + f * 60, 0.032, 'lowpass'); },
-  wood:  f => { tone(f ? 128 : 112, 0, 0.055, 'sine', 0.030); noise(0.028, 1000, 0.014, 'bandpass'); },
-  stone: f => { noise(0.03, 1050 + f * 220, 0.026, 'bandpass'); noise(0.14, 760, 0.008, 'bandpass', 0.085); },
-  water: f => { noise(0.09, 620 + f * 120, 0.030, 'lowpass'); noise(0.05, 2400, 0.010, 'bandpass', 0.02); },
-  /* Not a footstep at all: the submarine's motor, and a bubble behind it. The
-     only "surface" you never actually touch. */
-  deep:  f => { tone(f ? 62 : 58, 0, 0.14, 'sine', 0.026); noise(0.06, 900, 0.008, 'bandpass', 0.05); }
+  /* Broad lowpass rather than a narrow band: a filter tight enough to sound
+     exactly like grass also throws away nearly all of the noise, which is how
+     these ended up peaking at 0.004 while the music sat at 0.015. The character
+     comes from the cutoff and the length now, and the level survives it. */
+  grass: f => { noise(0.06, 2400 + f * 300, 0.07, 'lowpass'); },
+  sand:  f => { noise(0.085, 900 + f * 90, 0.115, 'lowpass'); },
+  dirt:  f => { noise(0.055, 780 + f * 100, 0.114, 'lowpass'); tone(f ? 232 : 214, 0, 0.045, 'sine', 0.024); },
+  wood:  f => { tone(f ? 196 : 178, 0, 0.06, 'sine', 0.05); noise(0.03, 1700, 0.07, 'lowpass'); },
+  stone: f => { noise(0.03, 1500 + f * 250, 0.10, 'bandpass'); noise(0.13, 900, 0.035, 'bandpass', 0.085); },
+  water: f => { noise(0.09, 1100 + f * 150, 0.09, 'lowpass'); noise(0.05, 2600, 0.05, 'bandpass', 0.02); },
+  /* Not a footstep at all: the submarine's motor, and a bubble behind it. Ninety
+     hertz rather than sixty, because a tablet speaker cannot make sixty. */
+  deep:  f => { tone(f ? 96 : 88, 0, 0.16, 'sine', 0.05); noise(0.07, 420, 0.06, 'lowpass', 0.04); }
 };
 
 export const SURFACES = Object.keys(SURFACE);
 
-/* On the bicycle. Not a footstep: a short low hum with a tick of chain on top,
-   quieter than any of the feet, because it fires nearly twice as often. */
+/* On the bicycle. Not a footstep: a short hum with a tick of chain on top, and
+   deliberately a little under a footstep, because it fires nearly twice as
+   often. A hundred and fifty hertz rather than ninety for the same reason the
+   motor moved up -- the speaker this is played on cannot make ninety. */
 function wheel(f) {
-  tone(f ? 96 : 88, 0, 0.07, 'sine', 0.020);
-  noise(0.02, 3200, 0.008, 'bandpass');
+  tone(f ? 158 : 146, 0, 0.075, 'sine', 0.042);
+  noise(0.02, 2800, 0.03, 'bandpass');
 }
 
 export const sfx = {
@@ -117,7 +133,9 @@ export const sfx = {
      the music. `where` is a surface name from SURFACES, `foot` alternates. */
   step:    (where, foot) => on && (SURFACE[where] || SURFACE.dirt)(foot ? 1 : 0),
   wheel:   foot => on && wheel(foot ? 1 : 0),
-  bump:    () => on && tone(120, 0, 0.06, 'sine', 0.030),
+  /* Walking into something. It was quieter than a footstep, which is the wrong
+     way round: a bump is the game telling you no. */
+  bump:    () => on && (tone(152, 0, 0.07, 'sine', 0.055) || noise(0.04, 500, 0.05, 'lowpass')),
   open:    () => seq([[520, .06], [700, .1]], 'triangle', 0.06),
   page:    () => noise(0.1, 2200, 0.030),
   right:   () => seq([[660, .09], [880, .09], [1180, .16]], 'triangle', 0.085),
@@ -131,8 +149,43 @@ export const sfx = {
   finale:  () => seq([[392, .16], [523, .16], [659, .16], [784, .16], [1046, .2], [1318, .5]], 'triangle', 0.11)
 };
 
+/* ---------------- measuring ---------------- */
+
+/* Render one effect offline and report how loud it actually is, the same way
+   music.js renderOne does for a region theme. This exists because "I cannot
+   hear the footsteps" was true and unarguable and there was no number anywhere
+   to argue with: a step was peaking at 0.015, which is exactly the level the
+   music sits at continuously, so it was buried by arithmetic.
+
+   The whole effects graph is pointed at an offline context for the duration, so
+   what comes back has been through the same SFX bus a player hears. */
+export async function measure(play, seconds = 0.6) {
+  const OC = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  if (!OC) return null;
+  const rate = 22050;
+  const c = new OC(1, Math.ceil(rate * seconds), rate);
+
+  const keepCtx = ctx, keepBus = bus, keepOn = on;
+  ctx = c; bus = null; on = true; offline = true;
+  try {
+    play();
+  } finally {
+    ctx = keepCtx; bus = keepBus; on = keepOn; offline = false;
+  }
+
+  const buf = await c.startRendering();
+  const d = buf.getChannelData(0);
+  let peak = 0, sum = 0;
+  for (let i = 0; i < d.length; i++) {
+    const a = Math.abs(d[i]);
+    if (a > peak) peak = a;
+    sum += d[i] * d[i];
+  }
+  return { peak, rms: Math.sqrt(sum / d.length) };
+}
+
 /* Read by the self test so the balance against the music is checked rather than
    eyeballed. */
 export function levels() {
-  return { bus: SFX_LEVEL, step: 0.036, bump: 0.030, right: 0.085, caught: 0.10 };
+  return { bus: SFX_LEVEL, step: 0.036, bump: 0.055, right: 0.085, caught: 0.10 };
 }

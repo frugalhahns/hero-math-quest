@@ -6,7 +6,7 @@ import { setSound, sfx } from './audio.js';
 import * as music from './music.js';
 import * as W from './world.js';
 import { TS, VIEW_W, VIEW_H } from './world.js';
-import { bake } from './pixels.js';
+import { bake, SIDE_FACING } from './pixels.js';
 import * as U from './ui.js';
 import { advance, refreshBar, markers } from './quest.js';
 import { openDoc, openSign } from './reading.js';
@@ -374,7 +374,8 @@ function drawPlayer(rx, ry, cam, now) {
   const under = !!(REGIONS[P.map] && REGIONS[P.map].deep);
   const onBike = !under && riding();
   const base = (under ? 'sub_' : onBike ? 'bike_' : 'player_') + dirPart;
-  const flip = P.dir === 'right';
+  // the profile art faces one way; mirror it for the other
+  const flip = P.dir === (SIDE_FACING === 'right' ? 'left' : 'right');
   const walking = P.t < 1;
   /* Two frames per direction, alternating one per tile, so a walk is legs
      rather than a sprite sliding along the ground and a ride is wheels turning.

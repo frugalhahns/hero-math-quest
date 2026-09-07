@@ -397,6 +397,14 @@ along the ground and only bobbed a pixel. The self test checks all three frames
 exist per direction and that they are actually different from each other, which
 is the failure that would otherwise ship silently.
 
+**And they now go the way he is walking.** The old profile sprite faced left. The
+redrawn one faces right, and the mirror in the renderer was never turned round,
+so for two days the kid walked backwards and it took a child to say so. Which way
+the art faces is `SIDE_FACING` in `js/pixels.js` now, main.js reads it rather
+than deciding for itself, and the self test reads the art -- the eye, or the
+submarine's window -- and checks the drawing agrees with the constant. Facing is
+invisible in a grid of letters unless something goes looking for it.
+
 The world palette is warmed toward the Game Boy Advance games: yellower greens, a
 sandy path instead of a muddy one, brighter sea. Rock, cliff and cave are left
 alone on purpose -- the caves are meant to be gloomy, and it is the grey that
@@ -404,7 +412,9 @@ makes the green look green.
 
 `island/spritelab.html` draws every 16x16 sprite in the game at 9x, which is how
 this was iterated on rather than by squinting at screenshots of the map. The kid
-on the bicycle came out of three passes there.
+on the bicycle came out of three passes there. It would not have caught the
+backwards walking, though: the sprite is right, it was the mirror that was wrong,
+and a page that draws sprites one at a time cannot see that.
 
 One more thing the shell has to survive: `flowtest.html` carries its own copy of
 the game markup so it can press real buttons, so the two can drift apart, and the
@@ -515,21 +525,43 @@ Details that matter more than they sound like they should:
 - **The music ducks while you are reading.** A passage on screen drops it from
   0.42 to 0.16. Reading is the point of the game; the soundtrack should not
   compete with it.
-- **The effects are balanced against it as a group.** Everything in
-  `js/audio.js` runs through one bus at 0.5 rather than straight to the speakers,
-  because otherwise there is no way to tune effects against music at all. The
-  footstep is a soft low-passed tap rather than a tone, and only every other one
-  plays: a pitched blip on all eight steps of a walk across the screen buries
-  the pads completely, which is exactly what it did on the first pass.
-- **The ground you are on picks the footstep.** Six of them: grass swishes, sand
-  is a soft low shuffle, a dock board knocks, cave floor clicks and comes back
-  off the wall about a tenth of a second later, the stepping stones in the
-  meadow pond splash, and dirt is the tap it always was. The two feet alternate,
-  which is most of what stopped one repeated tick sounding like a machine.
-  Nothing goes over 0.036, because footsteps fire hundreds of times a minute and
-  are the one effect that can ruin the balance on its own. The self test proves
-  every tile you can stand on has a surface, that each names a sound the synth
-  can actually make, and plays all six.
+- **The effects are balanced against it as a group, and it is measured now.**
+  Everything in `js/audio.js` runs through one bus rather than straight to the
+  speakers, because otherwise there is no way to tune effects against music at
+  all. That bus was 0.5, set by ear against a *description* of the music. The
+  description was wrong: the busiest region renders at rms 0.025 and peaks at
+  0.07, not the 0.015 the comments claimed, so everything on the effects bus was
+  sitting at or under the soundtrack's continuous level. The bus is 1.0 now.
+- **The ground you are on picks the footstep.** Seven of them: grass swishes,
+  sand is a soft low shuffle, a dock board knocks, cave floor clicks and comes
+  back off the wall about a tenth of a second later, the stepping stones in the
+  meadow pond splash, dirt is a tap, and under the water it is the submarine's
+  motor. The two feet alternate, which is most of what stopped one repeated tick
+  sounding like a machine.
+- **"I cannot hear the footsteps" was arithmetic, twice.** A step was peaking at
+  0.004 against a soundtrack sitting at 0.025 continuously. It was not subtle, it
+  was absent, and the reason it survived two goes at fixing it is that there was
+  no number anywhere to argue with -- only somebody's ear against somebody else's.
+  The narrow filters were most of it: a lowpass at 240Hz on a noise burst sounds
+  exactly like sand and throws away nearly all of the energy. Broad cutoffs,
+  frequencies a tablet speaker can actually reproduce, and the bus at 1.0 put a
+  footstep at 0.046 to 0.068 peak, which is about twice the music's rms and a
+  third under the sound of getting an answer right.
+- **`island/audiotest.html` is the third dev page**, and the only one that
+  measures anything. It renders every effect offline through the real bus and
+  holds two fences: louder than the music it lands on, or it is not there at all;
+  quieter than getting an answer right, or the game is applauding you for walking
+  across a beach. It also checks the two feet differ, that no surface is twice as
+  loud as another, that the bicycle sits under every footstep because it fires
+  more often, and that a bump is at least as loud as a step -- it was quieter,
+  which is the wrong way round for the game telling you no.
+
+  It has to be a page of its own: rendering audio offline is real work on a real
+  audio thread, and a headless browser dumping `selftest.html` does not wait for
+  it, which silently truncated that whole report the first time this lived there.
+  All three dev pages now set `document.documentElement.dataset.done` when they
+  finish, so anything driving them from outside can tell "finished" from "still
+  going" rather than trusting a dump.
 - **Nothing is built until you touch the page.** Browsers block audio before a
   gesture, so the whole graph waits for the first key press or tap rather than
   being created at load and silently refused.

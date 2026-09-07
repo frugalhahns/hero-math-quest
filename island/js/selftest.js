@@ -10,7 +10,7 @@ import { DOCS, SIGNS, QUEST } from './content/quests.js';
 import { SPECIES, BY_ID, JOBS } from './content/pokemon.js';
 import { PROJECTS } from './content/projects.js';
 import { GLOSSARY } from './content/glossary.js';
-import { ART, SPRITE_SIZE } from './pixels.js';
+import { ART, SPRITE_SIZE, SIDE_FACING } from './pixels.js';
 import { isKnownTile, isSolidTile } from './tileset.js';
 import * as W from './world.js';
 import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
@@ -952,6 +952,33 @@ for (const d of ['player_down', 'player_up', 'player_side']) {
   ok(new Set(frames).size === frames.length, `${d}: the three frames are actually different`);
 }
 
+/* Which way a profile sprite faces is invisible in the data unless you go
+   looking, and getting it wrong is not subtle: the old side sprite faced left,
+   the redrawn one faces right, the mirror in the renderer was never turned
+   round, and the kid walked backwards for two days. main.js reads SIDE_FACING
+   rather than deciding for itself, and this checks the art agrees with it. The
+   eye -- or the submarine's window -- is what says which way somebody is
+   looking, so that is what gets measured. */
+head('which way the profile sprites face');
+{
+  ok(['left', 'right'].includes(SIDE_FACING), 'pixels.js says which way they are drawn', SIDE_FACING);
+  const sides = Object.keys(ART).filter(n => n.includes('_side'));
+  ok(sides.length >= 3, 'there are profile sprites to check', String(sides.length));
+  for (const name of sides) {
+    const cols = [];
+    ART[name].forEach(row => [...row].forEach((ch, x) => {
+      if (ch === 'e' || ch === 'x') cols.push(x);
+    }));
+    ok(cols.length > 0, `${name}: has an eye or a window, so which way it looks is visible`);
+    if (!cols.length) continue;
+    const mean = cols.reduce((a, b) => a + b, 0) / cols.length;
+    const middle = (SPRITE_SIZE - 1) / 2;
+    ok(SIDE_FACING === 'right' ? mean > middle : mean < middle,
+      `${name}: is drawn facing ${SIDE_FACING}, like pixels.js says`,
+      `eye at x ${mean.toFixed(1)}, middle is ${middle}`);
+  }
+}
+
 /* ---------------- vendored sprites ---------------- */
 head('resident sprites');
 for (const sp of SPECIES) {
@@ -1651,6 +1678,14 @@ head('soundtrack engine');
 
   musicSet(false);   // do not leave a dev page humming
   ok(true, 'soundtrack stopped cleanly after the check');
+
+  /* How loud all of this actually is, measured rather than described, lives in
+     island/audiotest.html. It has to: rendering audio offline is real work on a
+     real audio thread, and a headless browser dumping this page does not wait
+     for it, which quietly truncated this whole report the first time it was
+     tried in here. */
+  note('measured loudness lives in audiotest.html -- offline rendering does not survive a headless dump of this page');
+
   note('loudness is measured by hand with renderOne() in js/music.js -- see the comment there for why it is not automated');
 }
 
@@ -1659,3 +1694,6 @@ head('soundtrack engine');
 out.unshift(`<h2>${fails ? fails + ' FAILURES' : 'all clear'} — ${checks} checks</h2>`);
 document.getElementById('out').innerHTML = out.join('');
 document.title = fails ? 'FAIL ' + fails : 'PASS ' + checks;
+/* Read by anything driving this page from outside: the title changes on every
+   section, so it is not a finish line. This is. */
+document.documentElement.dataset.done = '1';
