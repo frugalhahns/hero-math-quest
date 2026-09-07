@@ -1704,21 +1704,17 @@ head('viewport');
   ok(W.VIEW_W === was[0] && W.VIEW_H === was[1], 'and the view can be put back', `${W.VIEW_W}x${W.VIEW_H}`);
 }
 
-/* The two files below say the same thing twice and cannot see each other:
-   island.css lays the pad out either side of the map on a phone held sideways,
-   and main.js measures that layout to work out how much width is left. The
-   stylesheet also carries the starting tile counts, so the island has the right
-   shape for the frame before the script runs. Either pair drifting apart is a
+/* Three files carry the island's shape and none of them can see the other two.
+   world.js draws 22x15. index.html decides from those same numbers, before the
+   first paint, whether the pad goes under the map or beside it. island.css
+   starts at that shape so the frame before the script runs is not a squashed
+   one, and styles the layout index.html asked for. Any of them drifting is a
    bug nobody would think to look for, so look for it here. */
-head('the stylesheet and main.js agree');
+head('the files that carry the island shape agree');
 {
-  const [css, main] = await Promise.all(
-    ['css/island.css', 'js/main.js'].map(u => fetch(u).then(r => r.text()))
+  const [css, main, index] = await Promise.all(
+    ['css/island.css', 'js/main.js', 'index.html'].map(u => fetch(u).then(r => r.text()))
   );
-  const query = (main.match(/matchMedia\('([^']+)'\)/) || [])[1];
-  ok(!!query, 'main.js has a media query it is matching on', String(query));
-  ok(!!query && css.includes('@media ' + query),
-    'and the stylesheet lays the page out on the same one', String(query));
 
   const fallback = [
     +(css.match(/--tiles-w:\s*(\d+)/) || [])[1],
@@ -1727,6 +1723,21 @@ head('the stylesheet and main.js agree');
   ok(fallback[0] === W.VIEW_MAX.w && fallback[1] === W.VIEW_MAX.h,
     'the shape the stylesheet starts with is the biggest the game will draw',
     `css ${fallback.join('x')}, js ${W.VIEW_MAX.w}x${W.VIEW_MAX.h}`);
+
+  /* The boot script has to do this arithmetic inline: it runs before any module
+     is loaded, which is the whole point of it. */
+  const boot = index.match(/dataset\.lay[\s\S]{0,160}?(\d+)\s*\/\s*(\d+)/);
+  ok(!!boot, 'the boot script picks a layout from an aspect ratio', boot ? boot[0].slice(-12) : 'not found');
+  ok(!!boot && +boot[1] === W.VIEW_MAX.w && +boot[2] === W.VIEW_MAX.h,
+    'and it is the island\'s own shape it compares the window against',
+    boot ? `${boot[1]}/${boot[2]} vs ${W.VIEW_MAX.w}/${W.VIEW_MAX.h}` : '');
+
+  /* Both scripts write data-lay and the stylesheet reads it. A rename on either
+     side is a layout that silently never happens. */
+  ok(main.includes("dataset.lay") && main.includes("'side'"),
+    'main.js keeps the layout switch up to date');
+  ok(css.includes('html[data-lay="side"]'),
+    'and the stylesheet lays out the side arrangement it asks for');
 }
 
 /* ---------------- the soundtrack actually runs ---------------- */

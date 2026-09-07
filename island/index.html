@@ -33,6 +33,14 @@
       var bar = document.querySelector('meta[name="theme-color"]');
       if (bar) bar.setAttribute('content', '#eef4ef');
     }
+    /* Which way the controls go, decided before first paint so the pad never
+       jumps from under the map to beside it while the page is loading. The rule
+       is the island's own shape: wider than 22 by 15 and the map runs out of
+       height first, so the spare width is where the pad belongs. main.js keeps
+       this up to date from the same two numbers, and the self test checks that
+       this copy of them still matches the renderer's. */
+    document.documentElement.dataset.lay =
+      window.innerWidth / window.innerHeight > 22 / 15 ? 'side' : 'stack';
   })();
 </script>
 <link rel="stylesheet" href="css/island.css">

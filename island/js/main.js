@@ -5,7 +5,7 @@ import { S, save, give, askToPersist } from './state.js';
 import { setSound, sfx } from './audio.js';
 import * as music from './music.js';
 import * as W from './world.js';
-import { TS, VIEW_W, VIEW_H } from './world.js';
+import { TS, VIEW_W, VIEW_H, VIEW_MAX } from './world.js';
 import { bake, SIDE_FACING } from './pixels.js';
 import * as U from './ui.js';
 import { advance, refreshBar, markers } from './quest.js';
@@ -64,24 +64,33 @@ hctx.imageSmoothingEnabled = false;
    only these few lines plus the three numbers the stylesheet needs. */
 
 const IDEAL = 34;      // CSS pixels a tile, aimed at rather than guaranteed
-const MAX_TILE = 64;   // four times the art. Past this it is a wall, not a game
+const MAX_TILE = 80;   // five times the art. Past this it is a wall, not a game
 
 const topbarEl = document.getElementById('topbar');
 const padEl = document.getElementById('pad');
 const dpadEl = document.getElementById('dpad');
 const actBtn = document.getElementById('btn-act');   // also the prompt's mirror, below
 
-/* The same rule as the stylesheet's landscape block, and it has to stay the
-   same: sideways puts the pad either side of the stage, so the stage keeps the
-   height the pad would have taken and gives up the width instead. */
-const SIDEWAYS = window.matchMedia('(orientation: landscape) and (max-height: 620px)');
+/* Under the map, or either side of it. The island is 22 tiles by 15, so a window
+   wider than that shape runs out of height before it runs out of width, and the
+   width left over is exactly where the pad should go. Narrower -- upright on a
+   phone, a 4:3 tablet -- and the map is width limited, so the pad goes below.
+
+   The same two numbers are in the boot script in index.html, which settles this
+   before first paint so nothing jumps. The self test checks the copies agree. */
+function sideways() {
+  return window.innerWidth / window.innerHeight > VIEW_MAX.w / VIEW_MAX.h;
+}
 
 function fitView() {
+  const side = sideways();
+  document.documentElement.dataset.lay = side ? 'side' : 'stack';
+
+  // read after writing the attribute: every measurement below depends on it
   const cs = getComputedStyle(document.body);
   const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
   const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
   const gap = parseFloat(cs.rowGap) || 0;
-  const side = SIDEWAYS.matches;
 
   const free = {
     w: Math.max(200, window.innerWidth - padX -

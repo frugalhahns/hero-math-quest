@@ -743,37 +743,61 @@ html[data-home="off"] #title { display: none; }
   #dpad { grid-template-columns: repeat(3, 46px); grid-template-rows: repeat(3, 46px); }
 }
 
-/* Sideways on a phone there is no room to stack: 390 pixels of height minus the
-   bar and the pad leaves nothing for the island. So the pad goes either side of
-   it instead and the stage gets the whole height. display: contents is what
-   lifts the d-pad and the action button out of #pad and into this grid.
+/* Pad beside the map, rather than under it.
 
-   The same rule is written as SIDEWAYS in main.js, which measures the two of
-   them to work out how much width is left. Change one and change the other. */
-@media (orientation: landscape) and (max-height: 620px) {
-  body {
-    --gutter: 6px;
-    --floor: 6px;
-    display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
-    grid-template-rows: auto minmax(0, 1fr);
-    align-items: center;
-    justify-items: center;
-    min-height: 100dvh;
-    gap: 6px;
-  }
-  #topbar { grid-column: 1 / -1; }
-  #pad { display: contents; }
-  #dpad {
-    grid-column: 1;
-    grid-row: 2;
-    grid-template-columns: repeat(3, 46px);
-    grid-template-rows: repeat(3, 46px);
-  }
-  #stage { grid-column: 2; grid-row: 2; }
-  #btn-act { grid-column: 3; grid-row: 2; max-width: 128px; padding: 18px 14px; }
-  #place small { display: none; }      /* the step is in the Journal; the island is not */
+   Which one you get is not about being a phone. It is about shape: the island is
+   22 tiles by 15, so in anything wider than that the map runs out of height
+   first and the width either side is spare. Stacking there wastes it twice over,
+   once on the pad and once on the margins -- a 1440x900 full screen was drawing
+   a 962 wide island with 478 pixels of empty background beside it. Put the pad
+   in that spare width instead and the same screen draws 1189.
 
+   Narrower than 22:15 -- a phone held upright, a 4:3 tablet -- and the map is
+   width limited, so the pad has to go underneath and this does not apply.
+
+   The switch is `data-lay` on the root, set from the window's own aspect by the
+   script in index.html before first paint and kept up to date by main.js, which
+   has to know anyway to work out how much width is left. display: contents is
+   what lifts the d-pad and the action button out of #pad and into this grid. */
+html[data-lay="side"] body {
+  --gutter: 6px;
+  --floor: 6px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr);
+  align-items: center;
+  justify-items: center;
+  min-height: 100dvh;
+  gap: 6px;
+}
+/* Over the map, not over the whole window: in this layout the pad is in the
+   columns either side, and a bar that spanned them would be wider than the
+   island it is labelling. */
+html[data-lay="side"] #topbar { grid-column: 2; }
+html[data-lay="side"] #pad { display: contents; }
+html[data-lay="side"] #dpad {
+  grid-column: 1;
+  grid-row: 2;
+  grid-template-columns: repeat(3, 46px);
+  grid-template-rows: repeat(3, 46px);
+}
+html[data-lay="side"] #stage { grid-column: 2; grid-row: 2; }
+html[data-lay="side"] #btn-act {
+  grid-column: 3;
+  grid-row: 2;
+  max-width: 128px;
+  padding: 18px 14px;
+}
+
+/* Short and narrow, which means a phone held sideways: the line under the place
+   name saying what to go and do costs twenty pixels of island there. It is in
+   the Journal too. A short desktop window keeps it, having the width to spare. */
+@media (orientation: landscape) and (max-height: 620px) and (max-width: 950px) {
+  #place small { display: none; }
+}
+
+/* Short, with width going spare. Nothing here is about where the pad went. */
+@media (max-height: 620px) and (min-width: 620px) {
   /* The home page has the opposite problem to the island: it is a column of
      cards, and sideways there is width going spare and no height at all. So the
      cards go two abreast and everything round them gives up a few pixels, which
