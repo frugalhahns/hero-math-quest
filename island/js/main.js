@@ -40,6 +40,86 @@ const heroCanvas = document.getElementById('hero');
 const hctx = heroCanvas.getContext('2d');
 hctx.imageSmoothingEnabled = false;
 
+/* ---------------- fitting the island to the screen ---------------- */
+
+/* The canvas used to be a fixed 352x240 stretched to whatever width was going.
+   On a phone that meant tiles 17 pixels across -- the art at life size -- and a
+   third of the screen used, with the page empty below the d-pad. So the tile
+   count comes from the space that is actually free, aiming at IDEAL pixels a
+   tile: upright, that is about 11x15 tiles at roughly double the size, and a
+   desktop window is unchanged because 22x15 is still the ceiling.
+
+   Everything that draws already reads canvas.width, and the residents in
+   #actors are positioned in percentages of VIEW_W and VIEW_H, so resizing is
+   only these few lines plus the two numbers the stylesheet needs. */
+
+const IDEAL = 34;      // CSS pixels a tile, aimed at rather than guaranteed
+
+const topbarEl = document.getElementById('topbar');
+const padEl = document.getElementById('pad');
+const stageEl = document.getElementById('stage');
+const dpadEl = document.getElementById('dpad');
+const actBtn = document.getElementById('btn-act');   // also the prompt's mirror, below
+
+/* The same rule as the stylesheet's landscape block, and it has to stay the
+   same: sideways puts the pad either side of the stage, so the stage keeps the
+   height the pad would have taken and gives up the width instead. */
+const SIDEWAYS = window.matchMedia('(orientation: landscape) and (max-height: 620px)');
+
+function fitView() {
+  const cs = getComputedStyle(document.body);
+  const padX = parseFloat(cs.paddingLeft) + parseFloat(cs.paddingRight);
+  const padY = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom);
+  const gap = parseFloat(cs.rowGap) || 0;
+  const side = SIDEWAYS.matches;
+
+  const free = {
+    w: Math.max(200, Math.min(820, window.innerWidth - padX -
+      (side ? dpadEl.offsetWidth + actBtn.offsetWidth + gap * 2 : 0))),
+    h: Math.max(200, window.innerHeight - padY - gap - topbarEl.offsetHeight -
+      (side ? 0 : padEl.offsetHeight + gap))
+  };
+
+  W.setView(free.w / IDEAL, free.h / IDEAL);
+
+  const px = VIEW_W * TS, py = VIEW_H * TS;
+  if (canvas.width !== px || canvas.height !== py) {
+    canvas.width = heroCanvas.width = px;
+    canvas.height = heroCanvas.height = py;
+    // sizing a canvas throws away its context state, smoothing included
+    ctx.imageSmoothingEnabled = false;
+    hctx.imageSmoothingEnabled = false;
+  }
+
+  /* The stylesheet turns these into the on-screen size: the stage is as wide as
+     it can be without the height budget pushing the d-pad off the bottom. */
+  stageEl.style.setProperty('--tiles-w', VIEW_W);
+  stageEl.style.setProperty('--tiles-h', VIEW_H);
+  stageEl.style.setProperty('--fit-w', Math.floor(free.h * VIEW_W / VIEW_H) + 'px');
+}
+
+/* A phone fires resize for every scrap of browser chrome sliding away, so the
+   work waits for the frame rather than running per event. */
+let refitting = false;
+function refit() {
+  if (refitting) return;
+  refitting = true;
+  requestAnimationFrame(() => { refitting = false; fitView(); });
+}
+window.addEventListener('resize', refit);
+window.addEventListener('orientationchange', refit);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', refit);
+
+/* Not everything that changes the sums is a window resize. The top bar wraps to
+   a second row the first time the bicycle chip appears, and the pad changes
+   shape when the phone is turned, and either one moves the floor the stage is
+   standing on. The stage itself is deliberately not watched: it is the thing
+   fitView writes to, and watching it would feed straight back into itself. */
+if (window.ResizeObserver) {
+  const ro = new ResizeObserver(refit);
+  for (const el of [topbarEl, dpadEl, actBtn]) ro.observe(el);
+}
+
 const P = { map: S.map, x: S.x, y: S.y, dir: S.dir || 'down', fromX: S.x, fromY: S.y, t: 1 };
 const held = { up: false, down: false, left: false, right: false };
 const DELTA = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] };
@@ -65,6 +145,7 @@ W.buildWorld(S);
 U.wireGlossary(document);
 advance();
 refreshBar(P.map);
+fitView();
 requestAnimationFrame(loop);
 
 /* The home page owns the first screen. The world is built behind it either way,
@@ -87,6 +168,12 @@ function begin(fromTap) {
   U.setInputBlock(false);
   checkGrowth();
   checkWardrobe();
+  /* First visit gets a nudge toward the only thing on the beach that is written
+     on. Here rather than at boot: a toast is five seconds long, and spent over
+     the home page while a kid reads the cards it is five seconds nobody sees. */
+  if (!S.flags.notice && !S.read.notice) {
+    U.toast('Ranger Elm is gone. Something is nailed to the cabin door.', 5200);
+  }
   if (fromTap) onGesture();
 }
 
@@ -130,11 +217,6 @@ function checkGrowth() {
     announced.add(id);
     U.toast(form(id).name + ' is ready to grow. Open Team.', 5000);
   }
-}
-
-/* First visit gets a nudge toward the only thing on the beach that is written on. */
-if (!S.flags.notice && !S.read.notice) {
-  U.toast('Ranger Elm is gone. Something is nailed to the cabin door.', 5200);
 }
 
 /* ---------------- the loop ---------------- */
@@ -463,9 +545,6 @@ const KIND_VERB = {
   wild: 'Say hello', project: 'Take a look', rocket: 'See what they are up to'
 };
 
-
-const actBtn = document.getElementById('btn-act');
-
 function updatePrompt() {
   const el = document.getElementById('prompt');
   const e = U.sheetOpen() ? null : facingEntity();
@@ -608,6 +687,7 @@ window.addEventListener('keydown', ev => {
   if (ev.key === 't' || ev.key === 'T') openTeam();
   if (ev.key === 'b' || ev.key === 'B') openBuildList(() => { advance(); refreshBar(P.map); checkGrowth(); });
   if (ev.key === 'r' || ev.key === 'R') toggleRide();
+  if (ev.key === 'f' || ev.key === 'F') toggleFull();
   if (ev.key === '?' || ev.key === '/') openHelp();
 });
 
@@ -631,7 +711,7 @@ document.querySelectorAll('.dbtn').forEach(b => {
   b.addEventListener('pointerleave', off);
 });
 
-document.getElementById('btn-act').addEventListener('click', act);
+actBtn.addEventListener('click', act);
 
 /* tapping the map walks toward, or interacts with, what you tapped */
 canvas.addEventListener('click', ev => {
@@ -690,6 +770,49 @@ function toggleRide(sayNo = true) {
 
 if (bikeBtn) bikeBtn.addEventListener('click', () => toggleRide());
 syncBikeButton();
+
+/* Full screen. Worth a button of its own on a phone: the browser's own bars are
+   about a fifth of the screen and the island is the thing that wants it.
+
+   The chip starts hidden and only appears where the API exists, because on an
+   iPhone it does not -- Safari there offers full screen to <video> and nothing
+   else. The way to a full screen island on iOS is Add to Home Screen, which the
+   manifest already covers and the save panel already explains.
+
+   The screen is deliberately not locked to landscape on the way in. Turning a
+   kid's phone round mid-sentence to make the map bigger is a bad trade, and the
+   stylesheet now lays the pad out either side if they turn it themselves. */
+const fullBtn = document.getElementById('btn-full');
+const rootEl = document.documentElement;
+const goFull = rootEl.requestFullscreen || rootEl.webkitRequestFullscreen;
+const leaveFull = document.exitFullscreen || document.webkitExitFullscreen;
+
+function isFull() {
+  return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function toggleFull() {
+  if (!goFull) return;
+  const p = isFull() ? leaveFull.call(document) : goFull.call(rootEl);
+  // Safari's prefixed pair returns undefined rather than a promise
+  if (p && p.catch) p.catch(() => {});
+}
+
+function syncFullButton() {
+  if (!fullBtn) return;
+  const on = isFull();
+  fullBtn.textContent = on ? 'Exit' : 'Full';
+  fullBtn.title = on ? 'Leave full screen (F)' : 'Full screen (F)';
+  fullBtn.classList.toggle('on', on);
+}
+
+if (fullBtn && goFull) {
+  fullBtn.classList.remove('hidden');
+  fullBtn.addEventListener('click', toggleFull);
+  document.addEventListener('fullscreenchange', () => { syncFullButton(); refit(); });
+  document.addEventListener('webkitfullscreenchange', () => { syncFullButton(); refit(); });
+  syncFullButton();
+}
 
 /* top bar */
 document.querySelectorAll('#tools [data-open]').forEach(b =>

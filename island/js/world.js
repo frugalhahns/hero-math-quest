@@ -10,8 +10,22 @@ import { tiles, variantAt, isSolidTile, TS } from './tileset.js';
 
 export { MAP_W, MAP_H, REGIONS, TS };
 
-export const VIEW_W = 22;   // viewport, in tiles
-export const VIEW_H = 15;
+/* The viewport, in tiles. Not a constant: a phone held upright is about 374 CSS
+   pixels across, and 22 tiles into that is 17 pixels a tile, which is the 16x16
+   art at life size in a strip covering under a third of the screen. main.js
+   picks the counts from the space that is actually free and calls setView.
+   22x15 is the ceiling on both, so a bigger window gets bigger tiles and never
+   more island than the game was drawn for. */
+export const VIEW_MAX = { w: 22, h: 15 };
+export const VIEW_MIN = 9;   // fewer than this and you cannot see far enough to walk
+
+export let VIEW_W = VIEW_MAX.w;
+export let VIEW_H = VIEW_MAX.h;
+
+export function setView(w, h) {
+  VIEW_W = Math.max(VIEW_MIN, Math.min(VIEW_MAX.w, MAP_W, Math.round(w)));
+  VIEW_H = Math.max(VIEW_MIN, Math.min(VIEW_MAX.h, MAP_H, Math.round(h)));
+}
 
 /* live grids: map -> array of arrays of single characters */
 let grid = {};

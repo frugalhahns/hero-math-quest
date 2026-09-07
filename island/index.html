@@ -55,6 +55,7 @@
     <button class="chip" data-open="team" type="button" title="Your helpers (T)">Team</button>
     <button class="chip" data-open="build" type="button" title="Projects (B)">Build</button>
     <button class="chip hidden" id="btn-bike" type="button" title="Get on or off the bicycle (R)">Bike</button>
+    <button class="chip hidden" id="btn-full" type="button" title="Full screen (F)" aria-label="Full screen">Full</button>
     <button class="chip" data-open="help" type="button" title="How to play (?)">?</button>
   </nav>
 </header>
@@ -64,6 +65,8 @@
   <div id="actors" aria-hidden="true"></div>
   <canvas id="hero" width="352" height="240" aria-hidden="true"></canvas>
   <div id="prompt" class="hidden"></div>
+  <!-- Inside the map on purpose: see the toast block in island.css. -->
+  <div id="toast" class="hidden" role="status"></div>
 </main>
 
 <div id="pad" aria-hidden="false">
@@ -92,7 +95,6 @@
   </div>
 </div>
 
-<div id="toast" class="hidden" role="status"></div>
 <div id="gloss" class="hidden" role="tooltip"></div>
 
 <script type="module" src="js/main.js"></script>

@@ -590,6 +590,15 @@ head('the shell');
   const test = idsOf(b);
   const missing = [...game].filter(id => !test.has(id));
   ok(missing.length === 0, 'flowtest.html has every element the game does', missing.join(', '));
+
+  /* Before any script runs, the page is only what the markup says. The canvases
+     carry the biggest view at 16 pixels a tile so that first frame is the shape
+     the island was drawn at, and main.js resizes them from there. */
+  const attrs = [...a.matchAll(/<canvas[^>]*\bwidth="(\d+)" height="(\d+)"/g)].map(m => [+m[1], +m[2]]);
+  const want = [W.VIEW_MAX.w * W.TS, W.VIEW_MAX.h * W.TS];
+  ok(attrs.length === 2 && attrs.every(([w, h]) => w === want[0] && h === want[1]),
+    'the canvases in the markup start at the size the biggest view needs',
+    `${attrs.map(p => p.join('x')).join(', ')} want ${want.join('x')}`);
   note(`${game.size} ids in the shell`);
 }
 
@@ -1637,6 +1646,87 @@ try {
   ok(true, 'every region draws without throwing');
 } catch (e) {
   ok(false, 'every region draws without throwing', e.message);
+}
+
+/* ---------------- the viewport fits the screen ---------------- */
+
+/* The map used to be a fixed 22x15 no matter what was holding it. It is now
+   whatever fits, so the things that used to be safe by construction -- the
+   camera staying inside the map, every region drawing -- have to be checked at
+   the sizes a phone actually asks for. */
+head('viewport');
+{
+  const was = [W.VIEW_W, W.VIEW_H];
+
+  W.setView(11.4, 15.2);
+  ok(W.VIEW_W === 11 && W.VIEW_H === 15, 'a fractional fit rounds to whole tiles', `${W.VIEW_W}x${W.VIEW_H}`);
+
+  W.setView(2, 1);
+  ok(W.VIEW_W === W.VIEW_MIN && W.VIEW_H === W.VIEW_MIN,
+    'a tiny window still shows enough island to walk in', `${W.VIEW_W}x${W.VIEW_H}`);
+
+  W.setView(999, 999);
+  ok(W.VIEW_W === W.VIEW_MAX.w && W.VIEW_H === W.VIEW_MAX.h,
+    'a huge window gets bigger tiles, not more island', `${W.VIEW_W}x${W.VIEW_H}`);
+
+  /* Every shape between the two, at the corners of the map: this is where a
+     camera that forgot to clamp shows the void past the edge. */
+  const shapes = [[9, 9], [11, 15], [18, 10], [22, 15]];
+  const spots = [[0, 0], [MAP_W - 1, 0], [0, MAP_H - 1], [MAP_W - 1, MAP_H - 1], [17, 12]];
+  let bad = '';
+  for (const [vw, vh] of shapes) {
+    W.setView(vw, vh);
+    for (const [x, y] of spots) {
+      const cam = W.camera(x, y);
+      if (cam.cx < 0 || cam.cy < 0 || cam.cx + W.VIEW_W > MAP_W || cam.cy + W.VIEW_H > MAP_H) {
+        bad += ` ${vw}x${vh}@${x},${y}->${cam.cx},${cam.cy}`;
+      }
+    }
+  }
+  ok(!bad, 'the camera stays on the map at every viewport size', bad);
+
+  /* A canvas the size the phone would have made, drawn with the smallest view:
+     the renderer walks VIEW_W+1 columns, so an off-by-one here is a stripe of
+     bare canvas down the side rather than an exception. */
+  let threw = null;
+  try {
+    W.setView(W.VIEW_MIN, W.VIEW_MIN);
+    const c = document.createElement('canvas');
+    c.width = W.VIEW_W * W.TS; c.height = W.VIEW_H * W.TS;
+    const g = c.getContext('2d');
+    for (const m of Object.keys(GRIDS)) W.drawMap(g, m, W.camera(3, 3), 0, FULL);
+  } catch (e) {
+    threw = e.message;
+  }
+  ok(!threw, 'every region draws at the size a small phone asks for', threw || '');
+
+  W.setView(was[0], was[1]);
+  ok(W.VIEW_W === was[0] && W.VIEW_H === was[1], 'and the view can be put back', `${W.VIEW_W}x${W.VIEW_H}`);
+}
+
+/* The two files below say the same thing twice and cannot see each other:
+   island.css lays the pad out either side of the map on a phone held sideways,
+   and main.js measures that layout to work out how much width is left. The
+   stylesheet also carries the starting tile counts, so the island has the right
+   shape for the frame before the script runs. Either pair drifting apart is a
+   bug nobody would think to look for, so look for it here. */
+head('the stylesheet and main.js agree');
+{
+  const [css, main] = await Promise.all(
+    ['css/island.css', 'js/main.js'].map(u => fetch(u).then(r => r.text()))
+  );
+  const query = (main.match(/matchMedia\('([^']+)'\)/) || [])[1];
+  ok(!!query, 'main.js has a media query it is matching on', String(query));
+  ok(!!query && css.includes('@media ' + query),
+    'and the stylesheet lays the page out on the same one', String(query));
+
+  const fallback = [
+    +(css.match(/--tiles-w:\s*(\d+)/) || [])[1],
+    +(css.match(/--tiles-h:\s*(\d+)/) || [])[1]
+  ];
+  ok(fallback[0] === W.VIEW_MAX.w && fallback[1] === W.VIEW_MAX.h,
+    'the shape the stylesheet starts with is the biggest the game will draw',
+    `css ${fallback.join('x')}, js ${W.VIEW_MAX.w}x${W.VIEW_MAX.h}`);
 }
 
 /* ---------------- the soundtrack actually runs ---------------- */

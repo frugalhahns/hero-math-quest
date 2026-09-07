@@ -208,7 +208,12 @@ export function openHelp(onChange) {
       <p>Walk: arrow keys, or W A S D, or the pad under the map.<br>
       Look at whatever you are facing: <b>Space</b>, <b>Enter</b>, <b>E</b>, or the big green button.<br>
       Journal <b>J</b> &middot; Team <b>T</b> &middot; Projects <b>B</b> &middot; Close a window <b>Esc</b>${
-        S.flags.bicycle ? '<br>On and off the bicycle: <b>R</b>, or the Bike button. Not underground.' : ''}</p>
+        S.flags.bicycle ? '<br>On and off the bicycle: <b>R</b>, or the Bike button. Not underground.' : ''}${
+        /* Only where there is a button to talk about: an iPhone has no full
+           screen outside of video, so on one this line would describe a chip
+           that main.js has left hidden. */
+        (document.documentElement.requestFullscreen || document.documentElement.webkitRequestFullscreen)
+          ? '<br>Fill the screen: <b>F</b>, or the Full button.' : ''}</p>
     </div>
 
     <h3>Settings</h3>
