@@ -42,22 +42,32 @@ hctx.imageSmoothingEnabled = false;
 
 /* ---------------- fitting the island to the screen ---------------- */
 
-/* The canvas used to be a fixed 352x240 stretched to whatever width was going.
-   On a phone that meant tiles 17 pixels across -- the art at life size -- and a
-   third of the screen used, with the page empty below the d-pad. So the tile
-   count comes from the space that is actually free, aiming at IDEAL pixels a
-   tile: upright, that is about 11x15 tiles at roughly double the size, and a
-   desktop window is unchanged because 22x15 is still the ceiling.
+/* The canvas used to be a fixed 352x240 stretched into a box 820 wide, whatever
+   was holding it. On a phone that meant tiles 17 pixels across -- the art at
+   life size -- and a third of the screen used, with the page empty below the
+   d-pad. On a big monitor it meant a postcard in the middle of the desk.
+
+   Two separate questions, and 820 was answering both of them badly:
+
+   HOW MUCH ISLAND. The tile count, from the space that is actually free, aiming
+   at IDEAL pixels a tile. Upright on a phone that is about 11x15. It is capped
+   at the 22x15 the game was drawn for, so a bigger screen never shows more of
+   the map than the design intends.
+
+   HOW BIG IT IS DRAWN. Once the count is capped, every pixel of extra room goes
+   into the tiles instead: a 1440x900 window gets a 962 wide island rather than
+   820, and a tall 1440p one runs to MAX_TILE. The bar and the pad take their
+   width from the same measurement, so the shell stays one shape.
 
    Everything that draws already reads canvas.width, and the residents in
    #actors are positioned in percentages of VIEW_W and VIEW_H, so resizing is
-   only these few lines plus the two numbers the stylesheet needs. */
+   only these few lines plus the three numbers the stylesheet needs. */
 
 const IDEAL = 34;      // CSS pixels a tile, aimed at rather than guaranteed
+const MAX_TILE = 64;   // four times the art. Past this it is a wall, not a game
 
 const topbarEl = document.getElementById('topbar');
 const padEl = document.getElementById('pad');
-const stageEl = document.getElementById('stage');
 const dpadEl = document.getElementById('dpad');
 const actBtn = document.getElementById('btn-act');   // also the prompt's mirror, below
 
@@ -74,8 +84,8 @@ function fitView() {
   const side = SIDEWAYS.matches;
 
   const free = {
-    w: Math.max(200, Math.min(820, window.innerWidth - padX -
-      (side ? dpadEl.offsetWidth + actBtn.offsetWidth + gap * 2 : 0))),
+    w: Math.max(200, window.innerWidth - padX -
+      (side ? dpadEl.offsetWidth + actBtn.offsetWidth + gap * 2 : 0)),
     h: Math.max(200, window.innerHeight - padY - gap - topbarEl.offsetHeight -
       (side ? 0 : padEl.offsetHeight + gap))
   };
@@ -91,11 +101,16 @@ function fitView() {
     hctx.imageSmoothingEnabled = false;
   }
 
-  /* The stylesheet turns these into the on-screen size: the stage is as wide as
-     it can be without the height budget pushing the d-pad off the bottom. */
-  stageEl.style.setProperty('--tiles-w', VIEW_W);
-  stageEl.style.setProperty('--tiles-h', VIEW_H);
-  stageEl.style.setProperty('--fit-w', Math.floor(free.h * VIEW_W / VIEW_H) + 'px');
+  /* The stylesheet turns these into the on-screen size: as wide as the map can
+     be without its own height pushing the d-pad off the bottom of the screen,
+     and never so wide that a tile is bigger than MAX_TILE. The stylesheet caps
+     it again at the width available, so this only ever has to say what the
+     height allows. */
+  const root = document.documentElement.style;
+  root.setProperty('--tiles-w', VIEW_W);
+  root.setProperty('--tiles-h', VIEW_H);
+  root.setProperty('--fit-w',
+    Math.floor(Math.min(free.h * VIEW_W / VIEW_H, VIEW_W * MAX_TILE)) + 'px');
 }
 
 /* A phone fires resize for every scrap of browser chrome sliding away, so the

@@ -18,6 +18,9 @@
   --shadow: 0 10px 30px rgba(0, 0, 0, .45);
   --radius: 14px;
   --read: 1.06rem;
+  --tiles-w: 22;
+  --tiles-h: 15;
+  --fit-w: 820px;
 }
 
 html[data-theme="light"] {
@@ -79,9 +82,15 @@ body {
 
 /* ---------------- top bar ---------------- */
 
+/* The bar and the pad line up with the map, but never let it drag them narrower
+   than the phone breakpoint: on a small screen the map is limited by height, and
+   a bar squeezed to match wraps its chips onto another row, which eats the
+   height, which shrinks the map, which narrows the bar. It converges, on a worse
+   answer than it started with. Above that floor the map is the wider thing and
+   the three of them agree. */
 #topbar {
   width: 100%;
-  max-width: 820px;
+  max-width: max(var(--fit-w), 480px);
   display: flex;
   align-items: center;
   gap: 10px;
@@ -122,18 +131,15 @@ body {
 
 /* ---------------- the world ---------------- */
 
-/* main.js sets all three of these from the space that is free: the tile counts
-   give the shape, and --fit-w is how wide the stage can be before its own height
-   pushes the d-pad off the bottom of the screen. The fallbacks are the shape the
-   game was drawn at, so the island still looks right for the one frame before
-   the script runs, and on a desktop window nothing moves at all. */
+/* main.js sets all three of these on the root from the space that is free: the
+   tile counts give the shape, and --fit-w is how wide the map can be before its
+   own height pushes the d-pad off the bottom of the screen. The bar and the pad
+   line up with it rather than with a number of their own, so the whole shell is
+   one width and that width is a measurement. The fallbacks here are the shape
+   the game was drawn at, for the one frame before the script runs. */
 #stage {
   position: relative;
-  --tiles-w: 22;
-  --tiles-h: 15;
-  --fit-w: 820px;
   width: min(100%, var(--fit-w));
-  max-width: 820px;
   aspect-ratio: var(--tiles-w) / var(--tiles-h);
   margin-inline: auto;
 }
@@ -220,7 +226,7 @@ body {
 
 #pad {
   width: 100%;
-  max-width: 820px;
+  max-width: max(var(--fit-w), 480px);    /* the same floor as the top bar */
   display: flex;
   align-items: center;
   justify-content: space-between;
