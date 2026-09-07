@@ -233,29 +233,76 @@ body {
   gap: 16px;
 }
 
+/* A thumbstick, and it used to be four separate buttons. Four buttons make you
+   let go and find another one every time you turn a corner, the diagonals
+   between them do nothing at all, and a thumb that drifts off the edge mid-walk
+   just stops. main.js reads the whole circle instead: press anywhere, slide to
+   steer, and the direction follows your thumb without ever lifting it.
+
+   touch-action: none is what stops the browser deciding a slow drag was a scroll
+   and taking the gesture away half way through. */
 #dpad {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 52px);
   grid-template-rows: repeat(3, 52px);
   gap: 4px;
-}
-.dbtn {
-  font: inherit;
-  font-size: 1.1rem;
-  color: var(--ink);
+  border-radius: 50%;
   background: var(--card);
   border: 1px solid var(--line);
-  border-radius: 12px;
+  touch-action: none;
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
-  touch-action: manipulation;
 }
-.dbtn:active { background: var(--accent); color: var(--accent-ink); }
-.dbtn.up    { grid-area: 1 / 2; }
-.dbtn.left  { grid-area: 2 / 1; }
-.dbtn.right { grid-area: 2 / 3; }
-.dbtn.down  { grid-area: 3 / 2; }
+
+/* The arrows are marks on the rim now, not buttons: no box, no press state, and
+   no pointer events, because the circle underneath is what is being pressed.
+   They stay real buttons so that Tab still reaches them, Enter still walks a
+   step, and a screen reader still finds four named directions. */
+.dbtn {
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+  color: var(--ink-dim);
+  background: none;
+  border: 0;
+  padding: 0;
+  pointer-events: none;
+  transition: color .1s ease, transform .1s ease;
+}
+.dbtn.on { color: var(--accent); transform: scale(1.3); }
+
+/* Each mark is pushed to the outer edge of its cell rather than sitting in the
+   middle of it, so the knob at full stretch stops short of the arrow it is
+   pointing at instead of sitting on top of it. */
+.dbtn.up    { grid-area: 1 / 2; align-self: start; }
+.dbtn.down  { grid-area: 3 / 2; align-self: end; }
+.dbtn.left  { grid-area: 2 / 1; justify-self: start; }
+.dbtn.right { grid-area: 2 / 3; justify-self: end; }
+
+/* The knob. It sits in the middle of the grid and main.js slides it under the
+   thumb; the transition is only there for the spring back to centre, and is
+   turned off while a thumb is actually on it. */
+#stick {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 40%;
+  height: 40%;
+  margin: -20% 0 0 -20%;
+  border-radius: 50%;
+  background: var(--bg2);
+  border: 2px solid var(--line);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, .25);
+  pointer-events: none;
+  transition: transform .12s ease-out, background .12s ease;
+}
+#dpad.live #stick {
+  transition: none;
+  background: var(--accent);
+  border-color: transparent;
+}
 
 #btn-act {
   font: inherit;

@@ -205,7 +205,8 @@ export function openHelp(onChange) {
 
     <h3>Buttons</h3>
     <div class="passage">
-      <p>Walk: arrow keys, or W A S D, or the pad under the map.<br>
+      <p>Walk: arrow keys, or W A S D, or the round stick. Hold a thumb on the
+      stick and slide it to turn a corner without letting go.<br>
       Look at whatever you are facing: <b>Space</b>, <b>Enter</b>, <b>E</b>, or the big green button.<br>
       Journal <b>J</b> &middot; Team <b>T</b> &middot; Projects <b>B</b> &middot; Close a window <b>Esc</b>${
         S.flags.bicycle ? '<br>On and off the bicycle: <b>R</b>, or the Bike button. Not underground.' : ''}${

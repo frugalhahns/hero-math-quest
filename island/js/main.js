@@ -702,7 +702,13 @@ window.addEventListener('keydown', ev => {
   // let the sheet own the keyboard while it is up, apart from Escape
   if (U.sheetOpen()) return;
 
+  /* Space and Enter are Look, except on a focused arrow: there they are that
+     button's own key, and what the button says is walk. Without this a keyboard
+     player tabbing onto the pad would take a step and talk to whatever they
+     stepped in front of, in the same press. */
   if (ev.key === ' ' || ev.key === 'Enter' || ev.key === 'e' || ev.key === 'E') {
+    const on = document.activeElement;
+    if (ev.key !== 'e' && ev.key !== 'E' && on && on.classList.contains('dbtn')) return;
     ev.preventDefault();
     act();
     return;
@@ -722,18 +728,101 @@ window.addEventListener('keyup', ev => {
 
 window.addEventListener('blur', () => {
   for (const k of Object.keys(held)) held[k] = false;
+  stickDrop();      // a thumb still down when the window went away is not a thumb
 });
 
-/* touch / mouse pad */
-document.querySelectorAll('.dbtn').forEach(b => {
-  const dir = b.dataset.dir;
-  const on = ev => { ev.preventDefault(); held[dir] = true; };
-  const off = ev => { ev.preventDefault(); held[dir] = false; };
-  b.addEventListener('pointerdown', on);
-  b.addEventListener('pointerup', off);
-  b.addEventListener('pointercancel', off);
-  b.addEventListener('pointerleave', off);
+/* ---------------- the thumbstick ---------------- */
+
+/* It was four buttons, one press each. Turning a corner meant letting go and
+   finding another button, the gaps between them did nothing, and a thumb that
+   slid a few pixels off the edge stopped the walk without saying why. An eight
+   year old was fighting it.
+
+   So the whole circle is one control. Press anywhere in it, and where you press
+   relative to the middle is the direction; keep the thumb down and slide, and
+   the direction follows without a single lift. The pointer is captured on the
+   way in, so it keeps steering even once the thumb has wandered off the pad
+   entirely, which is what a real stick does. */
+
+const stick = document.getElementById('stick');
+const dirBtn = {};
+document.querySelectorAll('.dbtn').forEach(b => { dirBtn[b.dataset.dir] = b; });
+
+const DEAD = 0.3;      // inside this fraction of the radius, nobody is asking to walk
+const TILT = 1.25;     // how far past the diagonal a thumb goes before the axis flips
+
+let stickId = null;    // the pointer currently on the stick
+let stickDir = null;
+
+function stickPoint(dir) {
+  if (stickDir === dir) return;
+  if (stickDir) dirBtn[stickDir].classList.remove('on');
+  for (const k of Object.keys(held)) held[k] = false;
+  stickDir = dir;
+  if (dir) {
+    held[dir] = true;
+    dirBtn[dir].classList.add('on');
+  }
+}
+
+function stickRead(ev) {
+  const r = dpadEl.getBoundingClientRect();
+  const radius = r.width / 2;
+  const dx = (ev.clientX - (r.left + radius)) / radius;
+  const dy = (ev.clientY - (r.top + r.height / 2)) / radius;
+  const len = Math.hypot(dx, dy) || 1;
+
+  // the knob goes where the thumb is, but stays inside the ring
+  const reach = Math.min(1, len) * radius * 0.36;   // stops short of the rim marks
+  stick.style.transform = `translate(${(dx / len) * reach}px, ${(dy / len) * reach}px)`;
+
+  if (Math.hypot(dx, dy) < DEAD) { stickPoint(null); return; }
+
+  /* Four ways to walk, so the bigger of the two axes wins. A thumb wandering
+     along the diagonal would sit right on the boundary and flicker between two
+     of them, so an axis that is already being walked has to be beaten by TILT
+     rather than by a hair. */
+  const ax = Math.abs(dx), ay = Math.abs(dy);
+  let horiz = ax > ay;
+  if (stickDir) {
+    const wasHoriz = stickDir === 'left' || stickDir === 'right';
+    if (wasHoriz !== horiz && Math.max(ax, ay) < Math.min(ax, ay) * TILT) horiz = wasHoriz;
+  }
+  stickPoint(horiz ? (dx > 0 ? 'right' : 'left') : (dy > 0 ? 'down' : 'up'));
+}
+
+function stickDrop() {
+  stickId = null;
+  stickPoint(null);
+  dpadEl.classList.remove('live');
+  stick.style.transform = '';
+}
+
+dpadEl.addEventListener('pointerdown', ev => {
+  if (stickId !== null) return;
+  ev.preventDefault();
+  stickId = ev.pointerId;
+  dpadEl.classList.add('live');
+  try { dpadEl.setPointerCapture(ev.pointerId); } catch (e) { /* mouse leaving the window */ }
+  stickRead(ev);
 });
+dpadEl.addEventListener('pointermove', ev => {
+  if (ev.pointerId === stickId) stickRead(ev);
+});
+for (const type of ['pointerup', 'pointercancel', 'lostpointercapture']) {
+  dpadEl.addEventListener(type, ev => { if (ev.pointerId === stickId) stickDrop(); });
+}
+
+/* The arrows are still buttons, so Tab reaches them and Enter walks a step. A
+   real tap never gets here: the marks have no pointer events, and a click made
+   by a keyboard is the one that arrives with a detail of 0. */
+for (const [dir, b] of Object.entries(dirBtn)) {
+  b.addEventListener('click', ev => {
+    if (ev.detail !== 0 || U.sheetOpen()) return;
+    P.dir = dir;
+    if (P.t >= 1) tryMove(dir);
+  });
+}
 
 actBtn.addEventListener('click', act);
 

@@ -78,11 +78,14 @@
 </main>
 
 <div id="pad" aria-hidden="false">
+  <!-- A thumbstick: main.js reads the whole circle, and the four buttons are the
+       marks around its rim, still there for the keyboard and the screen reader. -->
   <div id="dpad">
     <button class="dbtn up"    data-dir="up"    type="button" aria-label="Walk north">&#9650;</button>
     <button class="dbtn left"  data-dir="left"  type="button" aria-label="Walk west">&#9664;</button>
     <button class="dbtn down"  data-dir="down"  type="button" aria-label="Walk south">&#9660;</button>
     <button class="dbtn right" data-dir="right" type="button" aria-label="Walk east">&#9654;</button>
+    <div id="stick" aria-hidden="true"></div>
   </div>
   <button id="btn-act" type="button">Look / Talk</button>
 </div>

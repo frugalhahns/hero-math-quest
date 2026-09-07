@@ -819,7 +819,7 @@ content.
 ## Layout
 
 ```
-index.html          the shell: canvas, sprite layer, top bar, touch pad, sheet
+index.html          the shell: canvas, sprite layer, top bar, thumbstick, sheet
 selftest.html       content, reachability, reading-level and save-file assertions
 flowtest.html       the same game, driven by real clicks on real buttons
 manifest.json       so it can be installed, which is how iOS keeps the save
