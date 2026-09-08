@@ -17,6 +17,7 @@ import { BASE_DEX, TILES_TALL, animUrl, stillUrl } from './creatures.js';
 import { form, nextForm, canGrow, growableCount } from './evolve.js';
 import { isTarget, markers, nextHop, regionsFor } from './quest.js';
 import { SURFACES, sfx } from './audio.js';
+import { STEP_MS, RIDE_MS, advanceTile } from './pace.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 import {
@@ -1738,6 +1739,67 @@ head('the files that carry the island shape agree');
     'main.js keeps the layout switch up to date');
   ok(css.includes('html[data-lay="side"]'),
     'and the stylesheet lays out the side arrangement it asks for');
+}
+
+/* ---------------- how fast a tile goes by ---------------- */
+
+/* The frame loop in main.js, with the game taken out of it: stand still, hold a
+   direction, and count how long twenty tiles take. It is the same shape as
+   tick(), and the point of it is that a tile has to cost the time it says and
+   not a millisecond more. It used to cost a whole frame more, at every tile. */
+function walk(ms, frame, tiles) {
+  let t = 1, done = 0, elapsed = 0;
+  while (done < tiles && elapsed < 60000) {
+    elapsed += frame;
+    let dt = frame;
+    for (let guard = 4; guard > 0; guard--) {
+      if (t < 1) {
+        const s = advanceTile(t, dt, ms);
+        t = s.t;
+        if (!s.landed) break;
+        dt = s.left;
+        done++;
+        continue;
+      }
+      t = 0;                 // the next tile starts, in this same frame
+    }
+  }
+  return elapsed;
+}
+
+head('pace');
+{
+  for (const [name, ms] of [['walking', STEP_MS], ['riding', RIDE_MS]]) {
+    for (const [screen, frame] of [['60Hz', 1000 / 60], ['30Hz', 1000 / 30], ['120Hz', 1000 / 120]]) {
+      const took = walk(ms, frame, 20);
+      const want = 20 * ms;
+      /* Within one frame: the walk can only start on a frame boundary, so that
+         much is unavoidable. Anything more is time being dropped on the floor. */
+      ok(Math.abs(took - want) <= frame + 0.01,
+        `${name} on a ${screen} screen: twenty tiles take twenty tiles' worth of time`,
+        `${Math.round(took)}ms, want ${want}ms`);
+    }
+  }
+
+  /* The bicycle is what you get for reading a page nobody made you read. If it
+     is not obviously quicker it is not a reward, it is a chip in the top bar. */
+  const ride = walk(RIDE_MS, 1000 / 60, 20);
+  const foot = walk(STEP_MS, 1000 / 60, 20);
+  ok(ride < foot * 0.6, 'the bicycle is getting on for twice the speed of walking',
+    `${Math.round(foot)}ms on foot, ${Math.round(ride)}ms riding, ${(foot / ride).toFixed(2)}x`);
+
+  /* Nothing is lost and nothing is invented: the leftovers from a run of frames
+     have to add up to the time that went in. */
+  let t = 0, fed = 0, got = 0;
+  for (let i = 0; i < 50; i++) {
+    const dt = 3 + (i % 7) * 4;       // ragged frames, like a real phone
+    fed += dt;
+    const s = advanceTile(t, dt, STEP_MS);
+    got += (s.t - t) * STEP_MS + s.left;
+    t = s.landed ? 0 : s.t;
+  }
+  ok(Math.abs(fed - got) < 0.0001, 'every millisecond that goes into a frame comes out of it',
+    `${fed.toFixed(3)}ms in, ${got.toFixed(3)}ms out`);
 }
 
 /* ---------------- the soundtrack actually runs ---------------- */

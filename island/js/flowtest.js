@@ -79,6 +79,68 @@ let before = null;
 try { before = readStorage(); } catch (e) { before = null; }
 
 try {
+  /* ---------------- the game actually starts ---------------- */
+
+  /* Everything else on this page drives the modules directly, and selftest.html
+     does the same. Neither of them ever loads main.js, which means main.js could
+     fail to parse and both suites would come back all clear -- which is exactly
+     what happened once: a second import of a name that was already taken, the
+     island never booted, and 2,690 checks said everything was fine.
+
+     So load the real page, in a frame, and look for a fingerprint only main.js
+     leaves: the tile counts it writes on to the root element as it fits the map
+     to the window. The stylesheet declares those on :root, so a value in the
+     inline style means the script ran. Then check the canvas has something on
+     it, because booting and drawing are different claims. */
+  head('the game starts at all');
+  {
+    const frame = document.createElement('iframe');
+    /* On screen, not parked off to the left: a frame outside the viewport has its
+       animation frames throttled away, so it would boot and never draw. The
+       report above is opaque and sits at z-index 200, so this is not seen. */
+    frame.style.cssText = 'position:fixed;left:0;top:0;width:900px;height:700px;border:0;z-index:1';
+    const loaded = new Promise(r => frame.addEventListener('load', r, { once: true }));
+    frame.src = 'index.html';
+    document.body.appendChild(frame);
+    await loaded;
+    await wait(400);
+
+    const d = frame.contentDocument;
+    const fitted = d.documentElement.style.getPropertyValue('--tiles-w');
+    ok(!!fitted, 'main.js runs and fits the island to the window it is in',
+      fitted ? `${fitted} tiles across` : 'the root has no tile count: main.js never ran');
+
+    const screen = d.getElementById('screen');
+    ok(!!screen && screen.width > 0 && screen.height > 0, 'the map canvas has a size',
+      screen ? `${screen.width}x${screen.height}` : 'no canvas');
+
+    /* Booting and drawing are different claims, so ask for one animation frame
+       down there and then look at the canvas. Ask, rather than wait: a headless
+       browser running on --virtual-time-budget never paints a child frame and so
+       never gives it a frame, and a suite that hung waiting for one would be a
+       worse bug than the one this is here to catch. Drive this page over the
+       debugging port to get the drawing checked as well as the boot. */
+    const painted = await Promise.race([
+      new Promise(r => frame.contentWindow.requestAnimationFrame(() => r(true))),
+      wait(700).then(() => false)
+    ]);
+
+    if (painted) {
+      // a canvas nothing has drawn on is one flat colour, and mostly transparent
+      const px = screen.getContext('2d')
+        .getImageData(0, Math.floor(screen.height / 2), screen.width, 1).data;
+      const seen = new Set();
+      for (let i = 0; i < px.length; i += 4) seen.add(`${px[i]},${px[i + 1]},${px[i + 2]},${px[i + 3]}`);
+      ok(seen.size > 3, 'and the frame loop has drawn an island on it',
+        `${seen.size} colours across the middle`);
+    } else {
+      ok(!!fitted, 'the frame was never painted, so only the boot is checked here',
+        'run flowtest.html in a browser, or over --remote-debugging-port, for the rest');
+    }
+
+    frame.remove();
+  }
+
   /* ---------------- a sign, from walking up to it to the berry ---------------- */
   head('working out a sign');
   {

@@ -796,6 +796,13 @@ different claims, and I was making the second on the evidence of the first.
 `island/flowtest.html` presses the buttons. The real game shell is underneath the
 report and every check is a genuine click on a genuine handler — 39 of them:
 
+- the game starts at all: `index.html` in a frame, checked for the fingerprint
+  only `main.js` leaves behind. Both suites drive the modules directly and
+  neither of them ever loads `main.js`, so it could fail to parse and 2,690
+  checks would still come back all clear. That is not hypothetical; it happened,
+  on a second import of a name that was already taken. The drawing half of that
+  check needs a browser that paints child frames, so it is skipped, out loud,
+  under `--virtual-time-budget`
 - page through a sign, work out its question, take the berry, and find the save
   marked afterwards; then do it again and confirm it does not pay twice
 - get one wrong: it explains, marks nothing, costs nothing
@@ -827,6 +834,7 @@ icons/              the two app icons, and the script that drew them
 css/island.css      one stylesheet, light and dark
 js/
   main.js           boot, input, frame loop, what the action button does
+  pace.js           how long a tile takes, and how a frame is spent on one
   world.js          live tile grids, collision, crossings, camera, map renderer
   tileset.js        every tile drawn in code, four variants each, two water frames
   pixels.js         original 16x16 pixel art, baked to canvas on first use

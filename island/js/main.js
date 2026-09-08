@@ -18,9 +18,8 @@ import { pending, form } from './evolve.js';
 import { REGIONS } from './content/entities.js';
 import { BASE_DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
 import { swap as costume, checkWardrobe } from './costume.js';
+import { STEP_MS, RIDE_MS, advanceTile } from './pace.js';
 
-const STEP_MS = 145;      // one tile, walking
-const RIDE_MS = 88;       // one tile, on the bicycle
 
 /* Elm's two rules, in code. Underground is out because the cave floor is wet
    rock full of holes, and the sea is out because a bicycle is not a boat. */
@@ -269,14 +268,30 @@ function loop(now) {
   requestAnimationFrame(loop);
 }
 
+/* One frame of walking. A tile that lands part way through a frame hands the
+   rest of the frame to the tile after it and the next tile starts immediately,
+   rather than both being thrown away -- see pace.js, which is where the sums
+   live and where the self test can get at them.
+
+   The guard is for arithmetic, not for gameplay: dt is capped at 64ms upstream
+   and the quickest tile is 72, so in practice at most one tile lands per frame.
+   It is here so that a future faster mode cannot turn a long frame into a
+   teleport. */
 function tick(dt) {
-  if (P.t < 1) {
-    P.t = Math.min(1, P.t + dt / stepMs());
-    if (P.t >= 1) arrive();
-    return;
+  for (let guard = 4; guard > 0; guard--) {
+    if (P.t < 1) {
+      const s = advanceTile(P.t, dt, stepMs());
+      P.t = s.t;
+      if (!s.landed) return;
+      dt = s.left;
+      arrive();
+      continue;
+    }
+    const dir = held.up ? 'up' : held.down ? 'down' : held.left ? 'left' : held.right ? 'right' : null;
+    if (!dir) return;
+    tryMove(dir);
+    if (P.t >= 1) return;            // walked into something, so nothing to carry
   }
-  const dir = held.up ? 'up' : held.down ? 'down' : held.left ? 'left' : held.right ? 'right' : null;
-  if (dir) tryMove(dir);
 }
 
 function tryMove(dir) {
