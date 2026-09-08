@@ -1,0 +1,15 @@
+#!/bin/sh
+# wrangler, pointed at the island's own Cloudflare account.
+#
+# ~/.zshenv exports CLOUDFLARE_API_TOKEN globally for calendar-hub, and wrangler
+# reads exactly that name, so running plain `wrangler deploy` in here would
+# cheerfully deploy the kids' save sync into the wrong account. This maps the
+# Verdant variables on to the ones wrangler wants, for one command at a time,
+# and refuses to run if they are missing rather than falling back to whatever
+# happens to be in the environment.
+set -e
+: "${VERDANT_CF_API_TOKEN:?set VERDANT_CF_API_TOKEN in ~/.zshenv (see sync/README.md)}"
+: "${VERDANT_CF_ACCOUNT_ID:?set VERDANT_CF_ACCOUNT_ID in ~/.zshenv (see sync/README.md)}"
+CLOUDFLARE_API_TOKEN="$VERDANT_CF_API_TOKEN" \
+CLOUDFLARE_ACCOUNT_ID="$VERDANT_CF_ACCOUNT_ID" \
+exec npx wrangler "$@"

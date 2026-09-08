@@ -1,0 +1,12 @@
+name = "verdant-sync"
+main = "worker.js"
+compatibility_date = "2026-09-08"
+workers_dev = true
+
+# The database id is filled in by `./cf d1 create verdant-saves` on the account
+# the token belongs to. It is not a secret: it names a database that cannot be
+# reached without the token, and the rows in it are ciphertext either way.
+[[d1_databases]]
+binding = "DB"
+database_name = "verdant-saves"
+database_id = "00000000-0000-0000-0000-000000000000"

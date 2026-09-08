@@ -18,6 +18,7 @@ import { form, nextForm, canGrow, growableCount } from './evolve.js';
 import { isTarget, markers, nextHop, regionsFor } from './quest.js';
 import { SURFACES, sfx } from './audio.js';
 import { STEP_MS, RIDE_MS, advanceTile } from './pace.js';
+import * as sync from './sync.js';
 import { THEMES, unlock as musicUnlock, setRegion as musicRegion, setMusic as musicSet, status as musicStatus } from './music.js';
 import { askOne as U_askOne } from './ui.js';
 import {
@@ -1800,6 +1801,99 @@ head('pace');
   }
   ok(Math.abs(fed - got) < 0.0001, 'every millisecond that goes into a frame comes out of it',
     `${fed.toFixed(3)}ms in, ${got.toFixed(3)}ms out`);
+}
+
+/* ---------------- carrying an island to another device ---------------- */
+
+head('sync: the family code');
+{
+  const c = sync.newCode();
+  ok(/^[0-9A-HJKMNP-TV-Z]{4}(-[0-9A-HJKMNP-TV-Z]{4}){3}$/.test(c),
+    'a new code is four groups of four, in an alphabet with no lookalikes in it', c);
+
+  /* Every way a person might retype the thing off another screen. */
+  const same = [c, c.toLowerCase(), c.replace(/-/g, ''), c.replace(/-/g, ' '), ' ' + c + ' '];
+  const bad = same.filter(t => sync.tidy(t) !== c);
+  ok(bad.length === 0, 'lower case, spaces and the dashes left out all read the same', bad.join(' | '));
+
+  ok(sync.tidy('0IL0-1111-1111-1111') === '0110-1111-1111-1111',
+    'the letters that look like digits are read as the digits they look like',
+    String(sync.tidy('0IL0-1111-1111-1111')));
+
+  const junk = ['', 'hello', c.slice(0, 15), c + 'X', 'UUUU-UUUU-UUUU-UUUU', null, 42];
+  const took = junk.filter(t => sync.tidy(t) !== null);
+  ok(took.length === 0, 'and nothing that is not a code is taken for one', took.join(' | '));
+
+  const codes = new Set();
+  for (let i = 0; i < 200; i++) codes.add(sync.newCode());
+  ok(codes.size === 200, 'two hundred codes in a row are two hundred different codes', String(codes.size));
+}
+
+head('sync: who is ahead');
+{
+  /* local, cloud, what this device and the server last agreed on, what to do.
+     `ask` is the only answer that involves a person, and every case that cannot
+     be settled from the numbers alone has to end up there rather than guess. */
+  const table = [
+    [null, null, undefined, 'nothing', 'nothing anywhere'],
+    [7, null, undefined, 'push', 'only here'],
+    [null, 7, undefined, 'pull', 'only there'],
+    [7, 7, undefined, 'same', 'never agreed, but identical'],
+    [7, 9, undefined, 'ask', 'never agreed, and not identical'],
+    [7, 7, 7, 'same', 'agreed and unchanged'],
+    [7, 9, 7, 'pull', 'they moved, we did not'],
+    [9, 7, 7, 'push', 'we moved, they did not'],
+    [9, 11, 7, 'ask', 'both moved'],
+    [9, 9, 7, 'ask', 'both moved to the same count, which proves nothing']
+  ];
+  for (const [local, cloud, seen, want, why] of table) {
+    const got = sync.decide(local, cloud, seen);
+    ok(got === want, `${why}: ${want}`, got === want ? '' : `got ${got}`);
+  }
+
+  /* The one that matters most, stated as a rule rather than a row: a device
+     that has walked on since the last agreement never silently loses it. */
+  let lost = 0;
+  for (let local = 0; local < 12; local++) {
+    for (let cloud = 0; cloud < 12; cloud++) {
+      for (let seen = 0; seen < 12; seen++) {
+        if (local > seen && sync.decide(local, cloud, seen) === 'pull') lost++;
+      }
+    }
+  }
+  ok(lost === 0, 'nothing this device has done since the last agreement is ever thrown away without asking',
+    `${lost} cases would have`);
+}
+
+head('sync: the server is handed nothing it can read');
+{
+  const a = await sync.keysFor('AAAA-BBBB-CCCC-DDDD');
+  const again = await sync.keysFor('AAAA-BBBB-CCCC-DDDD');
+  const other = await sync.keysFor('AAAA-BBBB-CCCC-DDDE');
+  ok(a.addr === again.addr, 'a code always addresses the same row', a.addr);
+  ok(a.addr !== other.addr, 'and two codes do not land on the same one');
+
+  /* The Worker will not look at an address that does not match its own idea of
+     one, and it cannot see this file to check. */
+  const worker = await fetch('../sync/worker.js').then(r => r.text());
+  const rule = (worker.match(/const ADDR = \/\^(.+?)\$\//) || [])[1];
+  ok(!!rule, 'the Worker says what an address looks like', String(rule));
+  ok(!!rule && new RegExp('^' + rule + '$').test(a.addr),
+    'and the address this builds is one it will accept', a.addr);
+
+  const secret = { kind: 'verdant-isle-save', player: 'Ada', save: { x: 9, step: 3 } };
+  const sealed = await sync.seal(secret, a.key);
+  ok(!sealed.includes('Ada') && !sealed.includes('verdant'),
+    'a sealed island does not have the player in it anywhere', sealed.slice(0, 24) + '...');
+  const back = await sync.unseal(sealed, a.key);
+  ok(JSON.stringify(back) === JSON.stringify(secret), 'and it comes back exactly as it went in');
+
+  let refused = false;
+  try { await sync.unseal(sealed, other.key); } catch (e) { refused = true; }
+  ok(refused, 'the wrong code cannot open it');
+
+  const twice = await sync.seal(secret, a.key);
+  ok(twice !== sealed, 'the same island sealed twice looks different both times');
 }
 
 /* ---------------- the soundtrack actually runs ---------------- */

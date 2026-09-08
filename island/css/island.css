@@ -654,6 +654,21 @@ body {
   text-align: center;
 }
 
+/* The family code, meant to be read off one screen and typed into another, so
+   it is big, spaced, and in a face where a 5 and an S are different shapes. */
+.synccode {
+  font: 1.35rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  letter-spacing: .12em;
+  text-align: center;
+  background: var(--bg2);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 12px 8px;
+  margin: 10px 0 0;
+  user-select: all;
+  overflow-wrap: anywhere;
+}
+
 /* ---------------- save slots ---------------- */
 
 .slot-list { display: grid; gap: 8px; }

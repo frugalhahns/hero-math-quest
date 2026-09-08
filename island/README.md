@@ -661,21 +661,43 @@ stripped at the JSON reviver so an imported save cannot write through to
 level as the rest of the game, because that sentence is the whole error handling a
 player ever sees.
 
-**If there is ever an account.** There is no server and nothing leaves the
-device, but three fields exist so that a real account could adopt these saves
-later instead of asking everyone to start over: the profile `id` is the row it
-would sync to, `rev` counts every write so two copies of one island can be
-compared without trusting either device's clock, and a per-browser device id says
-which copy came from where. Save files carry all three. Loading a file onto a
-device that has never seen that island keeps its id, so both copies stay one
-island; loading it alongside itself mints a new id, because that really is a
-copy. v1 files, which predate profiles, still load and are given an id on
-arrival.
+**A family code.** The file works and nobody uses it: it is a deliberate act at
+both ends, and a kid moving from the iPad to the laptop is not going to perform
+it. So there is a code. Turn syncing on once, type the sixteen characters into
+the other device or open the link there, and every island follows you around and
+stays up to date on its own.
 
-That is the whole preparation, deliberately. Sync itself would be offline-first
--- localStorage stays the source of truth for the running game, and a backend
-would push and pull in the background -- which is why none of the game had to
-become asynchronous to leave the door open.
+No account, because an account is a password to lose and because a child under
+thirteen cannot have most of them. What makes that safe to do without one is
+that the code is the only secret, and the server is never told it: on the device
+the code is stretched into 512 bits, the first half addresses the row and the
+second half is the key the island is encrypted with. Cloudflare stores an
+address and a lump of ciphertext, and a dump of that database is a list of
+random strings. The self test checks that a sealed island does not contain the
+player's name, that the wrong code cannot open one, and that the address the
+game builds is one the Worker will actually accept.
+
+It could be built at all because of three fields that have been in the save
+since long before there was anywhere to send them: the profile `id` is the row
+it syncs to, `rev` counts every write so two copies of one island can be ordered
+without trusting either device's clock, and a device id says which copy came
+from where. Save files carry all three, so a file and a sync describe the same
+island rather than two.
+
+The thing sync must never do is lose an afternoon of reading. Every write is a
+compare and set: it says which rev it believes is there and is refused if it is
+wrong, so two devices cannot both win. Each device also remembers the rev it and
+the server last agreed on, which is what tells "this device moved on" apart from
+"this device is behind". When both have moved, it asks, in those words, and the
+self test walks every combination to prove that nothing done since the last
+agreement is ever discarded without a question.
+
+localStorage stays the source of truth for the running game. Sync pulls once at
+boot, pushes on a fifteen second heartbeat and when the tab is hidden, and is
+allowed to fail silently, because a tablet with no signal is the normal case and
+not an error. None of the game had to become asynchronous. The Worker is eighty
+lines in `sync/`, and the file export is still there and still the copy that
+outlives whoever is hosting the rest of it.
 
 **Asking the browser to keep it.** `navigator.storage.persist()` is the only way
 to opt out of eviction. It is granted on engagement, so it is asked for on the
@@ -698,6 +720,23 @@ python3 -m http.server 8000
 
 It has to be served over http rather than opened as a `file://` path, because ES
 modules need a real origin.
+
+To run all three test pages at once, from the repo root:
+
+```sh
+node run-tests.mjs            # selftest, flowtest, audiotest
+node run-tests.mjs selftest   # just the one
+```
+
+That exists because the obvious incantation quietly lies. `chrome --headless
+--virtual-time-budget=60000 --dump-dom selftest.html` looks like it works, but
+virtual time only advances through timers, so anything waiting on real work
+outside the timer queue counts as an idle page: offline audio rendering in
+audiotest, an animation frame in a child frame in flowtest, a PBKDF2 stretch in
+selftest's sync checks. The budget runs out, the DOM is dumped mid-report, and a
+truncated report has no failures in it. All three pages set
+`document.documentElement.dataset.done` when they have genuinely finished, and
+the runner waits for that.
 
 ## Self test
 
@@ -835,6 +874,7 @@ css/island.css      one stylesheet, light and dark
 js/
   main.js           boot, input, frame loop, what the action button does
   pace.js           how long a tile takes, and how a frame is spent on one
+  sync.js           the family code, and carrying an island between devices
   world.js          live tile grids, collision, crossings, camera, map renderer
   tileset.js        every tile drawn in code, four variants each, two water frames
   pixels.js         original 16x16 pixel art, baked to canvas on first use

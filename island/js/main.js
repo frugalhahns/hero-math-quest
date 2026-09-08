@@ -1,7 +1,7 @@
 /* Boot, input, the frame loop, and deciding what happens when you press the
    action button. Everything else lives in its own module. */
 
-import { S, save, give, askToPersist } from './state.js';
+import { S, save, give, askToPersist, activeSlot } from './state.js';
 import { setSound, sfx } from './audio.js';
 import * as music from './music.js';
 import * as W from './world.js';
@@ -19,6 +19,8 @@ import { REGIONS } from './content/entities.js';
 import { BASE_DEX, TILES_TALL, animUrl, markBroken } from './creatures.js';
 import { swap as costume, checkWardrobe } from './costume.js';
 import { STEP_MS, RIDE_MS, advanceTile } from './pace.js';
+import * as sync from './sync.js';
+import { askWhichCopy } from './saves.js';
 
 
 /* Elm's two rules, in code. Underground is out because the cave floor is wet
@@ -181,6 +183,34 @@ if (title.needed()) {
 } else {
   begin(false);
 }
+
+/* ---------------- the same island on every device ---------------- */
+
+/* A link with the code in it is how a code gets on to the second device without
+   anyone typing sixteen characters. It goes in the fragment rather than the
+   query on purpose: a fragment is never sent to a server, and this one is the
+   key to everything the family has stored.
+
+   None of this blocks the game. It runs behind the home page, it is allowed to
+   fail silently -- no signal on a tablet is the normal case, not an error -- and
+   if it turns out the island under the player is the stale copy, the page is
+   reloaded rather than swapped out underneath them. */
+const linked = (location.hash.match(/^#sync=([A-Za-z0-9-]+)$/) || [])[1];
+if (linked && sync.setCode(linked)) {
+  history.replaceState(null, '', location.pathname + location.search);
+}
+
+(async () => {
+  try {
+    const out = await sync.syncNow({ ask: askWhichCopy });
+    if (out.changed.some(c => c.slot === activeSlot())) { location.reload(); return; }
+    if (out.changed.length) {
+      U.toast(out.changed.length === 1 ? 'An island arrived from another device.'
+        : `${out.changed.length} islands arrived from another device.`, 4200);
+    }
+    sync.watch();
+  } catch (e) { /* the game does not depend on this and must not fall over with it */ }
+})();
 
 /* `fromTap` says whether a finger got us here. Choosing a player on the home
    page did; arriving after the reload that switching islands causes did not, and

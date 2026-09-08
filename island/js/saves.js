@@ -14,6 +14,7 @@ import {
   persistStatus, askToPersist
 } from './state.js';
 import { QUEST } from './content/quests.js';
+import * as sync from './sync.js';
 
 /* Running from the home screen rather than inside the browser. Worth knowing
    twice over: iOS only exempts installed apps from clearing their storage, and
@@ -82,6 +83,8 @@ export function openSaves() {
     </div>
     <input type="file" id="file" accept=".json,application/json" hidden>
 
+    ${syncSection()}
+
     <h3>Keep it on this device</h3>
     <div id="persist" class="muted small">Checking&hellip;</div>
     <div class="row" style="margin-top:8px">
@@ -126,12 +129,170 @@ export function openSaves() {
     if (f) readFile(f);
   });
 
+  wireSync(body);
+
   body.querySelector('#keep').addEventListener('click', async () => {
     const got = await askToPersist();
     U.toast(got === true ? 'This device will hold on to your game.'
       : got === false ? 'The browser said no. Save to a file instead.'
       : 'This browser cannot promise either way. Save to a file instead.');
     showPersist(U.$('#sheet-body'));
+  });
+}
+
+/* ---------------- the same island on every device ---------------- */
+
+/* Hidden entirely until the Worker exists, because a section explaining a thing
+   the family cannot do yet is worse than no section. sync.js reports itself as
+   not set up while its address is still a placeholder. */
+function syncSection() {
+  if (!sync.endpoint()) return '';
+  const c = sync.code();
+  if (!c) {
+    return `
+    <h3>Play on any device</h3>
+    <p class="muted small">Turn this on and you get a family code. Type it into the
+    other tablet or computer once, and every island here shows up there too, and
+    stays up to date on its own. No account, no password, nothing to sign into.
+    Your islands are locked with the code before they leave this device, so
+    nobody at the other end can read them, not even us.</p>
+    <div class="row" style="margin-top:8px">
+      <button class="btn" type="button" id="sync-on">Turn this on</button>
+      <button class="btn ghost" type="button" id="sync-have">I have a code</button>
+    </div>`;
+  }
+  const when = sync.lastSync();
+  const link = location.origin + location.pathname.replace(/[^/]*$/, '') + '#sync=' + c.replace(/-/g, '');
+  return `
+    <h3>Play on any device</h3>
+    <p class="muted small">Your family code. Type it into another device, or open the
+    link there, and the islands follow.</p>
+    <p class="synccode" id="sync-code">${U.esc(c)}</p>
+    <div class="row" style="margin-top:8px">
+      <button class="chip" type="button" id="sync-copy">Copy the code</button>
+      <button class="chip" type="button" id="sync-link" data-link="${U.esc(link)}">Copy a link</button>
+      <button class="chip" type="button" id="sync-go">Sync now</button>
+      <button class="chip" type="button" id="sync-off">Turn off</button>
+    </div>
+    <p class="muted small" id="sync-when">${when
+      ? 'Last agreed with the other devices ' + U.esc(new Date(when).toLocaleString()) + '.'
+      : 'Nothing has been sent yet.'}</p>`;
+}
+
+function wireSync(body) {
+  const on = body.querySelector('#sync-on');
+  if (on) on.addEventListener('click', () => {
+    sync.setCode(sync.newCode());
+    runSync('Turned on. Type this code into your other device.');
+  });
+
+  const have = body.querySelector('#sync-have');
+  if (have) have.addEventListener('click', askCode);
+
+  const copy = body.querySelector('#sync-copy');
+  if (copy) copy.addEventListener('click', () => hand(sync.code(), 'Code copied.'));
+
+  const link = body.querySelector('#sync-link');
+  if (link) link.addEventListener('click', () => hand(link.dataset.link, 'Link copied. Open it on the other device.'));
+
+  const go = body.querySelector('#sync-go');
+  if (go) go.addEventListener('click', () => runSync(null));
+
+  const off = body.querySelector('#sync-off');
+  if (off) off.addEventListener('click', () => {
+    sync.forget();
+    sync.stopWatching();
+    U.toast('Syncing off. Nothing already on this device is lost.');
+    openSaves();
+  });
+}
+
+/* Clipboard writes are refused often enough -- an insecure origin, a browser
+   that wants a fresher gesture -- that the fallback matters more than the
+   copy does. Being told the code and left looking at it is a fine outcome. */
+async function hand(text, said) {
+  try {
+    await navigator.clipboard.writeText(text);
+    U.toast(said);
+  } catch (e) {
+    U.toast(text, 9000);
+  }
+}
+
+async function runSync(said) {
+  U.toast(said || 'Syncing\u2026', 2000);
+  const out = await sync.syncNow({ ask: askWhichCopy });
+  sync.watch();
+  if (out.changed.some(c => c.slot === activeSlot())) { location.reload(); return; }
+  if (!out.ran) U.toast('Could not reach the other devices. Your island is safe here.', 4000);
+  else if (out.clash.length) U.toast('One island is being played somewhere else. Nothing was overwritten.', 5000);
+  else if (!said) U.toast('Up to date.', 2000);
+  openSaves();
+}
+
+function askCode() {
+  const body = U.updateSheet(`
+    <h2>Type the family code</h2>
+    <p class="muted small">It is on the other device, under Play on any device. Capital
+    letters, dashes, spaces: none of it matters.</p>
+    <input type="text" id="code-in" maxlength="24" autocomplete="off" autocapitalize="characters"
+      spellcheck="false" placeholder="XXXX-XXXX-XXXX-XXXX">
+    <p class="muted small" id="code-bad" style="min-height:1.2em"></p>
+    <div class="row end" style="margin-top:14px">
+      <button class="btn ghost" type="button" id="code-back">Back</button>
+      <button class="btn" type="button" id="code-ok">Use this code</button>
+    </div>`);
+  const input = body.querySelector('#code-in');
+  input.focus();
+  body.querySelector('#code-back').addEventListener('click', openSaves);
+  body.querySelector('#code-ok').addEventListener('click', () => {
+    if (!sync.setCode(input.value)) {
+      body.querySelector('#code-bad').textContent =
+        'That is not a family code. It is sixteen letters and numbers.';
+      return;
+    }
+    runSync('Code saved. Fetching your islands\u2026');
+  });
+  input.addEventListener('keydown', ev => { if (ev.key === 'Enter') body.querySelector('#code-ok').click(); });
+}
+
+/* Both sides have moved since they last agreed, so somebody has to lose. Ask,
+   in the plainest words available, and never guess: the wrong guess here is an
+   afternoon of reading gone. */
+export function askWhichCopy({ name, here, there }) {
+  return new Promise(resolve => {
+    const body = U.updateSheet(`
+      <h2>Two copies of ${U.esc(name || 'an island')}</h2>
+      <p>This island has been played in two places since they last agreed, so they do
+      not match any more. Keeping one means letting the other one go.</p>
+      <ul>
+        <li><b>This device</b> has ${here} saves on it.</li>
+        <li><b>The other device</b> has ${there}.</li>
+      </ul>
+      <p class="muted small">More saves usually means further along, but not always.
+      If you are not sure, close this and save both to a file first.</p>
+      <div class="row end" style="margin-top:14px">
+        <button class="btn ghost" type="button" id="clash-none">Decide later</button>
+        <button class="btn ghost" type="button" id="clash-theirs">Keep the other one</button>
+        <button class="btn" type="button" id="clash-mine">Keep this one</button>
+      </div>`);
+    /* Every way out of this sheet has to answer, including the ways that are not
+       buttons. Sync waits on this promise and holds the queue while it waits, so
+       a player who closes the sheet with the X or with Escape and never comes
+       back would stop the island syncing for the rest of the session. */
+    let said = false;
+    const pick = what => {
+      if (said) return;
+      said = true;
+      clearInterval(gone);
+      resolve(what);
+    };
+    const gone = setInterval(() => {
+      if (document.getElementById('sheet').classList.contains('hidden')) pick(null);
+    }, 300);
+    body.querySelector('#clash-mine').addEventListener('click', () => pick('mine'));
+    body.querySelector('#clash-theirs').addEventListener('click', () => pick('theirs'));
+    body.querySelector('#clash-none').addEventListener('click', () => pick(null));
   });
 }
 

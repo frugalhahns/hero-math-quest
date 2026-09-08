@@ -1,0 +1,2 @@
+# wrangler dev keeps its local D1 and caches in here
+.wrangler/
